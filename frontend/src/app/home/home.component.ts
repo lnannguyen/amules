@@ -37,11 +37,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   categories: ICategory[] = [];
 
   elements = [
-    { tag: 'Ngũ hành Kim', icon: 'sun', title: 'Sáng suốt & Khởi đầu', desc: 'Tập trung tinh thần, khơi mở trí tuệ minh triết và thu hút luồng khí hanh thông.', stones: 'Thạch anh trắng, Moonstone', dot: '#c9a24b' },
-    { tag: 'Ngũ hành Mộc', icon: 'sprout', title: 'Tái sinh & An yên', desc: 'Hòa gần những vết nứt cảm xúc, vỗ về tâm hồn và ươm mầm sinh khí tươi mới.', stones: 'Aventurine, Cẩm thạch xanh', dot: '#7a5a1a' },
-    { tag: 'Ngũ hành Thủy', icon: 'drop', title: 'Trực giác & Dòng chảy', desc: 'Khai mở linh cảm nhạy bén, giúp tâm trí mềm mại thích ứng trước mọi biến thiên.', stones: 'Aquamarine, Thạch anh đen', dot: '#8a2c6b' },
-    { tag: 'Ngũ hành Hỏa', icon: 'flame', title: 'Nhiệt huyết & Tỏa sáng', desc: 'Thắp sáng niềm đam mê bất tận, sức quyến rũ tự nhiên và can đảm theo đuổi ước vọng.', stones: 'Thạch anh hồng, Garnet hồng', dot: '#d16a95' },
-    { tag: 'Ngũ hành Thổ', icon: 'hexagon', title: 'Vững vàng & Thịnh vượng', desc: 'Điểm tựa của sự ổn định, tích lũy may mắn, vượng tài lộc và nuôi dưỡng hộ thân.', stones: 'Thạch anh vàng Citrine, Mắt hổ', dot: '#e0b048' }
+    { tag: 'Kim', icon: 'sun', title: 'Sáng suốt & Khởi đầu', desc: 'Tập trung tinh thần, khơi mở trí tuệ minh triết và thu hút luồng khí hanh thông.', stones: 'Thạch anh trắng, Moonstone', dot: '#c9a24b' },
+    { tag: 'Mộc', icon: 'sprout', title: 'Tái sinh & An yên', desc: 'Hòa gần những vết nứt cảm xúc, vỗ về tâm hồn và ươm mầm sinh khí tươi mới.', stones: 'Aventurine, Cẩm thạch xanh', dot: '#7a5a1a' },
+    { tag: 'Thủy', icon: 'drop', title: 'Trực giác & Dòng chảy', desc: 'Khai mở linh cảm nhạy bén, giúp tâm trí mềm mại thích ứng trước mọi biến thiên.', stones: 'Aquamarine, Thạch anh đen', dot: '#8a2c6b' },
+    { tag: 'Hỏa', icon: 'flame', title: 'Nhiệt huyết & Tỏa sáng', desc: 'Thắp sáng niềm đam mê bất tận, sức quyến rũ tự nhiên và can đảm theo đuổi ước vọng.', stones: 'Thạch anh hồng, Garnet hồng', dot: '#d16a95' },
+    { tag: 'Thổ', icon: 'hexagon', title: 'Vững vàng & Thịnh vượng', desc: 'Điểm tựa của sự ổn định, tích lũy may mắn, vượng tài lộc và nuôi dưỡng hộ thân.', stones: 'Thạch anh vàng Citrine, Mắt hổ', dot: '#e0b048' }
   ];
 
   products: ProductItem[] = [];

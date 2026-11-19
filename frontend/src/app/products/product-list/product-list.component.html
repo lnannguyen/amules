@@ -151,9 +151,9 @@
         </div>
         <ul class="filter-check-list">
           @for (cat of categories; track cat.id) {
-            <li class="filter-check-item" (click)="toggleCategory(cat.raw)" [class.active]="filters.category === cat.raw">
-              <div class="custom-checkbox" [class.checked]="filters.category === cat.raw">
-                @if (filters.category === cat.raw) {
+            <li class="filter-check-item" (click)="toggleCategory(cat.raw)" [class.active]="isCategoryActive(cat.raw)">
+              <div class="custom-checkbox" [class.checked]="isCategoryActive(cat.raw)">
+                @if (isCategoryActive(cat.raw)) {
                   <span class="check-mark">&#10003;</span>
                 }
               </div>
@@ -174,11 +174,11 @@
         </div>
         <ul class="element-vertical-list">
           @for (el of elements; track el.id) {
-            <li class="element-row" (click)="toggleElement(el.id)" [class.active]="filters.element === el.id">
+            <li class="element-row" (click)="toggleElement(el.id)" [class.active]="isElementActive(el.id)">
               <span class="elem-color-dot" [style.background]="el.dot"></span>
               <span class="elem-label">
                 {{ el.name }}
-                @if (filters.element === el.id) {
+                @if (isElementActive(el.id)) {
                   <em class="elem-active-tag">(Đang xem)</em>
                 }
               </span>
@@ -197,7 +197,7 @@
         </div>
         <div class="gemstone-tags">
           @for (g of gemstonePills; track g.id) {
-            <button type="button" class="gem-badge-btn" [class.selected]="filters.gemstone === g.query"
+            <button type="button" class="gem-badge-btn" [class.selected]="isGemstoneActive(g)"
                     (click)="toggleGemstone(g.query)">
               {{ g.label }}
             </button>
@@ -267,8 +267,11 @@
       <div class="shop-search-bar">
         <div class="search-input-container">
           <app-icon name="search" [size]="16" class="search-icon"></app-icon>
-          <input type="text" [(ngModel)]="filters.search" (keyup.enter)="onFilterChange()"
+          <input type="text" [(ngModel)]="filters.search" (keyup.enter)="onFilterChange()" (input)="onFilterChange()"
                  placeholder="Tìm theo tên đá, mẫu trang sức, mã bảo vật...">
+          @if (filters.search) {
+            <button type="button" class="btn-clear-search" (click)="removeSearch()" aria-label="Xóa từ khóa">&times;</button>
+          }
         </div>
         <div class="search-stats">
           Tìm thấy <b>{{ products.length }}</b> tác phẩm phong thủy

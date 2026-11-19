@@ -83,8 +83,14 @@ export class ProductService {
         return p;
       })),
       tap(items => {
-        if (items && items.length > 0 && (!query || Object.keys(query).length === 0)) {
-          this.products.set(items);
+        if (items && items.length > 0) {
+          const hasNarrowingFilter = query && (
+            query.category || query.element || query.gemstone || query.material ||
+            query.search || query.minPrice || query.maxPrice || query.inStock
+          );
+          if (!hasNarrowingFilter || this.products().length === 0) {
+            this.products.set(items);
+          }
         }
         this.isLoading.set(false);
       }),

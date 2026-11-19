@@ -675,6 +675,22 @@ input:checked + .toggle-slider:before {
   background: #ffffff;
   border-color: #80235c;
 }
+.btn-clear-search {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #867280;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+.btn-clear-search:hover {
+  color: #80235c;
+}
 .search-stats {
   font-size: 13px;
   color: #6d5867;

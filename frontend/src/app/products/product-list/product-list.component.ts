@@ -7,6 +7,35 @@ import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
 import { WishlistService } from '../../services/wishlist.service';
 
+export function normalizeCategoryKey(input: string): string {
+  if (!input) return '';
+  const s = String(input).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9]/g, '');
+  if (s.includes('nhan') || s.includes('ring')) return 'nhan';
+  if (s.includes('vong') || s.includes('lac') || s.includes('brace')) return 'vong-tay';
+  if (s.includes('day') || s.includes('chuyen') || s.includes('neck')) return 'day-chuyen';
+  if (s.includes('bong') || s.includes('hoa') || s.includes('tai') || s.includes('ear')) return 'bong-tai';
+  if (s.includes('charm')) return 'charm';
+  if (s.includes('qua') || s.includes('gift') || s.includes('combo') || s.includes('bo')) return 'set-qua';
+  return s;
+}
+
+export function normalizeElementKey(input: string): string {
+  if (!input) return '';
+  const s = String(input).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9]/g, '');
+  if (s.includes('kim')) return 'kim';
+  if (s.includes('moc')) return 'moc';
+  if (s.includes('thuy')) return 'thuy';
+  if (s.includes('hoa')) return 'hoa';
+  if (s.includes('tho')) return 'tho';
+  return '';
+}
+
 export interface FilterState {
   onlyInStock: boolean;
   category: string;
@@ -83,13 +112,8 @@ export class ProductListComponent implements OnInit {
     sort: 'newest'
   };
 
-  loading = false;
+  loading = true;
   addedToast: string | null = null;
-
-  selectCategory(cat: string): void {
-    this.filters.category = cat;
-    this.fetchProducts();
-  }
 
   constructor(
     private _productService: ProductService,
@@ -153,25 +177,64 @@ export class ProductListComponent implements OnInit {
       }
     });
 
-    // Lắng nghe query parameters từ URL
+    // 4. Luôn tải danh sách TOÀN BỘ sản phẩm của cửa hàng để tính badge và phục vụ lọc
+    this._http.get<IProduct[]>('/api/products').subscribe({
+      next: (items) => {
+        if (items && Array.isArray(items)) {
+          this.allProducts = items;
+          this.applyFilters();
+        }
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+
+    // 5. Lắng nghe query parameters từ URL
     this._route.queryParams.subscribe(params => {
       const catParam = params['category'] || params['cat'];
       if (catParam) {
-        if (catParam === 'rings') this.filters.category = 'Nhẫn';
-        else if (catParam === 'bracelets') this.filters.category = 'Vòng tay';
-        else if (catParam === 'necklaces') this.filters.category = 'Dây chuyền';
-        else if (catParam === 'earrings') this.filters.category = 'Bông tai';
-        else if (catParam === 'charms') this.filters.category = 'Charm đá';
-        else this.filters.category = catParam;
+        this.filters.category = catParam;
+      } else {
+        this.filters.category = '';
       }
-      if (params['element']) this.filters.element = params['element'];
-      if (params['gemstone']) this.filters.gemstone = params['gemstone'];
-      if (params['material']) this.filters.material = params['material'];
-      if (params['priceRange']) this.filters.priceRange = params['priceRange'];
-      if (params['inStock']) this.filters.onlyInStock = params['inStock'] === 'true';
-      if (params['search']) this.filters.search = params['search'];
-      if (params['sort']) this.filters.sort = params['sort'];
-      this.fetchProducts();
+
+      this.filters.element = params['element'] || '';
+      this.filters.gemstone = params['gemstone'] || '';
+      this.filters.material = params['material'] || '';
+      this.filters.priceRange = params['priceRange'] || 'all';
+      this.filters.onlyInStock = params['inStock'] === 'true';
+      this.filters.search = params['search'] || '';
+      this.filters.sort = params['sort'] || 'newest';
+
+      this.applyFilters();
+    });
+  }
+
+  // Áp dụng bộ lọc tức thì trên allProducts
+  applyFilters(): void {
+    if (this.allProducts.length === 0) {
+      return;
+    }
+    this.products = this.filterLocalProducts(this.allProducts, this.filters);
+    this.loading = false;
+  }
+
+  // Cập nhật router URL tương ứng với trạng thái lọc hiện tại
+  updateQueryParams(): void {
+    const q: any = {};
+    if (this.filters.category) q.category = this.filters.category;
+    if (this.filters.element) q.element = this.filters.element;
+    if (this.filters.gemstone) q.gemstone = this.filters.gemstone;
+    if (this.filters.material) q.material = this.filters.material;
+    if (this.filters.priceRange && this.filters.priceRange !== 'all') q.priceRange = this.filters.priceRange;
+    if (this.filters.onlyInStock) q.inStock = true;
+    if (this.filters.search && this.filters.search.trim()) q.search = this.filters.search.trim();
+    if (this.filters.sort && this.filters.sort !== 'newest') q.sort = this.filters.sort;
+
+    this._router.navigate([], {
+      relativeTo: this._route,
+      queryParams: q
     });
   }
 
@@ -189,17 +252,23 @@ export class ProductListComponent implements OnInit {
   }
 
   get activeCategoryLabel(): string {
-    const found = this.categories.find(c => c.raw === this.filters.category || c.id === this.filters.category);
+    if (!this.filters.category) return '';
+    const key = normalizeCategoryKey(this.filters.category);
+    const found = this.categories.find(c => normalizeCategoryKey(c.raw) === key || normalizeCategoryKey(c.name) === key);
     return found ? found.name : this.filters.category;
   }
 
   get activeElementLabel(): string {
-    const found = this.elements.find(e => e.id === this.filters.element);
+    if (!this.filters.element) return '';
+    const key = normalizeElementKey(this.filters.element);
+    const found = this.elements.find(e => normalizeElementKey(e.id) === key || normalizeElementKey(e.name) === key);
     return found ? found.name : `Mệnh ${this.filters.element}`;
   }
 
   get activeGemstoneLabel(): string {
-    const found = this.gemstonePills.find(g => g.query === this.filters.gemstone || g.id === this.filters.gemstone);
+    if (!this.filters.gemstone) return '';
+    const s = this.filters.gemstone.toLowerCase();
+    const found = this.gemstonePills.find(g => (g.query && g.query.toLowerCase() === s) || (g.label && g.label.toLowerCase().includes(s)));
     return found ? found.label : this.filters.gemstone;
   }
 
@@ -209,88 +278,112 @@ export class ProductListComponent implements OnInit {
   }
 
   get activeMaterialLabel(): string {
-    const found = this.materialOptions.find(m => m.query === this.filters.material || m.id === this.filters.material);
+    if (!this.filters.material) return '';
+    const s = this.filters.material.toLowerCase();
+    const found = this.materialOptions.find(m => (m.query && m.query.toLowerCase() === s) || (m.label && m.label.toLowerCase().includes(s)));
     return found ? found.label : this.filters.material;
+  }
+
+  isCategoryActive(catRaw: string): boolean {
+    if (!this.filters.category) return false;
+    return normalizeCategoryKey(this.filters.category) === normalizeCategoryKey(catRaw);
+  }
+
+  isElementActive(elemId: string): boolean {
+    if (!this.filters.element) return false;
+    return normalizeElementKey(this.filters.element) === normalizeElementKey(elemId);
+  }
+
+  isGemstoneActive(g: any): boolean {
+    if (!this.filters.gemstone) return false;
+    const s = this.filters.gemstone.toLowerCase();
+    return (g.query && g.query.toLowerCase() === s) || (g.label && g.label.toLowerCase().includes(s)) || (g.id && g.id.toLowerCase() === s);
   }
 
   // --- Dynamic Counter Helpers (Lấy dữ liệu trực tiếp từ MongoDB) ---
   getCategoryCount(catRaw: string): number {
-    const norm = catRaw.toLowerCase().trim();
+    const targetKey = normalizeCategoryKey(catRaw);
     return this.allProducts.filter(p => {
-      const pCat = (p.category || p.categoryName || '').toLowerCase().trim();
-      return pCat.includes(norm) || norm.includes(pCat);
+      const pKey = normalizeCategoryKey(p.category || p.categoryName || p.name || '');
+      return pKey === targetKey;
     }).length;
   }
 
   getElementCount(elemKey: string): number {
-    const norm = elemKey.toLowerCase().replace('mệnh', '').trim();
+    const targetKey = normalizeElementKey(elemKey);
     return this.allProducts.filter(p => {
-      const elStr = (p.element || '').toLowerCase();
-      const comp = (p.compatibleElements || []).map(c => String(c).toLowerCase());
-      return elStr.includes(norm) || comp.some(c => c.includes(norm));
+      const pEls = (p.element || '').toLowerCase();
+      const pComp = (p.compatibleElements || []).map(c => String(c).toLowerCase()).join(' ');
+      const pAll = `${pEls} ${pComp}`;
+      const eKey = normalizeElementKey(pAll);
+      return eKey === targetKey || pAll.includes(targetKey);
     }).length;
   }
 
-  // --- Selection Toggles ---
+  // --- Selection Toggles (Đồng bộ trực tiếp qua Router URL) ---
   toggleCategory(catRaw: string): void {
-    this.filters.category = (this.filters.category === catRaw) ? '' : catRaw;
-    this.fetchProducts();
+    const curKey = normalizeCategoryKey(this.filters.category);
+    const newKey = normalizeCategoryKey(catRaw);
+    this.filters.category = (curKey === newKey) ? '' : catRaw;
+    this.updateQueryParams();
   }
 
   toggleElement(elemId: string): void {
-    this.filters.element = (this.filters.element === elemId) ? '' : elemId;
-    this.fetchProducts();
+    const curKey = normalizeElementKey(this.filters.element);
+    const newKey = normalizeElementKey(elemId);
+    this.filters.element = (curKey === newKey) ? '' : elemId;
+    this.updateQueryParams();
   }
 
   toggleGemstone(gemQuery: string): void {
-    this.filters.gemstone = (this.filters.gemstone === gemQuery) ? '' : gemQuery;
-    this.fetchProducts();
+    this.filters.gemstone = (this.filters.gemstone.toLowerCase() === gemQuery.toLowerCase()) ? '' : gemQuery;
+    this.updateQueryParams();
   }
 
   toggleMaterial(matQuery: string): void {
-    this.filters.material = (this.filters.material === matQuery) ? '' : matQuery;
-    this.fetchProducts();
+    this.filters.material = (this.filters.material.toLowerCase() === matQuery.toLowerCase()) ? '' : matQuery;
+    this.updateQueryParams();
   }
 
   setPriceRange(rangeId: string): void {
-    this.filters.priceRange = rangeId;
-    this.fetchProducts();
+    this.filters.priceRange = (this.filters.priceRange === rangeId) ? 'all' : rangeId;
+    this.updateQueryParams();
   }
 
   // --- Dismiss Actions for Active Chips ---
   removeCategory(): void {
     this.filters.category = '';
-    this.fetchProducts();
+    this.updateQueryParams();
   }
 
   removeElement(): void {
     this.filters.element = '';
-    this.fetchProducts();
+    this.updateQueryParams();
   }
 
   removeGemstone(): void {
     this.filters.gemstone = '';
-    this.fetchProducts();
+    this.updateQueryParams();
   }
 
   removePrice(): void {
     this.filters.priceRange = 'all';
-    this.fetchProducts();
+    this.updateQueryParams();
   }
 
   removeMaterial(): void {
     this.filters.material = '';
-    this.fetchProducts();
+    this.updateQueryParams();
   }
 
   removeInStock(): void {
     this.filters.onlyInStock = false;
-    this.fetchProducts();
+    this.updateQueryParams();
   }
 
   removeSearch(): void {
     this.filters.search = '';
-    this.fetchProducts();
+    this.updateQueryParams();
   }
 
   resetFilters(): void {
@@ -304,11 +397,11 @@ export class ProductListComponent implements OnInit {
       search: '',
       sort: 'newest'
     };
-    this.fetchProducts();
+    this.updateQueryParams();
   }
 
   onFilterChange(): void {
-    this.fetchProducts();
+    this.updateQueryParams();
   }
 
   formatElement(el?: string): string {
@@ -345,22 +438,24 @@ export class ProductListComponent implements OnInit {
       list = list.filter(p => (p.stock !== undefined ? p.stock > 0 : true));
     }
 
-    // 2. Lọc theo danh mục
+    // 2. Lọc theo danh mục chuẩn hóa
     if (f.category) {
-      const cNorm = f.category.toLowerCase().trim();
+      const targetCatKey = normalizeCategoryKey(f.category);
       list = list.filter(p => {
-        const pCat = (p.category || p.categoryName || '').toLowerCase().trim();
-        return pCat.includes(cNorm) || cNorm.includes(pCat);
+        const pKey = normalizeCategoryKey(p.category || p.categoryName || p.name || '');
+        return pKey === targetCatKey;
       });
     }
 
     // 3. Lọc theo Mệnh ngũ hành (Kim, Mộc, Thủy, Hỏa, Thổ) chuẩn CSDL MongoDB
     if (f.element) {
-      const eNorm = f.element.toLowerCase().replace('mệnh', '').trim();
+      const targetElemKey = normalizeElementKey(f.element);
       list = list.filter(p => {
-        const elemStr = (p.element || '').toLowerCase();
-        const comp = (p.compatibleElements || []).map(c => String(c).toLowerCase());
-        return elemStr.includes(eNorm) || comp.some(c => c.includes(eNorm));
+        const pEls = (p.element || '').toLowerCase();
+        const pComp = (p.compatibleElements || []).map(c => String(c).toLowerCase()).join(' ');
+        const pAll = `${pEls} ${pComp}`;
+        const eKey = normalizeElementKey(pAll);
+        return eKey === targetElemKey || pAll.includes(targetElemKey);
       });
     }
 
@@ -421,49 +516,7 @@ export class ProductListComponent implements OnInit {
   }
 
   fetchProducts(): void {
-    const query: any = {};
-    if (this.filters.category) query.category = this.filters.category;
-    if (this.filters.element) query.element = this.filters.element;
-    if (this.filters.gemstone) query.gemstone = this.filters.gemstone;
-    if (this.filters.material) query.material = this.filters.material;
-    if (this.filters.onlyInStock) query.inStock = true;
-    if (this.filters.search) query.search = this.filters.search;
-    if (this.filters.sort) query.sort = this.filters.sort;
-
-    const pr = this.priceRanges.find(p => p.id === this.filters.priceRange);
-    if (pr && pr.id !== 'all') {
-      if (pr.min !== undefined) query.minPrice = pr.min;
-      if (pr.max !== undefined) query.maxPrice = pr.max;
-    }
-
-    // Bước 1: Lọc trên allProducts hoặc cache của ProductService
-    const pool = (this.allProducts && this.allProducts.length > 0)
-      ? this.allProducts
-      : this._productService.products();
-
-    if (this.allProducts.length === 0 && pool.length > 0) {
-      this.allProducts = pool;
-    }
-
-    this.products = this.filterLocalProducts(pool, this.filters);
-    this.loading = false;
-
-    // Bước 2: Đồng bộ ngầm với backend API mà không làm giật lag giao diện
-    this._productService.getProducts(query).subscribe({
-      next: (items) => {
-        if (items && Array.isArray(items) && items.length > 0) {
-          if (!this.hasActiveFilters) {
-            this.allProducts = items;
-          }
-          // Luôn áp dụng filterLocalProducts để bảo toàn triệt để sắp xếp và bộ lọc
-          this.products = this.filterLocalProducts(items, this.filters);
-        }
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      }
-    });
+    this.applyFilters();
   }
 
   addToCart(product: IProduct, event: Event): void {

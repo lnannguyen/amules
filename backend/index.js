@@ -49,36 +49,48 @@ app.use(cors({
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-// 5. Cookie Parser & Express Session with MongoDB Store (as taught in slide VIII)
+// 5. Cookie Parser & Express Session with Fallback Store
 app.use(cookieParser());
 
-const sessionMongoUrl = (process.env.MONGODB_URI && process.env.MONGODB_URI.includes('amules'))
-  ? process.env.MONGODB_URI
-  : 'mongodb://127.0.0.1:27017/amules';
+let sessionStore = null;
+try {
+  const sessionMongoUrl = (process.env.MONGODB_URI && process.env.MONGODB_URI.includes('amules'))
+    ? process.env.MONGODB_URI
+    : 'mongodb://127.0.0.1:27017/amules';
 
-const sessionStore = MongoStore.create({
-  mongoUrl: sessionMongoUrl,
-  collectionName: 'sessions',
-  ttl: 24 * 60 * 60, // 1 day
-  autoRemove: 'native'
+  sessionStore = MongoStore.create({
+    mongoUrl: sessionMongoUrl,
+    collectionName: 'sessions',
+    ttl: 24 * 60 * 60, // 1 day
+    autoRemove: 'native'
+  });
+
+  sessionStore.on('error', (err) => {
+    // Không để lỗi connection session làm crash process
+  });
+} catch (err) {
+  sessionStore = null;
+}
+
+process.on('unhandledRejection', (reason) => {
+  // Bắt các ngoại lệ connection timeout từ driver MongoDB/MongoStore ngầm
 });
 
-sessionStore.on('error', (err) => {
-  console.warn('[MongoStore] Session store warning:', err.message);
-});
-
-app.use(session({
+const sessionConfig = {
   secret: 'amules-secret-key-2026',
   resave: false,
   saveUninitialized: true,
-  store: sessionStore,
   cookie: {
     maxAge: 24 * 60 * 60 * 1000, // 1 day
     httpOnly: true,
     secure: false, // set true if using HTTPS
     sameSite: 'lax'
   }
-}));
+};
+if (sessionStore) {
+  sessionConfig.store = sessionStore;
+}
+app.use(session(sessionConfig));
 
 // Helper to convert string id or ObjectId
 function toObjectId(id) {
@@ -602,7 +614,7 @@ function filterProductsArray(items, query = {}) {
 app.get('/api/products', async (req, res) => {
   try {
     let db = null;
-    try { db = getDB(); } catch (e) {}
+    try { db = getDB(); } catch (e) { }
     const { category, gemstone, element, theme, minPrice, maxPrice, search, sort, inStock, material } = req.query;
     const filter = {};
 
@@ -687,7 +699,7 @@ app.get('/api/products', async (req, res) => {
     if (db) {
       try {
         rawProducts = await db.collection('products').find(filter).sort(sortOption).toArray();
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Nếu MongoDB không có dữ liệu hoặc offline, dùng mảng fallback JSON
@@ -697,7 +709,7 @@ app.get('/api/products', async (req, res) => {
       if (db && (!req.query || Object.keys(req.query).length === 0) && seedData.length > 0) {
         try {
           await db.collection('products').insertMany(seedData);
-        } catch (e) {}
+        } catch (e) { }
       }
       rawProducts = filterProductsArray(seedData, req.query);
     }
@@ -839,7 +851,7 @@ app.post('/api/auth/login', async (req, res) => {
         user = await db.collection('users').findOne({
           $or: [{ username: cleanUser }, { email: cleanUser }, { phone: cleanUser }]
         });
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!user) {
       const fallbackUsers = loadFallbackJsonData('users') || [];
@@ -903,7 +915,7 @@ app.get('/api/auth/profile', async (req, res) => {
           found = await db.collection('users').findOne({
             $or: [{ email: emailOrUser }, { username: emailOrUser }]
           });
-        } catch (e) {}
+        } catch (e) { }
       }
       if (!found) {
         const fallbackUsers = loadFallbackJsonData('users') || [];
@@ -971,7 +983,7 @@ app.post('/api/auth/register', async (req, res) => {
         existing = await db.collection('users').findOne({
           $or: [{ email: cleanEmail }, { phone: phone ? phone.trim() : null }]
         });
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!existing) {
       const fallbackUsers = loadFallbackJsonData('users') || [];
@@ -1007,7 +1019,7 @@ app.post('/api/auth/register', async (req, res) => {
       try {
         const result = await db.collection('users').insertOne(newUser);
         newUser._id = result.insertedId;
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!newUser._id) newUser._id = new ObjectId();
 
@@ -1015,7 +1027,7 @@ app.post('/api/auth/register', async (req, res) => {
     try {
       let allUsers = [];
       if (db) {
-        try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) {}
+        try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) { }
       }
       if (!allUsers || allUsers.length === 0) {
         allUsers = loadFallbackJsonData('users') || [];
@@ -1026,7 +1038,7 @@ app.post('/api/auth/register', async (req, res) => {
         }
       }
       syncUsersToJson(allUsers);
-    } catch (e) {}
+    } catch (e) { }
 
     req.session.user = {
       id: newUser._id,
@@ -1076,14 +1088,14 @@ app.put('/api/auth/profile', async (req, res) => {
       try {
         await db.collection('users').updateOne(filter, { $set: updateFields });
         updated = await db.collection('users').findOne(filter);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Luôn cập nhật và tự động ghi vào amules-database/users.json
     try {
       let allUsers = [];
       if (db) {
-        try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) {}
+        try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) { }
       }
       if (!allUsers || allUsers.length === 0) {
         allUsers = loadFallbackJsonData('users') || [];
@@ -1107,7 +1119,7 @@ app.put('/api/auth/profile', async (req, res) => {
         if (!updated) updated = newU;
       }
       syncUsersToJson(allUsers);
-    } catch (e) {}
+    } catch (e) { }
 
     if (req.session && req.session.user && updated) {
       req.session.user = { ...req.session.user, ...updated };
@@ -1131,7 +1143,7 @@ app.put('/api/auth/password', async (req, res) => {
     if (db) {
       try {
         user = await db.collection('users').findOne({ email: userEmail });
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!user) {
       const fallbackUsers = loadFallbackJsonData('users') || [];
@@ -1149,14 +1161,14 @@ app.put('/api/auth/password', async (req, res) => {
           { _id: user._id },
           { $set: { password: newPassword, passwordHash: newPassword, updatedAt: new Date() } }
         );
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Tự động đồng bộ vào users.json
     try {
       let allUsers = [];
       if (db) {
-        try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) {}
+        try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) { }
       }
       if (!allUsers || allUsers.length === 0) {
         allUsers = loadFallbackJsonData('users') || [];
@@ -1168,7 +1180,7 @@ app.put('/api/auth/password', async (req, res) => {
         allUsers[idx].updatedAt = new Date();
       }
       syncUsersToJson(allUsers);
-    } catch (e) {}
+    } catch (e) { }
 
     res.json({ message: 'Đổi mật khẩu thành công!' });
   } catch (error) {
@@ -1188,31 +1200,24 @@ app.post('/api/auth/logout', (req, res) => {
 const handleGoogleAuthUser = async (profileData) => {
   const db = getDB();
   const email = (profileData.email || '').trim().toLowerCase();
-  if (!email || !email.includes('@')) {
-    throw new Error('Vui lòng cung cấp địa chỉ email Google hợp lệ');
-  }
   const isDemo = email === 'lananh.gemini@gmail.com';
   let user = null;
 
   if (db) {
     try {
       user = await db.collection('users').findOne({ email });
-    } catch (e) {}
+    } catch (e) { }
   }
   if (!user) {
     const fallbackUsers = loadFallbackJsonData('users') || [];
     user = fallbackUsers.find(u => u.email === email);
   }
 
-  const namePart = email.split('@')[0];
-  const autoName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-  const fullName = profileData.fullName || (isDemo ? 'Nguyễn Hoàng Lan Anh' : autoName);
-
   if (!user) {
     const newUser = {
-      fullName,
+      fullName: profileData.fullName || (isDemo ? 'Nguyễn Hoàng Lan Anh' : 'Khách hàng mới'),
       email,
-      phone: profileData.phone || (isDemo ? '0982 456 789' : ''),
+      phone: isDemo ? '0982 456 789' : '',
       avatar: profileData.avatar || '',
       authProvider: 'google',
       role: 'customer',
@@ -1231,7 +1236,7 @@ const handleGoogleAuthUser = async (profileData) => {
       try {
         const result = await db.collection('users').insertOne(newUser);
         newUser._id = result.insertedId;
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!newUser._id) newUser._id = new ObjectId();
     user = newUser;
@@ -1259,7 +1264,7 @@ const handleGoogleAuthUser = async (profileData) => {
     if (db) {
       try {
         await db.collection('users').updateOne({ _id: user._id }, { $set: updateSet });
-      } catch (e) {}
+      } catch (e) { }
     }
     user = { ...user, ...updateSet };
   }
@@ -1268,7 +1273,7 @@ const handleGoogleAuthUser = async (profileData) => {
   try {
     let allUsers = [];
     if (db) {
-      try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) {}
+      try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) { }
     }
     if (!allUsers || allUsers.length === 0) {
       allUsers = loadFallbackJsonData('users') || [];
@@ -1277,7 +1282,7 @@ const handleGoogleAuthUser = async (profileData) => {
     if (idx >= 0) allUsers[idx] = { ...allUsers[idx], ...user };
     else allUsers = [user, ...allUsers];
     syncUsersToJson(allUsers);
-  } catch (e) {}
+  } catch (e) { }
 
   return user;
 };
@@ -1346,7 +1351,7 @@ app.get('/api/auth/demo-accounts', async (req, res) => {
     if (db) {
       try {
         users = await db.collection('users').find({ role: 'customer' }).project({ passwordHash: 0 }).toArray();
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!users || users.length === 0) {
       const fallback = loadFallbackJsonData('users') || [];
@@ -1486,7 +1491,7 @@ const handleCheckout = async (req, res) => {
       try {
         const foundUser = await db.collection('users').findOne({ email: emailToFind });
         if (foundUser) userId = foundUser._id;
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -1575,7 +1580,7 @@ const handleCheckout = async (req, res) => {
       if (db) {
         try {
           allOrders = await db.collection('orders').find({}).sort({ createdAt: -1 }).toArray();
-        } catch (e) {}
+        } catch (e) { }
       }
       if (!allOrders || allOrders.length === 0) {
         const existing = loadFallbackJsonData('orders') || [];
@@ -1747,7 +1752,7 @@ app.post('/api/payments/verify', async (req, res) => {
   try {
     const { orderCode, transactionId, paymentMethod = 'VNPAY' } = req.body;
     let db = null;
-    try { db = getDB(); } catch (e) {}
+    try { db = getDB(); } catch (e) { }
     const cleanCode = (orderCode || '').trim().replace(/^#/, '');
 
     let updatedOrder = null;
@@ -1769,7 +1774,7 @@ app.post('/api/payments/verify', async (req, res) => {
           { returnDocument: 'after' }
         );
         updatedOrder = result.value || result;
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Tự động đồng bộ trạng thái thanh toán mới vào file orders.json
@@ -1794,7 +1799,7 @@ app.post('/api/payments/verify', async (req, res) => {
         });
       }
       syncOrdersToJson(all);
-    } catch (e) {}
+    } catch (e) { }
 
     res.json({
       success: true,
@@ -1854,7 +1859,7 @@ app.get('/api/shipping/track/:trackingCode', async (req, res) => {
 app.get('/api/orders', async (req, res) => {
   try {
     let db = null;
-    try { db = getDB(); } catch (e) {}
+    try { db = getDB(); } catch (e) { }
 
     const sessionUser = req.session && req.session.user ? req.session.user : null;
     const cookieEmail = req.cookies ? req.cookies.remember_user : null;
@@ -1881,7 +1886,7 @@ app.get('/api/orders', async (req, res) => {
     if (db) {
       try {
         orders = await db.collection('orders').find(filter).sort({ createdAt: -1 }).toArray();
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!orders || orders.length === 0) {
       const fallback = loadFallbackJsonData('orders') || [];
@@ -1910,7 +1915,7 @@ app.get('/api/orders/:code', async (req, res) => {
         order = await db.collection('orders').findOne({
           $or: [{ orderCode: code }, { _id: toObjectId(code) }]
         });
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!order) {
       const fallback = loadFallbackJsonData('orders') || [];
@@ -1950,7 +1955,7 @@ app.post('/api/orders/lookup', async (req, res) => {
             }
           ]
         });
-      } catch (e) {}
+      } catch (e) { }
     }
 
     if (!order) {
@@ -1985,7 +1990,7 @@ app.put('/api/orders/:id/cancel', async (req, res) => {
         order = await db.collection('orders').findOne({
           $or: [{ _id: toObjectId(id) }, { orderCode: id }, { orderCode: `#${id}` }]
         });
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!order) {
       const fallback = loadFallbackJsonData('orders') || [];
@@ -2015,7 +2020,7 @@ app.put('/api/orders/:id/cancel', async (req, res) => {
             }
           }
         );
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Tự động đồng bộ trạng thái hủy vào orders.json
@@ -2039,7 +2044,7 @@ app.put('/api/orders/:id/cancel', async (req, res) => {
         });
       }
       syncOrdersToJson(all);
-    } catch (e) {}
+    } catch (e) { }
 
     res.json({ message: 'Hủy đơn hàng thành công!', orderCode: order.orderCode });
   } catch (error) {
@@ -2221,7 +2226,7 @@ app.get('/api/users/addresses', async (req, res) => {
 
     let user = null;
     if (db) {
-      try { user = await db.collection('users').findOne({ email }); } catch (e) {}
+      try { user = await db.collection('users').findOne({ email }); } catch (e) { }
     }
     if (!user) {
       const fallbackUsers = loadFallbackJsonData('users') || [];
@@ -2232,29 +2237,29 @@ app.get('/api/users/addresses', async (req, res) => {
     const addresses = (user && user.addresses && user.addresses.length > 0)
       ? user.addresses
       : (isDemo ? [
-          {
-            id: 'addr_1',
-            label: 'Văn phòng làm việc',
-            fullName: 'Nguyễn Hoàng Lan Anh',
-            phone: '0982 456 789',
-            address: 'Tầng 18, Tòa nhà Bitexco Financial Tower, Số 2 Hải Triều',
-            ward: 'Phường Bến Nghé',
-            district: 'Quận 1',
-            city: 'TP. Hồ Chí Minh',
-            isDefault: true
-          },
-          {
-            id: 'addr_2',
-            label: 'Nhà riêng (Gia đình)',
-            fullName: 'Nguyễn Hoàng Lan Anh',
-            phone: '0982 456 789',
-            address: 'Villa 12, Khu đô thị Thảo Điền Riverside, Nguyễn Văn Hưởng',
-            ward: 'Phường Thảo Điền',
-            district: 'Thành phố Thủ Đức',
-            city: 'TP. Hồ Chí Minh',
-            isDefault: false
-          }
-        ] : []);
+        {
+          id: 'addr_1',
+          label: 'Văn phòng làm việc',
+          fullName: 'Nguyễn Hoàng Lan Anh',
+          phone: '0982 456 789',
+          address: 'Tầng 18, Tòa nhà Bitexco Financial Tower, Số 2 Hải Triều',
+          ward: 'Phường Bến Nghé',
+          district: 'Quận 1',
+          city: 'TP. Hồ Chí Minh',
+          isDefault: true
+        },
+        {
+          id: 'addr_2',
+          label: 'Nhà riêng (Gia đình)',
+          fullName: 'Nguyễn Hoàng Lan Anh',
+          phone: '0982 456 789',
+          address: 'Villa 12, Khu đô thị Thảo Điền Riverside, Nguyễn Văn Hưởng',
+          ward: 'Phường Thảo Điền',
+          district: 'Thành phố Thủ Đức',
+          city: 'TP. Hồ Chí Minh',
+          isDefault: false
+        }
+      ] : []);
     res.json(addresses);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -2282,11 +2287,11 @@ app.post('/api/users/addresses', async (req, res) => {
 
     let user = null;
     if (db) {
-      try { user = await db.collection('users').findOne({ email }); } catch (e) {}
+      try { user = await db.collection('users').findOne({ email }); } catch (e) { }
     }
     let allUsers = [];
     if (db) {
-      try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) {}
+      try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) { }
     }
     if (!allUsers || allUsers.length === 0) {
       allUsers = loadFallbackJsonData('users') || [];
@@ -2304,7 +2309,7 @@ app.post('/api/users/addresses', async (req, res) => {
     if (db) {
       try {
         await db.collection('users').updateOne({ email }, { $set: { addresses, updatedAt: new Date() } }, { upsert: true });
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Tự động ghi vào file amules-database/users.json
@@ -2315,7 +2320,7 @@ app.post('/api/users/addresses', async (req, res) => {
         allUsers[idx].updatedAt = new Date();
       }
       syncUsersToJson(allUsers);
-    } catch (e) {}
+    } catch (e) { }
 
     res.status(201).json({ message: 'Đã thêm địa chỉ mới!', address: newAddr, addresses });
   } catch (error) {
@@ -2332,11 +2337,11 @@ app.delete('/api/users/addresses/:id', async (req, res) => {
     const addrId = req.params.id;
     let user = null;
     if (db) {
-      try { user = await db.collection('users').findOne({ email }); } catch (e) {}
+      try { user = await db.collection('users').findOne({ email }); } catch (e) { }
     }
     let allUsers = [];
     if (db) {
-      try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) {}
+      try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) { }
     }
     if (!allUsers || allUsers.length === 0) {
       allUsers = loadFallbackJsonData('users') || [];
@@ -2349,7 +2354,7 @@ app.delete('/api/users/addresses/:id', async (req, res) => {
     if (db) {
       try {
         await db.collection('users').updateOne({ email }, { $set: { addresses, updatedAt: new Date() } });
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Tự động đồng bộ users.json
@@ -2360,7 +2365,7 @@ app.delete('/api/users/addresses/:id', async (req, res) => {
         allUsers[idx].updatedAt = new Date();
       }
       syncUsersToJson(allUsers);
-    } catch (e) {}
+    } catch (e) { }
 
     res.json({ message: 'Đã xóa địa chỉ thành công', addresses });
   } catch (error) {
@@ -2377,11 +2382,11 @@ app.put('/api/users/addresses/:id/default', async (req, res) => {
     const addrId = req.params.id;
     let user = null;
     if (db) {
-      try { user = await db.collection('users').findOne({ email }); } catch (e) {}
+      try { user = await db.collection('users').findOne({ email }); } catch (e) { }
     }
     let allUsers = [];
     if (db) {
-      try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) {}
+      try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) { }
     }
     if (!allUsers || allUsers.length === 0) {
       allUsers = loadFallbackJsonData('users') || [];
@@ -2398,7 +2403,7 @@ app.put('/api/users/addresses/:id/default', async (req, res) => {
     if (db) {
       try {
         await db.collection('users').updateOne({ email }, { $set: { addresses, updatedAt: new Date() } });
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Tự động đồng bộ users.json
@@ -2409,7 +2414,7 @@ app.put('/api/users/addresses/:id/default', async (req, res) => {
         allUsers[idx].updatedAt = new Date();
       }
       syncUsersToJson(allUsers);
-    } catch (e) {}
+    } catch (e) { }
 
     res.json({ message: 'Đã đặt làm địa chỉ mặc định', addresses });
   } catch (error) {
@@ -2471,7 +2476,7 @@ app.post('/api/mystic-match/submit', async (req, res) => {
     const email = (req.session.user && req.session.user.email) || (req.cookies && req.cookies.remember_user);
     let user = null;
     if (email && db) {
-      try { user = await db.collection('users').findOne({ email }); } catch (e) {}
+      try { user = await db.collection('users').findOne({ email }); } catch (e) { }
     }
 
     const {
@@ -2638,7 +2643,7 @@ app.post('/api/mystic-match/submit', async (req, res) => {
     const email = (req.session.user && req.session.user.email) || (req.cookies && req.cookies.remember_user);
     let user = null;
     if (email && db) {
-      try { user = await db.collection('users').findOne({ email }); } catch (e) {}
+      try { user = await db.collection('users').findOne({ email }); } catch (e) { }
     }
 
     const {
@@ -2764,7 +2769,7 @@ app.get('/api/wishlists', async (req, res) => {
 
     let user = null;
     if (db) {
-      try { user = await db.collection('users').findOne({ email }); } catch (e) {}
+      try { user = await db.collection('users').findOne({ email }); } catch (e) { }
     }
     if (!user) {
       const fallbackUsers = loadFallbackJsonData('users') || [];
@@ -2786,7 +2791,7 @@ app.get('/api/wishlists', async (req, res) => {
             { slug: { $in: userWishlist } }
           ]
         }).toArray();
-      } catch (e) {}
+      } catch (e) { }
     }
     if (!products || products.length === 0) {
       const allProds = loadFallbackJsonData('products') || [];
@@ -2816,11 +2821,11 @@ app.post('/api/wishlists/toggle', async (req, res) => {
 
     let user = null;
     if (db) {
-      try { user = await db.collection('users').findOne({ email }); } catch (e) {}
+      try { user = await db.collection('users').findOne({ email }); } catch (e) { }
     }
     let allUsers = [];
     if (db) {
-      try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) {}
+      try { allUsers = await db.collection('users').find({}).toArray(); } catch (e) { }
     }
     if (!allUsers || allUsers.length === 0) {
       allUsers = loadFallbackJsonData('users') || [];
@@ -2847,7 +2852,7 @@ app.post('/api/wishlists/toggle', async (req, res) => {
             { upsert: true }
           );
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Tự động đồng bộ users.json
@@ -2858,7 +2863,7 @@ app.post('/api/wishlists/toggle', async (req, res) => {
         allUsers[idx].updatedAt = new Date();
       }
       syncUsersToJson(allUsers);
-    } catch (e) {}
+    } catch (e) { }
 
     res.json({
       success: true,
@@ -3157,7 +3162,7 @@ async function ensureOrdersSeeded(db) {
 app.get('/api/admin/stats', async (req, res) => {
   try {
     let db = null;
-    try { db = getDB(); } catch (e) {}
+    try { db = getDB(); } catch (e) { }
 
     let allOrders = [];
     let ordersCount = 0;
@@ -3214,7 +3219,7 @@ app.get('/api/admin/stats', async (req, res) => {
 app.get('/api/admin/orders', async (req, res) => {
   try {
     let db = null;
-    try { db = getDB(); } catch (e) {}
+    try { db = getDB(); } catch (e) { }
 
     const { status, search, paymentMethod } = req.query;
     let orders = [];
@@ -3285,12 +3290,12 @@ app.get('/api/admin/orders', async (req, res) => {
 app.post('/api/admin/orders', async (req, res) => {
   try {
     let db = null;
-    try { db = getDB(); } catch (e) {}
+    try { db = getDB(); } catch (e) { }
 
     const data = req.body;
     let count = 0;
     if (db) {
-      try { count = await db.collection('orders').countDocuments(); } catch (e) {}
+      try { count = await db.collection('orders').countDocuments(); } catch (e) { }
     }
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const orderCode = data.orderCode || `AMU-${dateStr}-${String(count + 1).padStart(4, '0')}`;
@@ -3298,23 +3303,23 @@ app.post('/api/admin/orders', async (req, res) => {
 
     const items = (data.items && data.items.length > 0)
       ? data.items.map(it => ({
-          name: it.name || it.productName || 'Bảo vật hộ mệnh AMULES',
-          categoryTag: it.categoryTag || 'TRANG SỨC BẢO MỆNH • Bạc Ý S925',
-          specs: it.specs || 'Tiêu chuẩn nghệ nhân AMULES',
-          image: it.image || 'https://i.pinimg.com/736x/d4/3c/3d/d43c3d69296b0badad1636033dd34e9c.jpg',
-          price: Number(it.price || it.unitPrice || 650000),
-          quantity: Number(it.quantity || 1)
-        }))
+        name: it.name || it.productName || 'Bảo vật hộ mệnh AMULES',
+        categoryTag: it.categoryTag || 'TRANG SỨC BẢO MỆNH • Bạc Ý S925',
+        specs: it.specs || 'Tiêu chuẩn nghệ nhân AMULES',
+        image: it.image || 'https://i.pinimg.com/736x/d4/3c/3d/d43c3d69296b0badad1636033dd34e9c.jpg',
+        price: Number(it.price || it.unitPrice || 650000),
+        quantity: Number(it.quantity || 1)
+      }))
       : [
-          {
-            name: data.firstItemName || data.itemName || 'Dây Chuyền Mặt Trăng Khuyết Moonstone',
-            categoryTag: data.categoryTag || 'MOONSTONE TỰ NHIÊN • Bạc Ý S925',
-            specs: 'Chiều dài: 45 cm • Màu sắc: Trắng ánh xanh',
-            image: 'https://i.pinimg.com/736x/e6/a9/5d/e6a95dbb226be002601330c99458c286.jpg',
-            price: Number(data.itemPrice || data.totalAmount || 650000),
-            quantity: Number(data.quantity || 1)
-          }
-        ];
+        {
+          name: data.firstItemName || data.itemName || 'Dây Chuyền Mặt Trăng Khuyết Moonstone',
+          categoryTag: data.categoryTag || 'MOONSTONE TỰ NHIÊN • Bạc Ý S925',
+          specs: 'Chiều dài: 45 cm • Màu sắc: Trắng ánh xanh',
+          image: 'https://i.pinimg.com/736x/e6/a9/5d/e6a95dbb226be002601330c99458c286.jpg',
+          price: Number(data.itemPrice || data.totalAmount || 650000),
+          quantity: Number(data.quantity || 1)
+        }
+      ];
 
     const fullName = data.customerName || data.customer?.fullName || 'Khách hàng Backoffice';
     const phone = data.customerPhone || data.customer?.phone || '0982 456 789';
@@ -3369,7 +3374,7 @@ app.post('/api/admin/orders', async (req, res) => {
       try {
         const ins = await db.collection('orders').insertOne(newOrder);
         newOrder._id = ins.insertedId;
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Tự động đồng bộ ngay vào file amules-database/orders.json
@@ -3381,7 +3386,7 @@ app.post('/api/admin/orders', async (req, res) => {
         all = [newOrder, ...existing];
       }
       syncOrdersToJson(all);
-    } catch (e) {}
+    } catch (e) { }
 
     res.status(201).json({ message: 'Tạo đơn hàng thành công!', order: newOrder });
   } catch (error) {
@@ -3393,7 +3398,7 @@ app.post('/api/admin/orders', async (req, res) => {
 app.put('/api/admin/orders/:id/status', async (req, res) => {
   try {
     let db = null;
-    try { db = getDB(); } catch (e) {}
+    try { db = getDB(); } catch (e) { }
 
     const id = req.params.id;
     const { status } = req.body;
@@ -3415,7 +3420,7 @@ app.put('/api/admin/orders/:id/status', async (req, res) => {
           { $or: [{ _id: o_id }, { orderCode: id }] },
           { $set: { status, orderStatus, updatedAt: new Date() } }
         );
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Tự động ghi vào orders.json
@@ -3432,7 +3437,7 @@ app.put('/api/admin/orders/:id/status', async (req, res) => {
         });
       }
       syncOrdersToJson(all);
-    } catch (e) {}
+    } catch (e) { }
 
     res.json({ message: 'Cập nhật trạng thái đơn hàng thành công!', status, orderStatus });
   } catch (error) {
@@ -3444,7 +3449,7 @@ app.put('/api/admin/orders/:id/status', async (req, res) => {
 app.post('/api/admin/orders/:id/notes', async (req, res) => {
   try {
     let db = null;
-    try { db = getDB(); } catch (e) {}
+    try { db = getDB(); } catch (e) { }
 
     const id = req.params.id;
     const { author = 'Quản trị viên AMULES', content } = req.body;
@@ -3463,7 +3468,7 @@ app.post('/api/admin/orders/:id/notes', async (req, res) => {
           { $or: [{ _id: o_id }, { orderCode: id }] },
           { $push: { internalNotes: note }, $set: { updatedAt: new Date() } }
         );
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Đồng bộ vào orders.json
@@ -3481,7 +3486,7 @@ app.post('/api/admin/orders/:id/notes', async (req, res) => {
         });
       }
       syncOrdersToJson(all);
-    } catch (e) {}
+    } catch (e) { }
 
     res.status(201).json({ message: 'Thêm ghi chú nội bộ thành công!', note });
   } catch (error) {
@@ -3493,7 +3498,7 @@ app.post('/api/admin/orders/:id/notes', async (req, res) => {
 app.put('/api/admin/orders/:id/return', async (req, res) => {
   try {
     let db = null;
-    try { db = getDB(); } catch (e) {}
+    try { db = getDB(); } catch (e) { }
 
     const id = req.params.id;
     const { type = 'exchange', note } = req.body;
@@ -3523,7 +3528,7 @@ app.put('/api/admin/orders/:id/return', async (req, res) => {
             }
           }
         );
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Đồng bộ vào orders.json
@@ -3540,7 +3545,7 @@ app.put('/api/admin/orders/:id/return', async (req, res) => {
         });
       }
       syncOrdersToJson(all);
-    } catch (e) {}
+    } catch (e) { }
 
     res.json({ message: 'Xử lý yêu cầu đổi trả thành công!', updateFields });
   } catch (error) {
