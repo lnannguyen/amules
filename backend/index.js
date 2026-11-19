@@ -1217,7 +1217,9 @@ const handleGoogleAuthUser = async (profileData) => {
     const newUser = {
       fullName: profileData.fullName || (isDemo ? 'Nguyễn Hoàng Lan Anh' : 'Khách hàng mới'),
       email,
-      phone: isDemo ? '0982 456 789' : '',
+      phone: profileData.phone || (isDemo ? '0982 456 789' : ''),
+      password: profileData.password || '123456',
+      passwordHash: profileData.password || '123456',
       avatar: profileData.avatar || '',
       authProvider: 'google',
       role: 'customer',
@@ -1245,6 +1247,13 @@ const handleGoogleAuthUser = async (profileData) => {
     if (!user.authProvider) updateSet.authProvider = 'google';
     if (profileData.fullName && (!user.fullName || (user.fullName === 'Nguyễn Hoàng Lan Anh' && !isDemo))) {
       updateSet.fullName = profileData.fullName;
+    }
+    if (profileData.phone && !user.phone) {
+      updateSet.phone = profileData.phone;
+    }
+    if (profileData.password) {
+      updateSet.password = profileData.password;
+      updateSet.passwordHash = profileData.password;
     }
     if (profileData.avatar && (!user.avatar || user.avatar.includes('user_lananh'))) {
       updateSet.avatar = profileData.avatar;

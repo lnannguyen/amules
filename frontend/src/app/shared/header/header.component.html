@@ -24,7 +24,7 @@
         <app-icon name="heart" [size]="19"></app-icon>
         <span class="badge">{{ wishCount }}</span>
       </a>
-      <a routerLink="/cart" class="icon-btn" aria-label="Giỏ hàng">
+      <a routerLink="/cart" (click)="onCartClick($event)" class="icon-btn" aria-label="Giỏ hàng">
         <app-icon name="bag" [size]="19"></app-icon>
         <span class="badge">{{ cartCount }}</span>
       </a>

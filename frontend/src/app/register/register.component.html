@@ -183,6 +183,29 @@
               placeholder="Số điện thoại nhận thông báo đơn hàng">
           </div>
 
+          <div class="google-field-group">
+            <label for="googlePasswordInput">Thiết lập mật khẩu bảo mật *</label>
+            <div class="google-pwd-wrap">
+              <input id="googlePasswordInput" [type]="showGooglePassword ? 'text' : 'password'"
+                [(ngModel)]="googlePassword" placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)">
+              <button type="button" class="btn-toggle-eye" (click)="showGooglePassword = !showGooglePassword">
+                <app-icon [name]="showGooglePassword ? 'eye-off' : 'eye'" [size]="15"></app-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="google-field-group">
+            <label for="googleConfirmPassInput">Xác nhận lại mật khẩu *</label>
+            <div class="google-pwd-wrap">
+              <input id="googleConfirmPassInput" [type]="showGoogleConfirm ? 'text' : 'password'"
+                [(ngModel)]="googleConfirmPassword" placeholder="Nhập lại mật khẩu để xác nhận"
+                (keyup.enter)="registerWithGoogle()">
+              <button type="button" class="btn-toggle-eye" (click)="showGoogleConfirm = !showGoogleConfirm">
+                <app-icon [name]="showGoogleConfirm ? 'eye-off' : 'eye'" [size]="15"></app-icon>
+              </button>
+            </div>
+          </div>
+
           <p class="google-disclaimer">
             Khi tiếp tục, Google sẽ kết nối hồ sơ xác thực của bạn với AMULES để mở khóa hồ sơ chiêm tinh, lịch sử bảo vật và đặc quyền VIP.
           </p>
@@ -193,7 +216,7 @@
               Mở OAuth Google &nearr;
             </button>
             <button type="button" class="btn-google-next" (click)="registerWithGoogle()"
-              [disabled]="googleSubmitting || !googleFullName.trim() || !googleEmail.trim()">
+              [disabled]="googleSubmitting || !googleFullName.trim() || !googleEmail.trim() || !googlePassword.trim() || !googleConfirmPassword.trim()">
               {{ googleSubmitting ? 'Đang tạo...' : 'Xác nhận đăng ký' }}
             </button>
           </div>

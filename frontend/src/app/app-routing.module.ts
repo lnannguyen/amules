@@ -74,7 +74,7 @@ const routes: Routes = [
       { path: 'products', component: ProductListComponent, title: 'Cửa hàng - AMULES' },
       { path: 'cua-hang', redirectTo: 'products', pathMatch: 'full' },
       { path: 'products/:slug', component: ProductDetailComponent, title: 'Chi tiết bảo vật - AMULES' },
-      { path: 'cart', component: CartComponent, title: 'Giỏ hàng bảo vật - AMULES' },
+      { path: 'cart', component: CartComponent, canActivate: [authGuard], title: 'Giỏ hàng bảo vật - AMULES' },
       { path: 'checkout', component: CheckoutComponent, canActivate: [checkoutGuard], title: 'Thanh toán & Đặt hàng - AMULES' },
       { path: 'order-success/:code', component: OrderSuccessComponent, title: 'Đặt hàng thành công - AMULES' },
       { path: 'order-lookup', component: OrderLookupComponent, title: 'Tra cứu đơn hàng vãng lai - AMULES' },

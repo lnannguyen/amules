@@ -40,6 +40,10 @@ export class RegisterComponent {
   googleFullName = '';
   googleEmail = '';
   googlePhone = '';
+  googlePassword = '';
+  googleConfirmPassword = '';
+  showGooglePassword = false;
+  showGoogleConfirm = false;
   googleSubmitting = false;
   googleError = '';
   googleClientId = '357340138878-4tj8dbnk5osk0n07ltvp7209781qdqlf.apps.googleusercontent.com';
@@ -119,13 +123,23 @@ export class RegisterComponent {
     const fullName = (this.googleFullName || '').trim();
     const email = (this.googleEmail || '').trim().toLowerCase();
     const phone = (this.googlePhone || '').trim();
+    const password = (this.googlePassword || '').trim();
+    const confirmPass = (this.googleConfirmPassword || '').trim();
 
     if (!fullName || fullName.length < 2) {
       this.googleError = 'Vui lòng nhập Họ và tên của bạn (tối thiểu 2 ký tự).';
       return;
     }
     if (!email || !email.includes('@') || !email.includes('.')) {
-      this.googleError = 'Vui lòng cung cấp địa chỉ email Google hợp lệ.';
+      this.googleError = 'Vui lòng cung cấp địa chỉ email hợp lệ.';
+      return;
+    }
+    if (!password || password.length < 6) {
+      this.googleError = 'Vui lòng nhập mật khẩu bảo mật (tối thiểu 6 ký tự).';
+      return;
+    }
+    if (password !== confirmPass) {
+      this.googleError = 'Mật khẩu xác nhận không trùng khớp.';
       return;
     }
 
@@ -134,6 +148,7 @@ export class RegisterComponent {
       fullName,
       email,
       phone: phone || undefined,
+      password,
       authProvider: 'google'
     };
 
@@ -149,7 +164,7 @@ export class RegisterComponent {
       },
       error: (err: any) => {
         this.googleSubmitting = false;
-        this.googleError = err?.message || 'Không thể đăng ký với Google. Vui lòng kiểm tra lại thông tin.';
+        this.googleError = err?.message || 'Không thể đăng ký tài khoản. Vui lòng kiểm tra lại thông tin.';
         this._cdr.detectChanges();
       }
     });

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CartService, CartItem } from '../services/cart.service';
 import { AuthService } from '../services/auth.service';
@@ -9,7 +9,7 @@ import { AuthService } from '../services/auth.service';
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css'
 })
-export class CartComponent {
+export class CartComponent implements OnInit {
   voucherCode = '';
   voucherMsg = '';
   voucherError = '';
@@ -20,6 +20,12 @@ export class CartComponent {
     public _authService: AuthService,
     private _router: Router
   ) {}
+
+  ngOnInit(): void {
+    if (!this._authService.isLoggedIn()) {
+      this._router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+    }
+  }
 
   get cartItems(): CartItem[] {
     return this._cartService.cartItems();

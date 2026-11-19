@@ -16,7 +16,8 @@
       </div>
       <h1 class="shop-hero__title serif">Khám Phá Trang Sức Đá Quý Thiên Nhiên</h1>
       <p class="shop-hero__sub">
-        Những tạo tác đá quý tự nhiên tuyển lựa, đính kết tinh xảo cùng linh số ngũ hành phương Đông mang đến vượng khí, tài lộc và trạng thái an yên thuần khiết.
+        Những tạo tác đá quý tự nhiên tuyển lựa, đính kết tinh xảo cùng linh số ngũ hành phương Đông mang đến vượng khí,
+        tài lộc và trạng thái an yên thuần khiết.
       </p>
     </div>
     <div class="shop-hero__cert">
@@ -32,11 +33,11 @@
 
   <!-- Toast thông báo thêm giỏ hàng thành công -->
   @if (addedToast) {
-    <div class="toast-notice">
-      <app-icon name="check" [size]="16"></app-icon>
-      <span>{{ addedToast }}</span>
-      <a routerLink="/cart" class="toast-link">Xem giỏ hàng &rarr;</a>
-    </div>
+  <div class="toast-notice">
+    <app-icon name="check" [size]="16"></app-icon>
+    <span>{{ addedToast }}</span>
+    <a routerLink="/cart" class="toast-link">Xem giỏ hàng &rarr;</a>
+  </div>
   }
 
   <!-- TAB LỌC NHANH PHÍA TRÊN & SẮP XẾP ("Bộ lọc hoạt động" - Khớp 100% Mockup) -->
@@ -53,57 +54,64 @@
 
       <!-- Các thẻ lọc nhanh đang active với nút [✕] -->
       @if (filters.category) {
-        <span class="active-chip">
-          {{ activeCategoryLabel }}
-          <button type="button" class="btn-remove-chip" (click)="removeCategory()" aria-label="Xóa bộ lọc danh mục">&times;</button>
-        </span>
+      <span class="active-chip">
+        {{ activeCategoryLabel }}
+        <button type="button" class="btn-remove-chip" (click)="removeCategory()"
+          aria-label="Xóa bộ lọc danh mục">&times;</button>
+      </span>
       }
 
       @if (filters.element) {
-        <span class="active-chip">
-          {{ activeElementLabel }}
-          <button type="button" class="btn-remove-chip" (click)="removeElement()" aria-label="Xóa bộ lọc ngũ hành">&times;</button>
-        </span>
+      <span class="active-chip">
+        {{ activeElementLabel }}
+        <button type="button" class="btn-remove-chip" (click)="removeElement()"
+          aria-label="Xóa bộ lọc ngũ hành">&times;</button>
+      </span>
       }
 
       @if (filters.gemstone) {
-        <span class="active-chip">
-          Đá {{ activeGemstoneLabel }}
-          <button type="button" class="btn-remove-chip" (click)="removeGemstone()" aria-label="Xóa bộ lọc đá">&times;</button>
-        </span>
+      <span class="active-chip">
+        Đá {{ activeGemstoneLabel }}
+        <button type="button" class="btn-remove-chip" (click)="removeGemstone()"
+          aria-label="Xóa bộ lọc đá">&times;</button>
+      </span>
       }
 
       @if (filters.material) {
-        <span class="active-chip">
-          {{ activeMaterialLabel }}
-          <button type="button" class="btn-remove-chip" (click)="removeMaterial()" aria-label="Xóa bộ lọc chất liệu">&times;</button>
-        </span>
+      <span class="active-chip">
+        {{ activeMaterialLabel }}
+        <button type="button" class="btn-remove-chip" (click)="removeMaterial()"
+          aria-label="Xóa bộ lọc chất liệu">&times;</button>
+      </span>
       }
 
       @if (filters.priceRange && filters.priceRange !== 'all') {
-        <span class="active-chip">
-          {{ activePriceLabel }}
-          <button type="button" class="btn-remove-chip" (click)="removePrice()" aria-label="Xóa bộ lọc giá">&times;</button>
-        </span>
+      <span class="active-chip">
+        {{ activePriceLabel }}
+        <button type="button" class="btn-remove-chip" (click)="removePrice()"
+          aria-label="Xóa bộ lọc giá">&times;</button>
+      </span>
       }
 
       @if (filters.onlyInStock) {
-        <span class="active-chip">
-          Sẵn hàng hỏa tốc 2h
-          <button type="button" class="btn-remove-chip" (click)="removeInStock()" aria-label="Xóa lọc còn hàng">&times;</button>
-        </span>
+      <span class="active-chip">
+        Sẵn hàng hỏa tốc 2h
+        <button type="button" class="btn-remove-chip" (click)="removeInStock()"
+          aria-label="Xóa lọc còn hàng">&times;</button>
+      </span>
       }
 
       @if (filters.search) {
-        <span class="active-chip">
-          "{{ filters.search }}"
-          <button type="button" class="btn-remove-chip" (click)="removeSearch()" aria-label="Xóa từ khóa tìm kiếm">&times;</button>
-        </span>
+      <span class="active-chip">
+        "{{ filters.search }}"
+        <button type="button" class="btn-remove-chip" (click)="removeSearch()"
+          aria-label="Xóa từ khóa tìm kiếm">&times;</button>
+      </span>
       }
 
       <!-- Nút Xóa tất cả -->
       @if (hasActiveFilters) {
-        <button type="button" class="btn-clear-all-link" (click)="resetFilters()">Xóa tất cả</button>
+      <button type="button" class="btn-clear-all-link" (click)="resetFilters()">Xóa tất cả</button>
       }
     </div>
 
@@ -151,15 +159,15 @@
         </div>
         <ul class="filter-check-list">
           @for (cat of categories; track cat.id) {
-            <li class="filter-check-item" (click)="toggleCategory(cat.raw)" [class.active]="isCategoryActive(cat.raw)">
-              <div class="custom-checkbox" [class.checked]="isCategoryActive(cat.raw)">
-                @if (isCategoryActive(cat.raw)) {
-                  <span class="check-mark">&#10003;</span>
-                }
-              </div>
-              <span class="check-title">{{ cat.name }}</span>
-              <span class="count-pill">{{ getCategoryCount(cat.raw) }}</span>
-            </li>
+          <li class="filter-check-item" (click)="toggleCategory(cat.raw)" [class.active]="isCategoryActive(cat.raw)">
+            <div class="custom-checkbox" [class.checked]="isCategoryActive(cat.raw)">
+              @if (isCategoryActive(cat.raw)) {
+              <span class="check-mark">&#10003;</span>
+              }
+            </div>
+            <span class="check-title">{{ cat.name }}</span>
+            <span class="count-pill">{{ getCategoryCount(cat.raw) }}</span>
+          </li>
           }
         </ul>
       </div>
@@ -174,16 +182,16 @@
         </div>
         <ul class="element-vertical-list">
           @for (el of elements; track el.id) {
-            <li class="element-row" (click)="toggleElement(el.id)" [class.active]="isElementActive(el.id)">
-              <span class="elem-color-dot" [style.background]="el.dot"></span>
-              <span class="elem-label">
-                {{ el.name }}
-                @if (isElementActive(el.id)) {
-                  <em class="elem-active-tag">(Đang xem)</em>
-                }
-              </span>
-              <span class="elem-sample-count">{{ getElementCount(el.id) }} mẫu</span>
-            </li>
+          <li class="element-row" (click)="toggleElement(el.id)" [class.active]="isElementActive(el.id)">
+            <span class="elem-color-dot" [style.background]="el.dot"></span>
+            <span class="elem-label">
+              {{ el.name }}
+              @if (isElementActive(el.id)) {
+              <em class="elem-active-tag">(Đang xem)</em>
+              }
+            </span>
+            <span class="elem-sample-count">{{ getElementCount(el.id) }} mẫu</span>
+          </li>
           }
         </ul>
       </div>
@@ -197,10 +205,10 @@
         </div>
         <div class="gemstone-tags">
           @for (g of gemstonePills; track g.id) {
-            <button type="button" class="gem-badge-btn" [class.selected]="isGemstoneActive(g)"
-                    (click)="toggleGemstone(g.query)">
-              {{ g.label }}
-            </button>
+          <button type="button" class="gem-badge-btn" [class.selected]="isGemstoneActive(g)"
+            (click)="toggleGemstone(g.query)">
+            {{ g.label }}
+          </button>
           }
         </div>
       </div>
@@ -215,12 +223,12 @@
         <div class="price-range-sub">350.000đ &mdash; 1.200.000đ+</div>
         <ul class="filter-radio-list">
           @for (pr of priceRanges; track pr.id) {
-            <li class="filter-radio-item" (click)="setPriceRange(pr.id)" [class.active]="filters.priceRange === pr.id">
-              <div class="custom-radio" [class.checked]="filters.priceRange === pr.id">
-                <span class="radio-dot"></span>
-              </div>
-              <span class="radio-label-text">{{ pr.label }}</span>
-            </li>
+          <li class="filter-radio-item" (click)="setPriceRange(pr.id)" [class.active]="filters.priceRange === pr.id">
+            <div class="custom-radio" [class.checked]="filters.priceRange === pr.id">
+              <span class="radio-dot"></span>
+            </div>
+            <span class="radio-label-text">{{ pr.label }}</span>
+          </li>
           }
         </ul>
       </div>
@@ -234,14 +242,14 @@
         </div>
         <ul class="filter-check-list">
           @for (m of materialOptions; track m.id) {
-            <li class="filter-check-item" (click)="toggleMaterial(m.query)" [class.active]="filters.material === m.query">
-              <div class="custom-checkbox" [class.checked]="filters.material === m.query">
-                @if (filters.material === m.query) {
-                  <span class="check-mark">&#10003;</span>
-                }
-              </div>
-              <span class="check-title">{{ m.label }}</span>
-            </li>
+          <li class="filter-check-item" (click)="toggleMaterial(m.query)" [class.active]="filters.material === m.query">
+            <div class="custom-checkbox" [class.checked]="filters.material === m.query">
+              @if (filters.material === m.query) {
+              <span class="check-mark">&#10003;</span>
+              }
+            </div>
+            <span class="check-title">{{ m.label }}</span>
+          </li>
           }
         </ul>
       </div>
@@ -268,9 +276,10 @@
         <div class="search-input-container">
           <app-icon name="search" [size]="16" class="search-icon"></app-icon>
           <input type="text" [(ngModel)]="filters.search" (keyup.enter)="onFilterChange()" (input)="onFilterChange()"
-                 placeholder="Tìm theo tên đá, mẫu trang sức, mã bảo vật...">
+            placeholder="Tìm theo tên đá, mẫu trang sức, mã bảo vật...">
           @if (filters.search) {
-            <button type="button" class="btn-clear-search" (click)="removeSearch()" aria-label="Xóa từ khóa">&times;</button>
+          <button type="button" class="btn-clear-search" (click)="removeSearch()"
+            aria-label="Xóa từ khóa">&times;</button>
           }
         </div>
         <div class="search-stats">
@@ -280,94 +289,97 @@
 
       <!-- Trạng thái Loading (nếu có) -->
       @if (loading) {
-        <div class="loading-state">
-          <div class="spinner"></div>
-          <p>Đang tải nguồn năng lượng từ bảo bối...</p>
-        </div>
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Đang tải nguồn năng lượng từ bảo bối...</p>
+      </div>
       } @else {
 
-        <!-- Grid Sản phẩm -->
-        @if (products.length > 0) {
-          <div class="product-grid">
-            @for (p of products; track p.name) {
-              <article class="p-card">
+      <!-- Grid Sản phẩm -->
+      @if (products.length > 0) {
+      <div class="product-grid">
+        @for (p of products; track p.name) {
+        <article class="p-card">
 
-                <!-- Media -->
-                <div class="p-card__media">
-                  <a [routerLink]="['/products', p.slug || p.id]">
-                    <img [src]="p.image" [alt]="p.name" loading="lazy">
-                  </a>
+          <!-- Media -->
+          <div class="p-card__media">
+            <a [routerLink]="['/products', p.slug || p.id]">
+              <img [src]="p.image" [alt]="p.name" loading="lazy">
+            </a>
 
-                  <!-- Badge nhãn nổi bật -->
-                  @if (p.badge) {
-                    <span class="p-badge" [class.badge-gold]="p.badge.includes('BÁN CHẠY') || p.badge.includes('BEST')">
-                      {{ p.badge }}
-                    </span>
-                  }
-
-                  <!-- Nút Wishlist -->
-                  <button type="button" class="btn-wish" [class.active]="p.liked" (click)="toggleLike(p, $event)" aria-label="Yêu thích tác phẩm">
-                    <app-icon name="heart" [size]="15"></app-icon>
-                  </button>
-                </div>
-
-                <!-- Body -->
-                <div class="p-card__body">
-                  <div class="p-meta">
-                    <span class="p-stone">{{ p.stone || 'ĐÁ TỰ NHIÊN' | uppercase }}</span>
-                    <span class="p-rating">&#9733; {{ (p.ratingAverage || 5.0) | number:'1.1-1' }} ({{ p.reviewCount !== undefined && p.reviewCount !== null ? p.reviewCount : 0 }})</span>
-                  </div>
-
-                  <h3 class="p-title">
-                    <a [routerLink]="['/products', p.slug || p.id]" [title]="p.name">{{ p.name }}</a>
-                  </h3>
-
-                  <p class="p-desc">{{ p.description || p.shortDescription || 'Tạo tác mang lại vượng khí và bình an.' }}</p>
-
-                  <div class="p-foot">
-                    <div class="p-price">
-                      <strong>{{ p.price | number }}đ</strong>
-                      @if (p.compareAtPrice && p.compareAtPrice > p.price) {
-                        <del>{{ p.compareAtPrice | number }}đ</del>
-                      }
-                    </div>
-
-                    @if (p.element) {
-                      <div class="p-elem-tags">
-                        @for (el of getElementsList(p.element); track el) {
-                          <span class="p-elem-tag">{{ el }}</span>
-                        }
-                      </div>
-                    }
-                  </div>
-
-                  <button type="button" class="btn-quick-add" (click)="addToCart(p, $event)">
-                    <app-icon name="bag" [size]="15"></app-icon>
-                    <span>Thêm vào giỏ</span>
-                  </button>
-
-                </div>
-
-              </article>
+            <!-- Badge nhãn nổi bật -->
+            @if (p.badge) {
+            <span class="p-badge" [class.badge-gold]="p.badge.includes('BÁN CHẠY') || p.badge.includes('BEST')">
+              {{ p.badge }}
+            </span>
             }
+
+            <!-- Nút Wishlist -->
+            <button type="button" class="btn-wish" [class.active]="p.liked" (click)="toggleLike(p, $event)"
+              aria-label="Yêu thích tác phẩm">
+              <app-icon name="heart" [size]="15"></app-icon>
+            </button>
           </div>
 
-          <!-- Thanh phân trang / thống kê kết quả -->
-          <div class="pagination-footer">
-            <span class="page-summary">Hiển thị {{ products.length }} trên tổng số {{ allProducts.length }} bảo vật tuyển chọn</span>
-          </div>
-
-        } @else {
-          <!-- Trạng thái trống -->
-          <div class="empty-shop">
-            <div class="empty-icon">
-              <app-icon name="sparkle" [size]="36"></app-icon>
+          <!-- Body -->
+          <div class="p-card__body">
+            <div class="p-meta">
+              <span class="p-stone">{{ p.stone || 'ĐÁ TỰ NHIÊN' | uppercase }}</span>
+              <span class="p-rating">&#9733; {{ (p.ratingAverage || 5.0) | number:'1.1-1' }} ({{ p.reviewCount !==
+                undefined && p.reviewCount !== null ? p.reviewCount : 0 }})</span>
             </div>
-            <h3 class="serif">Không tìm thấy bảo vật phù hợp</h3>
-            <p>Vui lòng thử điều chỉnh lại bộ lọc hoặc tìm kiếm với từ khóa khác.</p>
-            <button type="button" class="btn-reset-empty" (click)="resetFilters()">Xem tất cả bảo vật</button>
+
+            <h3 class="p-title">
+              <a [routerLink]="['/products', p.slug || p.id]" [title]="p.name">{{ p.name }}</a>
+            </h3>
+
+            <p class="p-desc">{{ p.description || p.shortDescription || 'Tạo tác mang lại vượng khí và bình an.' }}</p>
+
+            <div class="p-foot">
+              <div class="p-price">
+                <strong>{{ p.price | number }}đ</strong>
+                @if (p.compareAtPrice && p.compareAtPrice > p.price) {
+                <del>{{ p.compareAtPrice | number }}đ</del>
+                }
+              </div>
+
+              @if (p.element) {
+              <div class="p-elem-tags">
+                @for (el of getElementsList(p.element); track el) {
+                <span class="p-elem-tag">{{ el }}</span>
+                }
+              </div>
+              }
+            </div>
+
+            <button type="button" class="btn-quick-add" (click)="addToCart(p, $event)">
+              <app-icon name="bag" [size]="15"></app-icon>
+              <span>Thêm vào giỏ</span>
+            </button>
+
           </div>
+
+        </article>
         }
+      </div>
+
+      <!-- Thanh phân trang / thống kê kết quả -->
+      <div class="pagination-footer">
+        <span class="page-summary">Hiển thị {{ products.length }} trên tổng số {{ allProducts.length }} bảo vật tuyển
+          chọn</span>
+      </div>
+
+      } @else {
+      <!-- Trạng thái trống -->
+      <div class="empty-shop">
+        <div class="empty-icon">
+          <app-icon name="sparkle" [size]="36"></app-icon>
+        </div>
+        <h3 class="serif">Không tìm thấy bảo vật phù hợp</h3>
+        <p>Vui lòng thử điều chỉnh lại bộ lọc hoặc tìm kiếm với từ khóa khác.</p>
+        <button type="button" class="btn-reset-empty" (click)="resetFilters()">Xem tất cả bảo vật</button>
+      </div>
+      }
       }
 
     </main>

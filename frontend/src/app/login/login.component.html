@@ -47,6 +47,13 @@
       <p class="auth-sub">Đăng nhập để theo dõi hành trình đơn hàng, lưu danh sách bảo vật yêu thích và nhận thông điệp
         năng lượng chiêm tinh độc bản.</p>
 
+      @if (isCartRedirect) {
+        <div class="alert-info" style="margin-bottom: 16px; background: #fdf2f7; color: #80235c; border: 1px solid #eed5e3; padding: 12px 14px; border-radius: 10px; font-size: 13.5px; display: flex; align-items: center; gap: 8px;">
+          <app-icon name="bag" [size]="16"></app-icon>
+          <span>Vui lòng đăng nhập tài khoản thành viên để xem và quản lý giỏ hàng của bạn.</span>
+        </div>
+      }
+
       @if (errorMsg) { <div class="alert-error">{{ errorMsg }}</div> }
 
       <form #loginForm="ngForm" (ngSubmit)="onLogin(loginForm)" novalidate>

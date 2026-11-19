@@ -23,6 +23,10 @@ export class LoginComponent implements OnInit {
   customGoogleName = '';
   googleError = '';
 
+  get isCartRedirect(): boolean {
+    return this._route.snapshot.queryParams['returnUrl'] === '/cart';
+  }
+
   constructor(
     private _auth: AuthService,
     private _route: ActivatedRoute,

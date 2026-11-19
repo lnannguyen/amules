@@ -173,6 +173,28 @@
   cursor: not-allowed;
 }
 
+.google-pwd-wrap {
+  position: relative;
+  width: 100%;
+}
+.google-pwd-wrap input {
+  padding-right: 36px;
+}
+.btn-toggle-eye {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #5f6368;
+  cursor: pointer;
+  padding: 4px;
+}
+.btn-toggle-eye:hover {
+  color: #1a73e8;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

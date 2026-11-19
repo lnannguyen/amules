@@ -45,6 +45,13 @@ export class HeaderComponent {
     return this._authService.isLoggedIn() ? '/account/overview' : '/login';
   }
 
+  onCartClick(event: Event): void {
+    if (!this._authService.isLoggedIn()) {
+      event.preventDefault();
+      this._router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+    }
+  }
+
   toggleDropdown(event?: Event): void {
     if (event) event.stopPropagation();
     this.showUserDropdown = !this.showUserDropdown;
