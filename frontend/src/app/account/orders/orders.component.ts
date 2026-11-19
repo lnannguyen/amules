@@ -91,7 +91,7 @@ export class OrdersComponent implements OnInit {
                 name: i.name || i.productName || 'Bảo vật phong thủy',
                 variant: i.specs || `Kích thước: ${i.size || 'Tiêu chuẩn'}`,
                 qty: Number(i.quantity || 1),
-                price: Number(i.price || i.unitPrice || 650000),
+                price: Number(i.price || i.unitPrice || 0),
                 image: i.image || ''
               })),
               total: Number(o.totalAmount || 0),

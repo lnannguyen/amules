@@ -98,7 +98,7 @@
     "fullName": "Thu An",
     "email": "anan265464@gmail.com",
     "phone": "",
-    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIkn8Tyt55pJ3SuwS_y72gvhcS1mlCCRCdUy2le0olfl3QcSCKxCA=s96-c",
+    "avatar": "",
     "authProvider": "google",
     "role": "customer",
     "tier": "Thành viên mới",
@@ -113,10 +113,12 @@
       "$date": "2026-11-18T11:48:24.451Z"
     },
     "updatedAt": {
-      "$date": "2026-11-19T09:39:53.241Z"
+      "$date": "2026-11-19T09:58:32.604Z"
     },
     "nickname": "An",
     "password": "789654123",
-    "passwordHash": "789654123"
+    "passwordHash": "789654123",
+    "resetOtp": "708323",
+    "resetOtpExpires": "2026-11-19T10:12:26.306Z"
   }
 ]

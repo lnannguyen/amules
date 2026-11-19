@@ -346,6 +346,7 @@ registerStandardCollectionRoute('themes', 'themes');
 registerStandardCollectionRoute('articles', 'articles');
 registerStandardCollectionRoute('vouchers', 'vouchers');
 registerStandardCollectionRoute('reviews', 'reviews');
+registerStandardCollectionRoute('point-transactions', 'point_transactions');
 app.get('/api/gift-packages', async (req, res) => {
   try {
     const db = getDB();
@@ -875,8 +876,8 @@ app.post('/api/auth/login', async (req, res) => {
         email: user.email,
         fullName: user.fullName || user.name,
         role: user.role || 'customer',
-        tier: user.tier || (user.email === 'lananh.gemini@gmail.com' ? 'GEMSTONE VIP' : 'Thành viên mới'),
-        points: user.points !== undefined ? user.points : (user.email === 'lananh.gemini@gmail.com' ? 1250 : 0),
+        tier: user.tier || 'Thành viên mới',
+        points: user.points !== undefined ? user.points : 0,
         avatar: user.avatar || ''
       };
 
@@ -932,8 +933,8 @@ app.get('/api/auth/profile', async (req, res) => {
           phone: found.phone || '',
           avatar: found.avatar || '',
           role: found.role || 'customer',
-          tier: found.tier || (found.email === 'lananh.gemini@gmail.com' ? 'GEMSTONE VIP' : 'Thành viên mới'),
-          points: found.points !== undefined ? found.points : (found.email === 'lananh.gemini@gmail.com' ? 1250 : 0),
+          tier: found.tier || 'Thành viên mới',
+          points: found.points !== undefined ? found.points : 0,
           authProvider: found.authProvider || 'local'
         };
         if (req.session) {
@@ -1200,7 +1201,6 @@ app.post('/api/auth/logout', (req, res) => {
 const handleGoogleAuthUser = async (profileData) => {
   const db = getDB();
   const email = (profileData.email || '').trim().toLowerCase();
-  const isDemo = email === 'lananh.gemini@gmail.com';
   let user = null;
 
   if (db) {
@@ -1215,21 +1215,21 @@ const handleGoogleAuthUser = async (profileData) => {
 
   if (!user) {
     const newUser = {
-      fullName: profileData.fullName || (isDemo ? 'Nguyễn Hoàng Lan Anh' : 'Khách hàng mới'),
+      fullName: profileData.fullName || 'Khách hàng mới',
       email,
-      phone: profileData.phone || (isDemo ? '0982 456 789' : ''),
+      phone: profileData.phone || '',
       password: profileData.password || '123456',
       passwordHash: profileData.password || '123456',
       avatar: profileData.avatar || '',
       authProvider: 'google',
       role: 'customer',
-      tier: isDemo ? 'GEMSTONE VIP' : 'Thành viên mới',
-      points: isDemo ? 1250 : 0,
-      dob: isDemo ? '12 / 03 / 1998' : '',
-      gender: isDemo ? 'female' : '',
-      element: isDemo ? 'Mệnh Thủy (Tương sinh: Kim & Mộc)' : '',
-      zodiac: isDemo ? 'Song Ngư (Pisces) - 19/02 - 20/03' : '',
-      wristSize: isDemo ? '14.5 cm' : '',
+      tier: 'Thành viên mới',
+      points: 0,
+      dob: profileData.dob || '',
+      gender: profileData.gender || '',
+      element: '',
+      zodiac: '',
+      wristSize: '',
       addresses: [],
       createdAt: new Date(),
       updatedAt: new Date()
@@ -2242,33 +2242,9 @@ app.get('/api/users/addresses', async (req, res) => {
       user = fallbackUsers.find(u => u.email === email);
     }
 
-    const isDemo = email === 'lananh.gemini@gmail.com';
     const addresses = (user && user.addresses && user.addresses.length > 0)
       ? user.addresses
-      : (isDemo ? [
-        {
-          id: 'addr_1',
-          label: 'Văn phòng làm việc',
-          fullName: 'Nguyễn Hoàng Lan Anh',
-          phone: '0982 456 789',
-          address: 'Tầng 18, Tòa nhà Bitexco Financial Tower, Số 2 Hải Triều',
-          ward: 'Phường Bến Nghé',
-          district: 'Quận 1',
-          city: 'TP. Hồ Chí Minh',
-          isDefault: true
-        },
-        {
-          id: 'addr_2',
-          label: 'Nhà riêng (Gia đình)',
-          fullName: 'Nguyễn Hoàng Lan Anh',
-          phone: '0982 456 789',
-          address: 'Villa 12, Khu đô thị Thảo Điền Riverside, Nguyễn Văn Hưởng',
-          ward: 'Phường Thảo Điền',
-          district: 'Thành phố Thủ Đức',
-          city: 'TP. Hồ Chí Minh',
-          isDefault: false
-        }
-      ] : []);
+      : [];
     res.json(addresses);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -2892,8 +2868,8 @@ app.post('/api/wishlists/toggle', async (req, res) => {
 app.post('/api/reviews', async (req, res) => {
   try {
     const db = getDB();
-    const email = (req.session.user && req.session.user.email) || 'lananh.gemini@gmail.com';
-    const userName = (req.session.user && req.session.user.fullName) || 'Khách hàng AMULES';
+    const email = (req.session.user && req.session.user.email) || req.body.userEmail || '';
+    const userName = (req.session.user && (req.session.user.fullName || req.session.user.name)) || req.body.userName || 'Khách hàng AMULES';
 
     const newReview = {
       productName: req.body.productName || 'Bảo vật AMULES',
@@ -3093,21 +3069,21 @@ async function ensureOrdersSeeded(db) {
           if (!status) status = idx === 0 ? 'completed' : 'shipping';
         }
 
-        const fullName = (o.customer && o.customer.fullName) || (o.shippingAddress && (o.shippingAddress.fullName || o.shippingAddress.recipient)) || (idx === 0 ? 'Nguyễn Hoàng Lan Anh' : 'Lê Minh Châu');
-        const phone = (o.customer && o.customer.phone) || (o.shippingAddress && o.shippingAddress.phone) || (idx === 0 ? '0982 456 789' : '0903 111 222');
-        const email = (o.customer && o.customer.email) || (o.shippingAddress && o.shippingAddress.email) || (idx === 0 ? 'lananh.gemini@gmail.com' : 'minhchau.le@gmail.com');
-        const tier = (o.customer && o.customer.tier) || (idx === 0 ? 'GEMSTONE VIP' : 'Khách mua lần đầu');
+        const fullName = (o.customer && o.customer.fullName) || (o.shippingAddress && (o.shippingAddress.fullName || o.shippingAddress.recipient)) || 'Khách hàng';
+        const phone = (o.customer && o.customer.phone) || (o.shippingAddress && o.shippingAddress.phone) || '';
+        const email = (o.customer && o.customer.email) || (o.shippingAddress && o.shippingAddress.email) || '';
+        const tier = (o.customer && o.customer.tier) || 'Thành viên mới';
 
         const items = (o.items || []).map(it => ({
           name: it.productName || it.name || 'Bảo vật phong thủy AMULES',
-          categoryTag: it.categoryTag || (idx === 0 ? 'MOONSTONE TỰ NHIÊN • Bạc Ý S925' : 'AQUAMARINE HỘ MỆNH • Bạc 925'),
-          specs: it.specs || (it.selectedSize ? `Chiều dài: ${it.selectedSize} • Màu: ${it.selectedColor || 'Tiêu chuẩn'}` : 'Chiều dài: 45 cm • Màu sắc: Trắng ánh xanh'),
-          image: it.image || (idx === 0 ? 'https://i.pinimg.com/736x/e6/a9/5d/e6a95dbb226be002601330c99458c286.jpg' : 'https://i.pinimg.com/736x/d4/3c/3d/d43c3d69296b0badad1636033dd34e9c.jpg'),
-          price: Number(it.unitPrice || it.price || 650000),
+          categoryTag: it.categoryTag || 'TRANG SỨC PHONG THỦY',
+          specs: it.specs || (it.selectedSize ? `Chiều dài: ${it.selectedSize} • Màu: ${it.selectedColor || 'Tiêu chuẩn'}` : ''),
+          image: it.image || '',
+          price: Number(it.unitPrice || it.price || 0),
           quantity: Number(it.quantity || 1)
         }));
 
-        const isReturn = rawReturns.some(r => r.orderId && o._id && (r.orderId.toString() === o._id.toString() || r.orderId === o._id)) || idx === 0;
+        const isReturn = rawReturns.some(r => r.orderId && o._id && (r.orderId.toString() === o._id.toString() || r.orderId === o._id));
 
         return {
           ...o,

@@ -10,7 +10,7 @@
     <span class="reward-pill__ico"><app-icon name="award" [size]="18"></app-icon></span>
     <div>
       <small>ĐIỂM TÍCH LŨY NHẬN ĐƯỢC</small>
-      <strong>+50 Tinh Thạch</strong> <span>/ mỗi lượt đánh giá</span>
+      <strong>+50 Linh Thạch</strong> <span>/ mỗi lượt đánh giá</span>
     </div>
   </div>
 </div>
@@ -19,7 +19,7 @@
 <div class="rev-bar">
   <div class="acc-pill-tabs" style="margin-bottom: 0;">
     <button type="button" [class.active]="activeTab === 'pending'" (click)="activeTab = 'pending'">
-      Chờ đánh giá <span class="tab-count">{{ submittedSuccess ? 0 : 1 }}</span>
+      Chờ đánh giá <span class="tab-count">{{ pendingReviews.length }}</span>
     </button>
     <button type="button" [class.active]="activeTab === 'submitted'" (click)="activeTab = 'submitted'">
       Đã đánh giá <span class="tab-count">{{ submittedReviews.length }}</span>
@@ -28,95 +28,115 @@
   <span class="rev-verify"><app-icon name="check-circle" [size]="14"></app-icon> 100% đánh giá được chứng thực từ người mua thật</span>
 </div>
 
-<!-- Khối viết đánh giá cho sản phẩm chờ đánh giá -->
-@if (!submittedSuccess) {
-  <section class="acc-card rev-form-card">
-    <!-- Cột trái: Thông tin sản phẩm đã mua -->
-    <div class="rev-prod">
-      <div class="rev-prod__img-wrap">
-        <img src="https://i.pinimg.com/736x/82/af/ce/82afce704fa0702179286be2a3d293d7.jpg" alt="Lắc Tay Nàng Thơ">
-        <span class="stone-badge">Rose Quartz</span>
-      </div>
-      <div class="rev-prod__info">
-        <span class="acc-badge">Đơn hàng đã giao thành công</span>
-        <h3>Lắc Tay Nàng Thơ Thạch Anh Hồng Madagascar</h3>
-        <p class="rev-order-code">Mã đơn: <b>#AMU-LT-004</b></p>
-        <small><app-icon name="calendar" [size]="12"></app-icon> Giao hoàn tất ngày 10/10/2025</small>
-      </div>
-    </div>
-
-    <!-- Cột phải: Form chấm sao & cảm nhận -->
-    <div class="rev-editor">
-      <div class="field">
-        <label>Chấm điểm chất lượng bùa hộ mệnh</label>
-        <div class="star-picker">
-          @for (s of [1, 2, 3, 4, 5]; track s) {
-            <button type="button" [class.on]="s <= rating" (click)="setRating(s)" aria-label="Sao">★</button>
-          }
-          <span class="star-label">{{ ratingLabels[rating] }}</span>
+<!-- TAB 1: CHỜ ĐÁNH GIÁ -->
+@if (activeTab === 'pending') {
+  @if (pendingReviews.length > 0 && selectedPendingItem) {
+    <section class="acc-card rev-form-card">
+      <!-- Cột trái: Thông tin sản phẩm đã mua -->
+      <div class="rev-prod">
+        <div class="rev-prod__img-wrap">
+          <img [src]="selectedPendingItem.image" [alt]="selectedPendingItem.name">
+          <span class="stone-badge">{{ selectedPendingItem.stoneTag }}</span>
+        </div>
+        <div class="rev-prod__info">
+          <span class="acc-badge">Đơn hàng đã giao thành công</span>
+          <h3>{{ selectedPendingItem.name }}</h3>
+          <p class="rev-order-code">Mã đơn: <b>#{{ selectedPendingItem.orderCode }}</b></p>
+          <small><app-icon name="calendar" [size]="12"></app-icon> Giao hoàn tất ngày {{ selectedPendingItem.date }}</small>
         </div>
       </div>
 
-      <div class="field">
-        <label>Tiêu đề đánh giá</label>
-        <div class="input-wrap no-left-icon">
-          <input type="text" [(ngModel)]="reviewTitle">
+      <!-- Cột phải: Form chấm sao & cảm nhận -->
+      <div class="rev-editor">
+        <div class="field">
+          <label>Chấm điểm chất lượng bùa hộ mệnh</label>
+          <div class="star-picker">
+            @for (s of [1, 2, 3, 4, 5]; track s) {
+              <button type="button" [class.on]="s <= rating" (click)="setRating(s)" aria-label="Sao">★</button>
+            }
+            <span class="star-label">{{ ratingLabels[rating] }}</span>
+          </div>
         </div>
-      </div>
 
-      <div class="field">
-        <label>Chia sẻ chi tiết trải nghiệm &amp; năng lượng đá</label>
-        <textarea rows="3" [(ngModel)]="reviewContent" class="rev-textarea"></textarea>
-      </div>
+        <div class="field">
+          <label>Tiêu đề đánh giá</label>
+          <div class="input-wrap no-left-icon">
+            <input type="text" [(ngModel)]="reviewTitle" placeholder="Tóm tắt cảm nhận của bạn về bảo vật...">
+          </div>
+        </div>
 
-      <div class="field">
-        <label>Ảnh / Video thực tế trên tay (Tối đa 5 ảnh)</label>
-        <div class="rev-photos">
-          <img src="https://i.pinimg.com/736x/d4/3c/3d/d43c3d69296b0badad1636033dd34e9c.jpg" alt="Ảnh thực tế 1">
-          <img src="https://i.pinimg.com/1200x/5e/19/ca/5e19cae249717d1321564c81f14a1732.jpg" alt="Ảnh thực tế 2">
-          <button type="button" class="add-photo-btn">
-            <app-icon name="camera" [size]="16"></app-icon>
-            <span>Thêm ảnh</span>
+        <div class="field">
+          <label>Chia sẻ chi tiết trải nghiệm &amp; năng lượng đá</label>
+          <textarea rows="3" [(ngModel)]="reviewContent" placeholder="Viết cảm nhận của bạn về độ tinh xảo, năng lượng đá quý..." class="rev-textarea"></textarea>
+        </div>
+
+        <div class="rev-editor__actions">
+          <button type="button" class="btn btn--outline btn--xs" (click)="reviewContent = ''; reviewTitle = ''">Hủy</button>
+          <button type="button" class="btn btn--primary btn--xs" [disabled]="submitting || !reviewContent.trim()" (click)="submitReview()">
+            {{ submitting ? 'Đang gửi...' : 'Gửi đánh giá' }} <app-icon name="send" [size]="13"></app-icon>
           </button>
         </div>
       </div>
-
-      <div class="rev-editor__actions">
-        <button type="button" class="btn btn--outline btn--xs">Hủy</button>
-        <button type="button" class="btn btn--primary btn--xs" (click)="submitReview()">
-          Gửi đánh giá <app-icon name="send" [size]="13"></app-icon>
-        </button>
+    </section>
+  } @else {
+    <!-- Empty State khi không có sản phẩm chờ đánh giá -->
+    <div class="acc-card" style="text-align: center; padding: 48px 24px; color: #786b72; margin-bottom: 24px;">
+      <div style="width: 54px; height: 54px; margin: 0 auto 14px; background: #fdf2f7; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #80235c;">
+        <app-icon name="sparkle" [size]="24"></app-icon>
       </div>
+      <h3 class="serif" style="font-size: 18px; color: #2d1822; margin-bottom: 8px;">Hiện Bạn Không Có Sản Phẩm Chờ Đánh Giá</h3>
+      <p style="font-size: 14px; max-width: 480px; margin: 0 auto 20px; line-height: 1.6;">
+        Chỉ những bảo vật từ các đơn hàng đã được giao hoàn tất mới có thể gửi đánh giá xác thực. Hãy khám phá và sở hữu bảo vật để trải nghiệm năng lượng tinh tú.
+      </p>
+      <a routerLink="/products" class="btn btn--primary btn--xs" style="padding: 10px 22px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;">
+        <app-icon name="gem" [size]="14"></app-icon> Khám Phá Cửa Hàng Bảo Vật
+      </a>
     </div>
-  </section>
+  }
 }
 
-<!-- Danh sách Đánh Giá Đã Gửi -->
-<div class="rev-list-head">
-  <h2 class="serif">Đánh Giá Đã Gửi</h2>
-  <span>Hiển thị {{ submittedReviews.length }} trong số {{ submittedReviews.length }} đánh giá</span>
-</div>
+<!-- TAB 2: ĐÃ ĐÁNH GIÁ -->
+@if (activeTab === 'submitted') {
+  <div class="rev-list-head">
+    <h2 class="serif">Đánh Giá Đã Gửi</h2>
+    <span>Hiển thị {{ submittedReviews.length }} đánh giá</span>
+  </div>
 
-@for (r of submittedReviews; track r.productName) {
-  <article class="acc-card rev-item">
-    <img [src]="r.image" [alt]="r.productName" class="rev-item__img">
-    <div class="rev-item__body">
-      <div class="rev-item__top">
-        <h3>{{ r.productName }}</h3>
-        <span class="acc-badge acc-badge--ok"><app-icon name="check-circle" [size]="12"></app-icon> Đã duyệt ✓</span>
-      </div>
-      <div class="rev-item__stars">
-        <span class="stars-gold">★★★★★</span>
-        <small>• Đã đăng ngày {{ r.date }}</small>
-      </div>
-      <p class="rev-item__quote">{{ r.quote }}</p>
-      <div class="rev-item__foot">
-        <span><app-icon name="thumbs-up" [size]="13"></app-icon> {{ r.helpfulCount }} khách hàng thấy hữu ích</span>
-        <span>•</span>
-        <a [routerLink]="['/products']" [queryParams]="{ search: r.productName }">Xem bài viết trên trang sản phẩm</a>
-      </div>
+  @if (submittedReviews.length > 0) {
+    @for (r of submittedReviews; track r.id || r.productName) {
+      <article class="acc-card rev-item">
+        <img [src]="r.image" [alt]="r.productName" class="rev-item__img">
+        <div class="rev-item__body">
+          <div class="rev-item__top">
+            <h3>{{ r.productName }}</h3>
+            <span class="acc-badge acc-badge--ok"><app-icon name="check-circle" [size]="12"></app-icon> Đã duyệt ✓</span>
+          </div>
+          <div class="rev-item__stars">
+            <span class="stars-gold">
+              @for (s of [1, 2, 3, 4, 5]; track s) {
+                <span [style.color]="s <= r.stars ? '#c9a24b' : '#dcd6d8'">★</span>
+              }
+            </span>
+            <small>• Đã đăng ngày {{ r.date }}</small>
+          </div>
+          <p class="rev-item__quote">{{ r.quote }}</p>
+          <div class="rev-item__foot">
+            <span><app-icon name="thumbs-up" [size]="13"></app-icon> {{ r.helpfulCount }} khách hàng thấy hữu ích</span>
+            <span>•</span>
+            <a [routerLink]="['/products']" [queryParams]="{ search: r.productName }">Xem bài viết trên trang sản phẩm</a>
+          </div>
+        </div>
+      </article>
+    }
+  } @else {
+    <div class="acc-card" style="text-align: center; padding: 48px 24px; color: #786b72; margin-bottom: 24px;">
+      <app-icon name="award" [size]="32" style="color: #c9a24b; margin-bottom: 12px;"></app-icon>
+      <h3 class="serif" style="font-size: 18px; color: #2d1822; margin-bottom: 8px;">Bạn Chưa Có Đánh Giá Nào</h3>
+      <p style="font-size: 14px; max-width: 480px; margin: 0 auto; line-height: 1.6;">
+        Toàn bộ phản hồi và chia sẻ cảm nhận của bạn sau khi nhận bảo vật sẽ được lưu trữ và hiển thị tại đây.
+      </p>
     </div>
-  </article>
+  }
 }
 
 <!-- Chính sách minh bạch -->

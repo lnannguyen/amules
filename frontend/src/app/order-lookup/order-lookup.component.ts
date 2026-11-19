@@ -81,12 +81,7 @@ export class OrderLookupComponent {
       },
       error: (err) => {
         this.cancelling = false;
-        // Mock fallback
-        this.showCancelModal = false;
-        this.searchedOrder.status = 'cancelled';
-        this.searchedOrder.orderStatus = 'Đã hủy';
-        this.searchedOrder.cancelReason = finalReason;
-        this.successMsg = 'Đơn hàng đã được cập nhật sang trạng thái Đã hủy.';
+        this.errorMsg = err.error?.message || 'Không thể hủy đơn hàng vào lúc này. Vui lòng kiểm tra lại trạng thái đơn hàng hoặc liên hệ CSKH AMULES.';
       }
     });
   }

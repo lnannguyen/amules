@@ -9,8 +9,8 @@
   <div class="tier-pill">
     <span class="tier-pill__ico"><app-icon name="gem" [size]="16"></app-icon></span>
     <div>
-      <small>HỘI VIÊN CAO CẤP</small>
-      <strong>Gemstone VIP</strong>
+      <small>HẠNG HỘI VIÊN</small>
+      <strong>{{ userTier }}</strong>
     </div>
   </div>
 </div>
@@ -20,28 +20,35 @@
   <!-- Cột trái: Điểm & Tiến trình -->
   <div class="rw-balance">
     <div class="rw-badges">
-      <span class="rw-tier-badge"><app-icon name="sparkle" [size]="11"></app-icon> Gemstone VIP (Cấp II • Bạch Kim)</span>
+      <span class="rw-tier-badge"><app-icon name="sparkle" [size]="11"></app-icon> {{ userTier }}</span>
       <span class="acc-badge acc-badge--outline">TÀI KHOẢN XÁC THỰC</span>
     </div>
 
     <small class="rw-sub-label">SỐ DƯ KHẢ DỤNG HIỆN TẠI</small>
     <div class="rw-points">
-      <strong>1.250</strong>
+      <strong>{{ userPoints | number }}</strong>
       <span>Linh Thạch (LT)</span>
     </div>
 
     <p class="rw-equiv">
       <app-icon name="sparkle" [size]="13"></app-icon>
-      Tương đương giá trị quy đổi: <b>125.000đ</b> chiết khấu trực tiếp vào giỏ hàng.
+      Tương đương giá trị quy đổi: <b>{{ equivalentCash | number }}đ</b> chiết khấu trực tiếp vào giỏ hàng.
     </p>
 
     <div class="rw-prog-box">
       <div class="rw-prog-box__top">
-        <span>Tiến trình thăng hạng: <b>Celestial VIP (Kim Cương)</b></span>
-        <b>1.250 / 1.500 LT (83%)</b>
+        <span>Tiến trình thăng hạng: <b>{{ nextTierInfo.nextName }}</b></span>
+        <b>{{ userPoints | number }} / {{ nextTierInfo.target | number }} LT ({{ nextTierInfo.progress }}%)</b>
       </div>
-      <div class="rw-bar"><i style="width: 83%;"></i></div>
-      <small><app-icon name="sparkle" [size]="11"></app-icon> Tích lũy thêm 250 LT trước ngày 31/12/2025 để nâng hạng Celestial VIP và mở khóa chiết khấu 15% trọn đời.</small>
+      <div class="rw-bar"><i [style.width.%]="nextTierInfo.progress"></i></div>
+      <small>
+        <app-icon name="sparkle" [size]="11"></app-icon> 
+        @if (nextTierInfo.needed > 0) {
+          Tích lũy thêm {{ nextTierInfo.needed | number }} LT để nâng hạng {{ nextTierInfo.nextName }}.
+        } @else {
+          Quý khách đã đạt hạng hội viên cao cấp nhất của AMULES!
+        }
+      </small>
     </div>
   </div>
 
@@ -77,54 +84,61 @@
   </div>
 
   <div class="acc-pill-tabs" style="margin-bottom: 0;">
-    <button type="button" [class.active]="voucherTab === 'all'" (click)="voucherTab = 'all'">Tất cả ưu đãi (4)</button>
-    <button type="button" [class.active]="voucherTab === 'available'" (click)="voucherTab = 'available'">Có thể sử dụng (2)</button>
-    <button type="button" [class.active]="voucherTab === 'other'" (click)="voucherTab = 'other'">Đã dùng / Hết hạn (1)</button>
+    <button type="button" [class.active]="voucherTab === 'all'" (click)="voucherTab = 'all'">Tất cả ưu đãi ({{ vouchers.length }})</button>
+    <button type="button" [class.active]="voucherTab === 'available'" (click)="voucherTab = 'available'">Có thể sử dụng</button>
+    <button type="button" [class.active]="voucherTab === 'other'" (click)="voucherTab = 'other'">Đã dùng / Khác</button>
   </div>
 </div>
 
-<div class="voucher-grid">
-  @for (v of filteredVouchers; track v.id) {
-    <article class="voucher-card" [class.voucher-used]="v.statusKey === 'used'">
-      <div class="voucher-card__top">
-        <span class="acc-badge" [class.acc-badge--gold]="v.isGold" [class.acc-badge--outline]="v.statusKey === 'used'">
-          {{ v.topBadge }}
-        </span>
-        <small><app-icon name="clock" [size]="12"></app-icon> {{ v.expiry }}</small>
-      </div>
-
-      <div class="voucher-card__main">
-        <div class="voucher-Stub" [class.gold]="v.isGold" [class.muted]="v.statusKey === 'used'">
-          <strong>{{ v.boxTitle }}</strong>
-          <small>{{ v.boxSub }}</small>
+@if (filteredVouchers.length > 0) {
+  <div class="voucher-grid">
+    @for (v of filteredVouchers; track v.id) {
+      <article class="voucher-card" [class.voucher-used]="v.statusKey === 'used'">
+        <div class="voucher-card__top">
+          <span class="acc-badge" [class.acc-badge--gold]="v.isGold" [class.acc-badge--outline]="v.statusKey === 'used'">
+            {{ v.topBadge }}
+          </span>
+          <small><app-icon name="clock" [size]="12"></app-icon> {{ v.expiry }}</small>
         </div>
-        <div class="voucher-info">
-          <h3>{{ v.title }}</h3>
-          <p>{{ v.desc }}</p>
+
+        <div class="voucher-card__main">
+          <div class="voucher-Stub" [class.gold]="v.isGold" [class.muted]="v.statusKey === 'used'">
+            <strong>{{ v.boxTitle }}</strong>
+            <small>{{ v.boxSub }}</small>
+          </div>
+          <div class="voucher-info">
+            <h3>{{ v.title }}</h3>
+            <p>{{ v.desc }}</p>
+          </div>
         </div>
-      </div>
 
-      <div class="voucher-card__code-row">
-        <span>MÃ VOUCHER:</span>
-        <b>{{ v.code }}</b>
-      </div>
+        <div class="voucher-card__code-row">
+          <span>MÃ VOUCHER:</span>
+          <b>{{ v.code }}</b>
+        </div>
 
-      <div class="voucher-card__foot">
-        @if (v.statusKey === 'available') {
-          <button type="button" class="btn btn--outline btn--xs" (click)="copyCode(v.code)">
-            <app-icon name="copy" [size]="13"></app-icon>
-            {{ copiedCode === v.code ? 'Đã sao chép!' : 'Sao chép mã' }}
-          </button>
-          <a routerLink="/" class="btn btn--xs" [class.btn--primary]="!v.isGold" [class.btn--gold-solid]="v.isGold">
-            {{ v.ctaLabel }} <app-icon name="arrow-right" [size]="13"></app-icon>
-          </a>
-        } @else {
-          <span class="voucher-note">{{ v.ctaLabel }}</span>
-        }
-      </div>
-    </article>
-  }
-</div>
+        <div class="voucher-card__foot">
+          @if (v.statusKey === 'available') {
+            <button type="button" class="btn btn--outline btn--xs" (click)="copyCode(v.code)">
+              <app-icon name="copy" [size]="13"></app-icon>
+              {{ copiedCode === v.code ? 'Đã sao chép!' : 'Sao chép mã' }}
+            </button>
+            <a routerLink="/products" class="btn btn--xs btn--primary">
+              {{ v.ctaLabel }} <app-icon name="arrow-right" [size]="13"></app-icon>
+            </a>
+          } @else {
+            <span class="voucher-note">{{ v.ctaLabel }}</span>
+          }
+        </div>
+      </article>
+    }
+  </div>
+} @else {
+  <div class="acc-card" style="text-align: center; padding: 32px 20px; color: #786b72; margin-bottom: 24px;">
+    <app-icon name="gift" [size]="28" style="color: #c9a24b; margin-bottom: 8px;"></app-icon>
+    <p style="margin: 0; font-size: 14px;">Hiện chưa có mã ưu đãi nào trong mục này.</p>
+  </div>
+}
 
 <!-- Bảng Lịch Sử Biến Động Linh Thạch -->
 <section class="acc-card">
@@ -135,68 +149,79 @@
     </div>
 
     <div class="hist-filter">
-      <span>Lọc thời gian:</span>
+      <span>Thời gian:</span>
       <select>
-        <option>Toàn bộ lịch sử (2025)</option>
+        <option>Toàn bộ lịch sử</option>
         <option>3 tháng gần nhất</option>
       </select>
     </div>
   </div>
 
-  <div class="table-wrap">
-    <table class="rw-table">
-      <thead>
-        <tr>
-          <th>NGÀY GIAO DỊCH</th>
-          <th>HOẠT ĐỘNG / LÝ DO</th>
-          <th>MÃ ĐƠN HÀNG</th>
-          <th>BIẾN ĐỘNG ĐIỂM</th>
-          <th>SỐ DƯ SAU GD</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (row of history; track row.date) {
+  @if (history.length > 0) {
+    <div class="table-wrap">
+      <table class="rw-table">
+        <thead>
           <tr>
-            <td>
-              <div class="td-date">
-                <app-icon name="calendar" [size]="13"></app-icon>
-                <div>
-                  <b>{{ row.date }}</b>
-                  <small>{{ row.time }}</small>
-                </div>
-              </div>
-            </td>
-            <td>
-              <strong class="td-title">{{ row.title }}</strong>
-              <small class="td-sub">{{ row.sub }}</small>
-            </td>
-            <td>
-              @if (row.orderCode !== '—') {
-                <a routerLink="/account/orders/AMU-2025-8942" class="td-code">{{ row.orderCode }} <app-icon name="arrow-up-right" [size]="11"></app-icon></a>
-              } @else {
-                <span>—</span>
-              }
-            </td>
-            <td><span class="delta-plus">{{ row.delta }}</span></td>
-            <td><b class="td-bal">{{ row.balance }}</b></td>
+            <th>NGÀY GIAO DỊCH</th>
+            <th>HOẠT ĐỘNG / LÝ DO</th>
+            <th>MÃ ĐƠN HÀNG</th>
+            <th>BIẾN ĐỘNG ĐIỂM</th>
+            <th>SỐ DƯ SAU GD</th>
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-
-  <div class="rw-table-foot">
-    <span>Hiển thị 4 trên 4 giao dịch điểm tích lũy gần nhất</span>
-    <div class="ord-page-btns">
-      <button type="button" disabled><app-icon name="chevron-left" [size]="13"></app-icon></button>
-      <button type="button" class="active">1</button>
-      <button type="button" disabled><app-icon name="chevron-right" [size]="13"></app-icon></button>
+        </thead>
+        <tbody>
+          @for (row of history; track $index) {
+            <tr>
+              <td>
+                <div class="td-date">
+                  <app-icon name="calendar" [size]="13"></app-icon>
+                  <div>
+                    <b>{{ row.date }}</b>
+                    <small>{{ row.time }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <strong class="td-title">{{ row.title }}</strong>
+                <small class="td-sub">{{ row.sub }}</small>
+              </td>
+              <td>
+                @if (row.orderCode && row.orderCode !== '—') {
+                  <span class="td-code">{{ row.orderCode }}</span>
+                } @else {
+                  <span>—</span>
+                }
+              </td>
+              <td><span class="delta-plus">{{ row.delta }}</span></td>
+              <td><b class="td-bal">{{ row.balance }}</b></td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
-  </div>
+
+    <div class="rw-table-foot">
+      <span>Hiển thị {{ history.length }} trên {{ history.length }} giao dịch điểm tích lũy</span>
+    </div>
+  } @else {
+    <!-- Empty State cho tài khoản chưa có giao dịch -->
+    <div style="text-align: center; padding: 48px 24px; color: #786b72;">
+      <div style="width: 54px; height: 54px; margin: 0 auto 14px; background: #fdf2f7; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #80235c;">
+        <app-icon name="sparkle" [size]="24"></app-icon>
+      </div>
+      <h3 class="serif" style="font-size: 18px; color: #2d1822; margin-bottom: 8px;">Chưa Có Biến Động Điểm Linh Thạch</h3>
+      <p style="font-size: 14px; max-width: 480px; margin: 0 auto 20px; line-height: 1.6;">
+        Khi bạn hoàn tất các đơn hàng bảo vật hoặc tham gia các chương trình tri ân thành viên AMULES, toàn bộ lịch sử tích lũy và sử dụng Linh Thạch sẽ được lưu trữ tự động tại đây.
+      </p>
+      <a routerLink="/products" class="btn btn--primary btn--xs" style="padding: 10px 22px; border-radius: 20px;">
+        <app-icon name="gem" [size]="14"></app-icon> Khám Phá Cửa Hàng Để Tích Điểm
+      </a>
+    </div>
+  }
 </section>
 
-<!-- Ghi chú cuối trang -->
+<!-- Ghi chú chính sách cuối trang -->
 <div class="acc-foot-note">
   <span class="ico"><app-icon name="info" [size]="15"></app-icon></span>
-  <p><b>Lưu ý:</b> Dữ liệu minh họa hệ thống tích điểm hội viên AMULES. Linh Thạch có giá trị quy đổi thành tiền giảm trừ trực tiếp trên hóa đơn và không có giá trị quy đổi thành tiền mặt lưu hành.</p>
+  <p><b>Chính sách tích điểm:</b> Điểm tích lũy Linh Thạch (LT) có giá trị giảm trừ trực tiếp trên hóa đơn mua sắm trang sức đá quý tại AMULES theo tỷ lệ 1 LT = 100đ.</p>
 </div>

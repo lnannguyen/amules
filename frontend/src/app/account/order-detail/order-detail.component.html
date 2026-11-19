@@ -13,7 +13,7 @@
         <h1 class="acc-page-head__title" style="margin: 0;">Đơn Hàng {{ orderCode }}</h1>
       </div>
       <div class="od-sub-row">
-        <span class="status-pill"><i class="pulse-dot"></i> ĐANG VẬN CHUYỂN HỎA TỐC</span>
+        <span class="status-pill"><i class="pulse-dot"></i> {{ orderStatus | uppercase }}</span>
       </div>
       <p class="od-meta">Ngày đặt: {{ orderDate }} • Kênh: {{ channel }}</p>
     </div>
@@ -58,7 +58,7 @@
     <section class="acc-card">
       <div class="acc-card__head">
         <h2 class="acc-card__title">Danh Sách Sản Phẩm</h2>
-        <span class="od-count">2 sản phẩm</span>
+        <span class="od-count">{{ items.length }} sản phẩm</span>
       </div>
 
       <div class="od-product-list">
@@ -145,23 +145,25 @@
       <div class="sum-rows">
         <div class="sum-row">
           <span>Tạm tính giá trị tạo tác</span>
-          <b>1.300.000đ</b>
+          <b>{{ subtotal | number }}đ</b>
         </div>
         <div class="sum-row">
-          <span>Phí vận chuyển hỏa tốc <app-icon name="info" [size]="12"></app-icon></span>
-          <b class="free-text">MIỄN PHÍ</b>
+          <span>Phí vận chuyển <app-icon name="info" [size]="12"></app-icon></span>
+          <b [class.free-text]="shippingFee === 0">{{ shippingFee === 0 ? 'MIỄN PHÍ' : (shippingFee | number) + 'đ' }}</b>
         </div>
+        @if (discount > 0) {
         <div class="sum-row">
-          <span>Khuyến mãi hội viên VIP (10%)</span>
-          <b class="discount-text">-100.000đ</b>
+          <span>Khuyến mãi giảm trừ</span>
+          <b class="discount-text">-{{ discount | number }}đ</b>
         </div>
+        }
       </div>
 
       <!-- Tổng thanh toán -->
       <div class="sum-total-box">
         <div>
           <small>TỔNG THANH TOÁN</small>
-          <strong>1.200.000đ</strong>
+          <strong>{{ totalAmount | number }}đ</strong>
         </div>
         <span class="sum-total-ico"><app-icon name="shield-check" [size]="18"></app-icon></span>
       </div>
@@ -170,13 +172,15 @@
       <div class="pay-method-box">
         <div class="pay-method-box__top">
           <small>PHƯƠNG THỨC</small>
-          <span class="acc-badge acc-badge--ok">ĐÃ HOÀN TẤT</span>
+          <span class="acc-badge" [class.acc-badge--ok]="paymentStatus.includes('hoàn tất')">{{ paymentStatus }}</span>
         </div>
         <div class="pay-method-box__body">
-          <span class="qr-ico"><app-icon name="qrcode" [size]="16"></app-icon></span>
+          <span class="qr-ico"><app-icon [name]="paymentMethod === 'COD' ? 'package' : 'qrcode'" [size]="16"></app-icon></span>
           <div>
-            <strong>Đã thanh toán online qua VNPay</strong>
-            <small>Mã giao dịch: VNP_299184</small>
+            <strong>Thanh toán {{ paymentMethod === 'COD' ? 'khi nhận hàng (COD)' : ('online qua ' + paymentMethod) }}</strong>
+            @if (transactionCode) {
+              <small>Mã giao dịch: {{ transactionCode }}</small>
+            }
           </div>
         </div>
       </div>

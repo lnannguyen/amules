@@ -33,5 +33,109 @@
       "Đá Kyanite hỗ trợ mệnh Thủy"
     ],
     "displayOrder": 3
+  },
+  {
+    "_id": "6afec6f25190da7156e197b2",
+    "sessionId": "6afec6f25190da7156e197b1",
+    "userId": "6afd90886110da292e0b54b0",
+    "productId": "673b0001ca8f6cf617970001",
+    "matchScore": 98,
+    "matchReasons": [
+      "Tương hợp bản mệnh Mệnh Thổ (Ốc Thượng Thổ - Năm Bính Tuất)",
+      "Cộng hưởng Luân xa Con Mắt Thứ 3 (Ajna)"
+    ],
+    "displayOrder": 1,
+    "createdAt": "2026-11-19T09:52:50.647Z"
+  },
+  {
+    "_id": "6afec6f25190da7156e197b3",
+    "sessionId": "6afec6f25190da7156e197b1",
+    "userId": "6afd90886110da292e0b54b0",
+    "productId": "673b0001ca8f6cf617970002",
+    "matchScore": 95,
+    "matchReasons": [
+      "Tương hợp bản mệnh Mệnh Thổ (Ốc Thượng Thổ - Năm Bính Tuất)",
+      "Cộng hưởng Luân xa Con Mắt Thứ 3 (Ajna)"
+    ],
+    "displayOrder": 2,
+    "createdAt": "2026-11-19T09:52:50.647Z"
+  },
+  {
+    "_id": "6afec6f25190da7156e197b4",
+    "sessionId": "6afec6f25190da7156e197b1",
+    "userId": "6afd90886110da292e0b54b0",
+    "productId": "673b0001ca8f6cf617970003",
+    "matchScore": 92,
+    "matchReasons": [
+      "Tương hợp bản mệnh Mệnh Thổ (Ốc Thượng Thổ - Năm Bính Tuất)",
+      "Cộng hưởng Luân xa Con Mắt Thứ 3 (Ajna)"
+    ],
+    "displayOrder": 3,
+    "createdAt": "2026-11-19T09:52:50.647Z"
+  },
+  {
+    "_id": "6afec6f25190da7156e197b5",
+    "sessionId": "6afec6f25190da7156e197b1",
+    "userId": "6afd90886110da292e0b54b0",
+    "productId": "6afd38c3ca8f6cf6179722d0",
+    "matchScore": 89,
+    "matchReasons": [
+      "Tương hợp bản mệnh Mệnh Thổ (Ốc Thượng Thổ - Năm Bính Tuất)",
+      "Cộng hưởng Luân xa Con Mắt Thứ 3 (Ajna)"
+    ],
+    "displayOrder": 4,
+    "createdAt": "2026-11-19T09:52:50.647Z"
+  },
+  {
+    "_id": "6afec6f35190da7156e197b7",
+    "sessionId": "6afec6f35190da7156e197b6",
+    "userId": "6afd90886110da292e0b54b0",
+    "productId": "673b0001ca8f6cf617970001",
+    "matchScore": 98,
+    "matchReasons": [
+      "Tương hợp bản mệnh Mệnh Thổ (Ốc Thượng Thổ - Năm Bính Tuất)",
+      "Cộng hưởng Luân xa Con Mắt Thứ 3 (Ajna)"
+    ],
+    "displayOrder": 1,
+    "createdAt": "2026-11-19T09:52:51.957Z"
+  },
+  {
+    "_id": "6afec6f35190da7156e197b8",
+    "sessionId": "6afec6f35190da7156e197b6",
+    "userId": "6afd90886110da292e0b54b0",
+    "productId": "673b0001ca8f6cf617970002",
+    "matchScore": 95,
+    "matchReasons": [
+      "Tương hợp bản mệnh Mệnh Thổ (Ốc Thượng Thổ - Năm Bính Tuất)",
+      "Cộng hưởng Luân xa Con Mắt Thứ 3 (Ajna)"
+    ],
+    "displayOrder": 2,
+    "createdAt": "2026-11-19T09:52:51.957Z"
+  },
+  {
+    "_id": "6afec6f35190da7156e197b9",
+    "sessionId": "6afec6f35190da7156e197b6",
+    "userId": "6afd90886110da292e0b54b0",
+    "productId": "673b0001ca8f6cf617970003",
+    "matchScore": 92,
+    "matchReasons": [
+      "Tương hợp bản mệnh Mệnh Thổ (Ốc Thượng Thổ - Năm Bính Tuất)",
+      "Cộng hưởng Luân xa Con Mắt Thứ 3 (Ajna)"
+    ],
+    "displayOrder": 3,
+    "createdAt": "2026-11-19T09:52:51.957Z"
+  },
+  {
+    "_id": "6afec6f35190da7156e197ba",
+    "sessionId": "6afec6f35190da7156e197b6",
+    "userId": "6afd90886110da292e0b54b0",
+    "productId": "6afd38c3ca8f6cf6179722d0",
+    "matchScore": 89,
+    "matchReasons": [
+      "Tương hợp bản mệnh Mệnh Thổ (Ốc Thượng Thổ - Năm Bính Tuất)",
+      "Cộng hưởng Luân xa Con Mắt Thứ 3 (Ajna)"
+    ],
+    "displayOrder": 4,
+    "createdAt": "2026-11-19T09:52:51.957Z"
   }
 ]
