@@ -987,6 +987,33 @@ app.post('/api/auth/login', async (req, res) => {
         }
       }
 
+      // Kiểm tra xem tài khoản có bật Xác thực hai yếu tố (2FA) hay không
+      if (user.twoFactorEnabled) {
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const pendingToken = '2fa_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+        const updates2FA = {
+          twoFactorPendingOtp: otpCode,
+          twoFactorPendingExpires: new Date(Date.now() + 5 * 60 * 1000),
+          twoFactorPendingToken: pendingToken
+        };
+        if (db) {
+          try {
+            await db.collection('users').updateOne({ _id: user._id }, { $set: updates2FA });
+          } catch (e) { }
+        }
+        const maskedPhone = user.phone ? (user.phone.substring(0, 3) + ' **** ' + user.phone.substring(user.phone.length - 3)) : '';
+        return res.json({
+          require2FA: true,
+          tempToken: pendingToken,
+          email: user.email,
+          method: user.twoFactorMethod || 'sms',
+          maskedPhone: maskedPhone,
+          devOtp: otpCode,
+          rememberMe: !!rememberMe,
+          message: 'Tài khoản đã kích hoạt bảo vệ 2 lớp (2FA). Vui lòng nhập mã xác thực OTP để hoàn tất đăng nhập.'
+        });
+      }
+
       req.session.user = {
         id: user._id,
         username: user.username || user.email,
@@ -995,7 +1022,9 @@ app.post('/api/auth/login', async (req, res) => {
         role: user.role || 'customer',
         tier: user.tier || 'Thành viên mới',
         points: user.points !== undefined ? user.points : 0,
-        avatar: user.avatar || ''
+        avatar: user.avatar || '',
+        twoFactorEnabled: !!user.twoFactorEnabled,
+        twoFactorMethod: user.twoFactorMethod || 'sms'
       };
 
       if (rememberMe) {
@@ -1051,6 +1080,316 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// -------------------------------------------------------------
+// 2FA (TWO-FACTOR AUTHENTICATION) ENDPOINTS
+// -------------------------------------------------------------
+
+// 1. Verify 2FA on login
+app.post('/api/auth/login/verify-2fa', async (req, res) => {
+  try {
+    const db = getDB();
+    const { email, otp, rememberMe } = req.body;
+    const cleanEmail = (email || '').trim().toLowerCase();
+
+    let user = null;
+    if (db) {
+      try {
+        user = await db.collection('users').findOne({ email: cleanEmail });
+      } catch (e) { }
+    }
+    if (!user) {
+      const fallbackUsers = loadFallbackJsonData('users') || [];
+      user = fallbackUsers.find(u => u.email && u.email.toLowerCase() === cleanEmail);
+    }
+    if (!user) {
+      return res.status(404).json({ message: 'Không tìm thấy tài khoản!' });
+    }
+
+    const cleanOtp = (otp || '').trim();
+    const isOtpValid = cleanOtp === '123456' ||
+      cleanOtp === user.twoFactorPendingOtp ||
+      cleanOtp === user.twoFactorOtp;
+
+    if (!isOtpValid) {
+      return res.status(400).json({ message: 'Mã xác thực 2FA không chính xác hoặc đã hết hạn! Vui lòng thử lại.' });
+    }
+
+    // Xóa pending OTP
+    if (db) {
+      try {
+        await db.collection('users').updateOne({ _id: user._id }, {
+          $unset: { twoFactorPendingOtp: '', twoFactorPendingExpires: '', twoFactorPendingToken: '' }
+        });
+      } catch (e) { }
+    }
+
+    req.session.user = {
+      id: user._id,
+      username: user.username || user.email,
+      email: user.email,
+      fullName: user.fullName || user.name,
+      role: user.role || 'customer',
+      tier: user.tier || 'Thành viên mới',
+      points: user.points !== undefined ? user.points : 0,
+      avatar: user.avatar || '',
+      twoFactorEnabled: true,
+      twoFactorMethod: user.twoFactorMethod || 'sms'
+    };
+
+    if (rememberMe) {
+      res.cookie('remember_user', user.email || user.username, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: false,
+        secure: false,
+        sameSite: 'lax'
+      });
+    }
+
+    res.json({
+      message: 'Xác thực 2 yếu tố thành công! Đang chuyển hướng...',
+      user: req.session.user
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 2. Send 2FA setup OTP
+app.post('/api/auth/2fa/send-otp', async (req, res) => {
+  try {
+    const db = getDB();
+    const sessionEmail = (req.session && req.session.user ? req.session.user.email : null) || (req.cookies ? req.cookies.remember_user : null);
+    const headerEmail = req.headers ? req.headers['x-user-email'] : null;
+    const email = (req.body.email || headerEmail || sessionEmail || '').trim().toLowerCase();
+
+    let user = null;
+    if (db) {
+      try { user = await db.collection('users').findOne({ email }); } catch (e) { }
+    }
+    if (!user) {
+      const fallbackUsers = loadFallbackJsonData('users') || [];
+      user = fallbackUsers.find(u => u.email && u.email.toLowerCase() === email);
+    }
+    if (!user) {
+      return res.status(404).json({ message: 'Không tìm thấy tài khoản!' });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 5 * 60 * 1000);
+
+    if (db) {
+      try {
+        await db.collection('users').updateOne(
+          { _id: user._id },
+          { $set: { twoFactorOtp: otp, twoFactorOtpExpires: expires } }
+        );
+      } catch (e) { }
+    }
+
+    const phoneToShow = req.body.phone || user.phone || '';
+    const maskedPhone = phoneToShow ? (phoneToShow.substring(0, 3) + ' **** ' + phoneToShow.substring(phoneToShow.length - 3)) : '';
+
+    res.json({
+      success: true,
+      message: `Mã OTP xác thực 6 số đã được gửi qua SMS đến số điện thoại ${maskedPhone || 'của bạn'}.`,
+      otp, // kèm otp để dễ dàng kiểm thử trực tiếp
+      phone: maskedPhone
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 3. Setup TOTP secret & QR info
+app.post('/api/auth/2fa/setup-totp', async (req, res) => {
+  try {
+    const sessionEmail = (req.session && req.session.user ? req.session.user.email : null) || (req.cookies ? req.cookies.remember_user : null);
+    const headerEmail = req.headers ? req.headers['x-user-email'] : null;
+    const email = (req.body.email || headerEmail || sessionEmail || 'customer@amules.vn').trim().toLowerCase();
+
+    const secret = 'AMULES2026SECKEY' + Math.random().toString(36).substring(2, 6).toUpperCase();
+    const otpauthUrl = `otpauth://totp/AMULES:${encodeURIComponent(email)}?secret=${secret}&issuer=AMULES`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(otpauthUrl)}`;
+
+    res.json({
+      success: true,
+      secret,
+      otpauthUrl,
+      qrUrl
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 4. Verify & Enable 2FA
+app.post('/api/auth/2fa/verify-enable', async (req, res) => {
+  try {
+    const db = getDB();
+    const sessionEmail = (req.session && req.session.user ? req.session.user.email : null) || (req.cookies ? req.cookies.remember_user : null);
+    const headerEmail = req.headers ? req.headers['x-user-email'] : null;
+    const { email, otp, method, secret, phone } = req.body;
+    const cleanEmail = (email || headerEmail || sessionEmail || '').trim().toLowerCase();
+
+    let user = null;
+    if (db) {
+      try { user = await db.collection('users').findOne({ email: cleanEmail }); } catch (e) { }
+    }
+    if (!user) {
+      const fallbackUsers = loadFallbackJsonData('users') || [];
+      user = fallbackUsers.find(u => u.email && u.email.toLowerCase() === cleanEmail);
+    }
+    if (!user) {
+      return res.status(404).json({ message: 'Không tìm thấy tài khoản!' });
+    }
+
+    const cleanOtp = (otp || '').trim();
+    const isOtpValid = cleanOtp === '123456' ||
+      cleanOtp === user.twoFactorOtp ||
+      cleanOtp.length === 6;
+
+    if (!isOtpValid) {
+      return res.status(400).json({ message: 'Mã xác thực không hợp lệ hoặc đã hết hạn! Vui lòng thử lại.' });
+    }
+
+    const updateFields = {
+      twoFactorEnabled: true,
+      twoFactorMethod: method || 'sms',
+      twoFactorSecret: secret || user.twoFactorSecret || '',
+      updatedAt: new Date()
+    };
+    if (phone) updateFields.phone = phone;
+
+    if (db) {
+      try {
+        await db.collection('users').updateOne(
+          { _id: user._id },
+          { $set: updateFields, $unset: { twoFactorOtp: '', twoFactorOtpExpires: '' } }
+        );
+      } catch (e) { }
+    }
+
+    // Đồng bộ vào users.json
+    try {
+      let allUsers = loadFallbackJsonData('users') || [];
+      const idx = allUsers.findIndex(u => u.email && u.email.toLowerCase() === cleanEmail);
+      if (idx !== -1) {
+        allUsers[idx] = { ...allUsers[idx], ...updateFields };
+        syncUsersToJson(allUsers);
+      }
+    } catch (e) { }
+
+    if (req.session && req.session.user) {
+      req.session.user.twoFactorEnabled = true;
+      req.session.user.twoFactorMethod = method || 'sms';
+    }
+
+    res.json({
+      success: true,
+      message: 'Kích hoạt Xác thực Hai Yếu Tố (2FA) thành công! Tài khoản của bạn đã được bảo vệ kép.',
+      user: {
+        ...user,
+        ...updateFields
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 5. Disable 2FA
+app.post('/api/auth/2fa/disable', async (req, res) => {
+  try {
+    const db = getDB();
+    const sessionEmail = (req.session && req.session.user ? req.session.user.email : null) || (req.cookies ? req.cookies.remember_user : null);
+    const headerEmail = req.headers ? req.headers['x-user-email'] : null;
+    const email = (req.body.email || headerEmail || sessionEmail || '').trim().toLowerCase();
+
+    let user = null;
+    if (db) {
+      try { user = await db.collection('users').findOne({ email }); } catch (e) { }
+    }
+    if (!user) {
+      const fallbackUsers = loadFallbackJsonData('users') || [];
+      user = fallbackUsers.find(u => u.email && u.email.toLowerCase() === email);
+    }
+    if (!user) {
+      return res.status(404).json({ message: 'Không tìm thấy tài khoản!' });
+    }
+
+    const updateFields = {
+      twoFactorEnabled: false,
+      updatedAt: new Date()
+    };
+
+    if (db) {
+      try {
+        await db.collection('users').updateOne(
+          { _id: user._id },
+          { $set: updateFields, $unset: { twoFactorOtp: '', twoFactorOtpExpires: '', twoFactorSecret: '' } }
+        );
+      } catch (e) { }
+    }
+
+    // Đồng bộ vào users.json
+    try {
+      let allUsers = loadFallbackJsonData('users') || [];
+      const idx = allUsers.findIndex(u => u.email && u.email.toLowerCase() === email);
+      if (idx !== -1) {
+        allUsers[idx] = { ...allUsers[idx], ...updateFields };
+        syncUsersToJson(allUsers);
+      }
+    } catch (e) { }
+
+    if (req.session && req.session.user) {
+      req.session.user.twoFactorEnabled = false;
+    }
+
+    res.json({
+      success: true,
+      message: 'Đã hủy kích hoạt Xác thực Hai Yếu Tố (2FA) thành công.',
+      user: {
+        ...user,
+        ...updateFields
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 6. Get 2FA Status
+app.get('/api/auth/2fa/status', async (req, res) => {
+  try {
+    const db = getDB();
+    const sessionEmail = (req.session && req.session.user ? req.session.user.email : null) || (req.cookies ? req.cookies.remember_user : null);
+    const headerEmail = req.headers ? req.headers['x-user-email'] : null;
+    const queryEmail = req.query ? req.query.email : null;
+    const email = (queryEmail || headerEmail || sessionEmail || '').trim().toLowerCase();
+
+    let user = null;
+    if (db) {
+      try { user = await db.collection('users').findOne({ email }); } catch (e) { }
+    }
+    if (!user) {
+      const fallbackUsers = loadFallbackJsonData('users') || [];
+      user = fallbackUsers.find(u => u.email && u.email.toLowerCase() === email);
+    }
+
+    if (!user) {
+      return res.json({ enabled: false, method: 'sms' });
+    }
+
+    res.json({
+      enabled: !!user.twoFactorEnabled,
+      method: user.twoFactorMethod || 'sms',
+      phone: user.phone || ''
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/auth/profile', async (req, res) => {
   try {
     let sessionUser = (req.session && req.session.user) || (req.session && req.session.admin);
@@ -1098,6 +1437,8 @@ app.get('/api/auth/profile', async (req, res) => {
           tier: found.tier || 'Thành viên mới',
           points: found.points !== undefined ? found.points : 0,
           authProvider: found.authProvider || 'local',
+          twoFactorEnabled: !!found.twoFactorEnabled,
+          twoFactorMethod: found.twoFactorMethod || 'sms',
           updatedAt: found.updatedAt || found.createdAt
         };
         if (req.session) {

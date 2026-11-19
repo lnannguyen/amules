@@ -197,4 +197,51 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal Xác thực 2 yếu tố (2FA) khi đăng nhập -->
+  @if (show2FAModal) {
+    <div class="google-modal-overlay" (click)="close2FAModal()">
+      <div class="google-modal-box" (click)="$event.stopPropagation()" style="max-width: 420px; padding: 28px 24px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="width: 52px; height: 52px; border-radius: 50%; background: #fdf2f8; color: #be185d; display: inline-grid; place-items: center; margin-bottom: 12px;">
+            <app-icon name="shield-check" [size]="28"></app-icon>
+          </div>
+          <h3 style="margin: 0 0 6px; font-size: 18px; font-weight: 700; color: #4a1836;">Xác Thực Hai Yếu Tố (2FA)</h3>
+          <p style="margin: 0; font-size: 13px; color: #786170; line-height: 1.45;">
+            Tài khoản của bạn đã được bảo vệ kép. Vui lòng nhập mã xác thực 6 số gửi đến số điện thoại <b>{{ twoFactorData?.maskedPhone || 'của bạn' }}</b> hoặc ứng dụng Authenticator.
+          </p>
+        </div>
+
+        @if (twoFactorError) {
+          <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; margin-bottom: 14px; text-align: center;">
+            {{ twoFactorError }}
+          </div>
+        }
+
+        <div style="margin-bottom: 20px;">
+          <input
+            type="text"
+            [(ngModel)]="twoFactorOtp"
+            maxlength="6"
+            placeholder="Nhập mã 6 chữ số"
+            style="width: 100%; text-align: center; font-size: 24px; font-weight: 700; letter-spacing: 8px; padding: 12px; border-radius: 12px; border: 2px solid #e5d7e0; outline: none;"
+            (keyup.enter)="verify2FALogin()"
+            autofocus
+          >
+          <small style="display: block; text-align: center; margin-top: 8px; font-size: 11.5px; color: #059669;">
+            💡 Gợi ý kiểm thử: Mã OTP của bạn là <b>{{ twoFactorData?.devOtp || '123456' }}</b>
+          </small>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn--outline" (click)="close2FAModal()" style="flex: 1; padding: 11px; font-size: 13px; border-radius: 10px;">
+            Hủy bỏ
+          </button>
+          <button type="button" class="btn btn--primary" (click)="verify2FALogin()" [disabled]="twoFactorSubmitting || !twoFactorOtp" style="flex: 2; padding: 11px; font-size: 13px; border-radius: 10px; background: #7b1e58; color: #fff;">
+            {{ twoFactorSubmitting ? 'Đang xác thực...' : 'Xác nhận Đăng Nhập' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

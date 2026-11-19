@@ -152,19 +152,70 @@ export class LoginComponent implements OnInit {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 
+  // 2FA Verification Modal on Login
+  show2FAModal = false;
+  twoFactorData: any = null;
+  twoFactorOtp = '';
+  twoFactorError = '';
+  twoFactorSubmitting = false;
+
   onLogin(form: NgForm) {
     if (form.invalid) { return; }
     this.submitting = true;
     this.errorMsg = '';
     const returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/';
     this._auth.login(this.user).subscribe({
-      next: () => this._router.navigateByUrl(returnUrl),
+      next: (res: any) => {
+        if (res && res.require2FA) {
+          this.submitting = false;
+          this.twoFactorData = res;
+          this.twoFactorOtp = res.devOtp || '';
+          this.show2FAModal = true;
+          this._cdr.detectChanges();
+          return;
+        }
+        this._router.navigateByUrl(returnUrl);
+      },
       error: (err: Error) => {
         this.errorMsg = err.message;
         this.submitting = false;
         this._cdr.detectChanges();
       }
     });
+  }
+
+  verify2FALogin(): void {
+    if (!this.twoFactorOtp || this.twoFactorOtp.trim().length < 6) {
+      this.twoFactorError = 'Vui lòng nhập đầy đủ mã xác thực 6 số!';
+      this._cdr.detectChanges();
+      return;
+    }
+    this.twoFactorSubmitting = true;
+    this.twoFactorError = '';
+    const returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/';
+
+    this._auth.verify2FA({
+      email: this.twoFactorData.email,
+      otp: this.twoFactorOtp,
+      rememberMe: this.user.remember
+    }).subscribe({
+      next: () => {
+        this.twoFactorSubmitting = false;
+        this.show2FAModal = false;
+        this._router.navigateByUrl(returnUrl);
+      },
+      error: (err: any) => {
+        this.twoFactorSubmitting = false;
+        this.twoFactorError = err.message || 'Mã xác thực 2FA không chính xác hoặc đã hết hạn!';
+        this._cdr.detectChanges();
+      }
+    });
+  }
+
+  close2FAModal(): void {
+    this.show2FAModal = false;
+    this.submitting = false;
+    this.twoFactorError = '';
   }
 
   onGoogle() {

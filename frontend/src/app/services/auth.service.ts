@@ -249,6 +249,19 @@ export class AuthService {
     );
   }
 
+  verify2FA(payload: { email: string; otp: string; rememberMe?: boolean }): Observable<any> {
+    return this._http.post(`${this.API}/login/verify-2fa`, payload, { withCredentials: true }).pipe(
+      tap((res: any) => {
+        if (res && res.user) {
+          this.currentUser.set(res.user);
+          this.isLoggedIn.set(true);
+          localStorage.setItem('amules_user', JSON.stringify(res.user));
+        }
+      }),
+      catchError(this.handleError)
+    );
+  }
+
   getProfile(): Observable<any> {
     const cur = this.currentUser();
     const headers: any = {};

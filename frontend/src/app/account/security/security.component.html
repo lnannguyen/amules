@@ -113,52 +113,61 @@
           <div class="acc-card__title">
             <span class="ico-box"><app-icon name="shield-check" [size]="16"></app-icon></span>
             <span>Xác Thực Hai Yếu Tố (2FA)</span>
-            @if (userPhone && twoFactorEnabled) {
-              <span class="acc-badge">ĐÃ KÍCH HOẠT ✓</span>
+            @if (twoFactorEnabled) {
+              <span class="acc-badge" style="background: #dcfce7; color: #166534;">ĐÃ KÍCH HOẠT ✓ ({{ twoFactorMethod === 'totp' ? 'TOTP App' : 'SMS OTP' }})</span>
             } @else {
               <span class="acc-badge" style="background: #fef3c7; color: #92400e;">CHƯA KÍCH HOẠT</span>
             }
           </div>
-          <p class="acc-card__sub">Tạo lớp bảo vệ kép cho tài khoản qua mã tin nhắn SMS</p>
+          <p class="acc-card__sub">Tạo lớp bảo vệ kép cho tài khoản qua mã tin nhắn SMS hoặc Google Authenticator</p>
         </div>
 
-        <button type="button" class="toggle-switch" [class.on]="twoFactorEnabled && !!userPhone" (click)="toggle2FA()" aria-label="Bật tắt 2FA">
+        <button type="button" class="toggle-switch" [class.on]="twoFactorEnabled" (click)="toggle2FA()" [attr.aria-label]="twoFactorEnabled ? 'Tắt 2FA' : 'Bật 2FA'">
           <i></i>
         </button>
       </div>
 
       @if (twoFactorNotice) {
-        <div style="background: #fffbeb; border: 1px solid #fef3c7; color: #92400e; padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 12px;">
-          <app-icon name="info" [size]="13"></app-icon> {{ twoFactorNotice }}
+        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+          <app-icon name="check-circle" [size]="15"></app-icon>
+          <span>{{ twoFactorNotice }}</span>
         </div>
       }
 
       <div class="twofa-grid">
-        <div class="twofa-box" [class.active]="userPhone && twoFactorEnabled">
+        <div class="twofa-box" [class.active]="twoFactorEnabled && twoFactorMethod === 'sms'">
           <div class="twofa-box__top">
             <strong><app-icon name="smartphone" [size]="14"></app-icon> Mã OTP qua SMS</strong>
-            <span class="acc-badge">{{ userPhone ? 'Mặc định' : 'Cần liên kết SĐT' }}</span>
+            <span class="acc-badge">{{ twoFactorEnabled && twoFactorMethod === 'sms' ? 'Đang dùng' : 'Khuyên dùng' }}</span>
           </div>
           <p>
             @if (userPhone) {
               Gửi mã xác minh 6 số về số điện thoại <b>{{ maskedPhone }}</b> khi đăng nhập trên trình duyệt lạ.
             } @else {
-              <span style="color: #c2410c;">Tài khoản chưa liên kết số điện thoại. Bổ sung ngay để nhận mã OTP SMS.</span>
+              <span style="color: #c2410c;">Tài khoản chưa có SĐT. Bạn có thể nhập SĐT để nhận mã kích hoạt ngay.</span>
             }
           </p>
-          <a routerLink="/account/profile" class="link-arrow">
-            {{ userPhone ? 'Thay đổi số điện thoại' : 'Liên kết số điện thoại ngay' }} <app-icon name="arrow-right" [size]="12"></app-icon>
-          </a>
+          <div style="display: flex; gap: 12px; align-items: center; margin-top: 10px;">
+            <button type="button" class="btn-setup-link" (click)="open2FAModal('sms')">
+              {{ twoFactorEnabled && twoFactorMethod === 'sms' ? 'Cấu hình lại SMS' : 'Kích hoạt SMS 2FA' }} &rarr;
+            </button>
+            @if (userPhone) {
+              <a routerLink="/account/profile" class="link-muted-small">Đổi SĐT</a>
+            }
+          </div>
         </div>
 
-        <div class="twofa-box">
+        <div class="twofa-box" [class.active]="twoFactorEnabled && twoFactorMethod === 'totp'">
           <div class="twofa-box__top">
             <strong><app-icon name="qrcode" [size]="14"></app-icon> Ứng dụng tạo mã (TOTP)</strong>
+            <span class="acc-badge">{{ twoFactorEnabled && twoFactorMethod === 'totp' ? 'Đang dùng' : 'Bảo mật cao' }}</span>
           </div>
-          <p>Sử dụng Google Authenticator hoặc iCloud Keychain để tạo mã xác thực 30 giây.</p>
-          <button type="button" (click)="configureTotp()" class="link-arrow" style="color: var(--muted); background: none; border: none; cursor: pointer; padding: 0;">
-            {{ totpNotice || 'Cấu hình ứng dụng' }} <app-icon name="chevron-right" [size]="12"></app-icon>
-          </button>
+          <p>Sử dụng Google Authenticator, Microsoft Authenticator hoặc iCloud Keychain để tạo mã 30 giây.</p>
+          <div style="margin-top: 10px;">
+            <button type="button" class="btn-setup-link" (click)="open2FAModal('totp')">
+              {{ twoFactorEnabled && twoFactorMethod === 'totp' ? 'Xem lại mã QR' : 'Cấu hình ứng dụng' }} &rarr;
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -230,3 +239,151 @@
     </section>
   </aside>
 </div>
+
+<!-- ======================================================== -->
+<!-- MODAL THIẾT LẬP / KÍCH HOẠT XÁC THỰC HAI YẾU TỐ (2FA)     -->
+<!-- ======================================================== -->
+@if (show2FAModal) {
+  <div class="modal-backdrop" (click)="close2FAModal()">
+    <div class="modal-card sec-2fa-modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-row">
+          <div class="modal-shield-ico"><app-icon name="shield-check" [size]="20"></app-icon></div>
+          <div>
+            <h3 class="modal-title">Kích Hoạt Xác Thực Hai Yếu Tố (2FA)</h3>
+            <p class="modal-sub">Bảo vệ tối đa tài khoản và thông tin tích lũy Linh Thạch của bạn</p>
+          </div>
+        </div>
+        <button type="button" class="btn-modal-close" (click)="close2FAModal()">&times;</button>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="modal-tabs">
+        <button type="button" class="modal-tab-btn" [class.active]="twoFactorTab === 'sms'" (click)="open2FAModal('sms')">
+          <app-icon name="smartphone" [size]="15"></app-icon>
+          <span>1. Xác thực qua SMS OTP</span>
+        </button>
+        <button type="button" class="modal-tab-btn" [class.active]="twoFactorTab === 'totp'" (click)="open2FAModal('totp')">
+          <app-icon name="qrcode" [size]="15"></app-icon>
+          <span>2. Google Authenticator (TOTP)</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        @if (modal2FAError) {
+          <div class="modal-alert alert-error">
+            <app-icon name="alert" [size]="15"></app-icon>
+            <span>{{ modal2FAError }}</span>
+          </div>
+        }
+        @if (modal2FASuccess) {
+          <div class="modal-alert alert-success">
+            <app-icon name="check-circle" [size]="15"></app-icon>
+            <span>{{ modal2FASuccess }}</span>
+          </div>
+        }
+
+        <!-- TAB 1: SMS OTP -->
+        @if (twoFactorTab === 'sms') {
+          <div class="twofa-tab-content">
+            <p class="step-guide">Hệ thống sẽ gửi mã xác thực gồm 6 chữ số về số điện thoại mỗi khi bạn đăng nhập trên thiết bị mới.</p>
+
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label class="form-lbl">Số điện thoại nhận mã OTP SMS</label>
+              <div class="sms-input-row">
+                <input type="text" [(ngModel)]="smsPhone" placeholder="Ví dụ: 0901234567" class="form-input">
+                <button type="button" class="btn-sms-send" (click)="sendSmsOtp()" [disabled]="submitting2FA || smsCountdown > 0">
+                  {{ smsCountdown > 0 ? ('Gửi lại (' + smsCountdown + 's)') : 'Gửi mã OTP' }}
+                </button>
+              </div>
+              <small class="form-hint">Mã sẽ được gửi tự động qua SMS viễn thông trong vòng 30 giây.</small>
+            </div>
+
+            @if (smsStep === 'verify') {
+              <div class="form-group verify-group">
+                <label class="form-lbl">Nhập mã xác thực 6 số nhận được:</label>
+                <input type="text" [(ngModel)]="smsOtp" maxlength="6" placeholder="------" class="otp-input-box">
+                <small class="form-hint" style="color: #059669;">
+                  💡 Gợi ý kiểm thử: Nhập mã OTP đã nhận hoặc mã dự phòng mặc định <b>123456</b>.
+                </small>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- TAB 2: TOTP GOOGLE AUTHENTICATOR -->
+        @if (twoFactorTab === 'totp') {
+          <div class="twofa-tab-content">
+            <p class="step-guide">Mở ứng dụng <b>Google Authenticator</b>, <b>Microsoft Authenticator</b> hoặc <b>iCloud Keychain</b> trên điện thoại và quét mã QR bên dưới:</p>
+
+            <div class="qr-setup-box">
+              <div class="qr-img-wrapper">
+                @if (totpQrUrl) {
+                  <img [src]="totpQrUrl" alt="QR Code 2FA AMULES" class="qr-code-img">
+                } @else {
+                  <div class="qr-placeholder">Đang tải mã QR...</div>
+                }
+              </div>
+              <div class="qr-secret-info">
+                <span class="secret-lbl">Hoặc nhập khóa bảo mật thủ công:</span>
+                <div class="secret-copy-box">
+                  <code>{{ totpSecret || 'AMULES2026SECKEY' }}</code>
+                  <button type="button" class="btn-copy-secret" (click)="copyTotpSecret()">
+                    {{ totpCopied ? 'Đã sao chép ✓' : 'Sao chép' }}
+                  </button>
+                </div>
+                <small class="secret-hint">Loại khóa: Dựa trên thời gian (Time-based / 30 giây)</small>
+              </div>
+            </div>
+
+            <div class="form-group verify-group" style="margin-top: 16px;">
+              <label class="form-lbl">Nhập mã 6 chữ số hiển thị trên ứng dụng:</label>
+              <input type="text" [(ngModel)]="totpCode" maxlength="6" placeholder="------" class="otp-input-box">
+              <small class="form-hint" style="color: #059669;">
+                💡 Gợi ý kiểm thử: Nhập mã 6 số từ ứng dụng Authenticator hoặc mã dự phòng <b>123456</b>.
+              </small>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" class="btn btn--outline btn--sm" (click)="close2FAModal()">Hủy bỏ</button>
+        @if (twoFactorTab === 'sms') {
+          <button type="button" class="btn btn--primary btn--sm" (click)="confirmEnableSms2FA()" [disabled]="submitting2FA || !smsOtp">
+            {{ submitting2FA ? 'Đang kích hoạt...' : 'Xác nhận & Bật 2FA SMS' }}
+          </button>
+        } @else {
+          <button type="button" class="btn btn--primary btn--sm" (click)="confirmEnableTotp2FA()" [disabled]="submitting2FA || !totpCode">
+            {{ submitting2FA ? 'Đang kích hoạt...' : 'Xác nhận & Bật 2FA TOTP' }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ======================================================== -->
+<!-- MODAL XÁC NHẬN TẮT 2FA                                    -->
+<!-- ======================================================== -->
+@if (showDisable2FAModal) {
+  <div class="modal-backdrop" (click)="showDisable2FAModal = false">
+    <div class="modal-card disable-2fa-modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h3 class="modal-title" style="color: #b91c1c;">Hủy Kích Hoạt 2FA?</h3>
+        <button type="button" class="btn-modal-close" (click)="showDisable2FAModal = false">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13.5px; line-height: 1.5; color: #4b3843; margin-bottom: 12px;">
+          Bạn có chắc chắn muốn tắt <b>Xác thực Hai Yếu Tố (2FA)</b> không? Khi tắt, tài khoản chỉ cần mật khẩu để đăng nhập và sẽ giảm bớt mức độ bảo vệ tài sản Linh Thạch.
+        </p>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn--outline btn--sm" (click)="showDisable2FAModal = false">Giữ lại 2FA</button>
+        <button type="button" class="btn btn--danger btn--sm" style="background: #e11d48; color: #fff; border: none; padding: 8px 16px; border-radius: 8px;" (click)="confirmDisable2FA()" [disabled]="submitting2FA">
+          {{ submitting2FA ? 'Đang tắt...' : 'Xác nhận Tắt 2FA' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
