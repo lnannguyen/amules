@@ -61,7 +61,7 @@ export class SecurityComponent implements OnInit {
     private _http: HttpClient,
     public _auth: AuthService,
     private _cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initRealSession();
@@ -445,7 +445,7 @@ export class SecurityComponent implements OnInit {
             localStorage.setItem('amules_user', JSON.stringify(cur));
             return of({ message: 'Đổi mật khẩu thành công!' });
           }
-        } catch (e) {}
+        } catch (e) { }
         return throwError(() => err);
       })
     ).subscribe({
@@ -464,7 +464,7 @@ export class SecurityComponent implements OnInit {
             this._auth.currentUser.set(cur);
             localStorage.setItem('amules_user', JSON.stringify(cur));
           }
-        } catch (e) {}
+        } catch (e) { }
 
         this._cdr.detectChanges();
         setTimeout(() => {

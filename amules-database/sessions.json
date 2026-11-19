@@ -121,8 +121,8 @@
   },
   {
     "_id": "ANU0zbB5xGniU4FxDMPfbhvQIiK5z-Cd",
-    "expires": "2026-11-20T16:54:35.636Z",
-    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T16:13:14.729Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"},\"admin\":{\"id\":\"admin_default\",\"email\":\"admin.an@amules.com\",\"fullName\":\"Admin An\",\"role\":\"admin\"},\"user\":{\"id\":\"admin_default\",\"email\":\"admin.an@amules.com\",\"fullName\":\"Admin An\",\"role\":\"admin\"}}"
+    "expires": "2026-11-20T17:37:49.843Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:28:38.968Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"},\"admin\":{\"id\":\"admin_default\",\"email\":\"admin.an@amules.com\",\"fullName\":\"Admin An\",\"role\":\"admin\"},\"user\":{\"id\":\"6aff2b65e02421e98b6ec47c\",\"email\":\"nguyenthithuan2425@gmail.com\",\"fullName\":\"Nguyen An\",\"phone\":\"0789651433\",\"tier\":\"Thành viên mới\",\"points\":0,\"role\":\"customer\",\"_id\":\"6aff2b65e02421e98b6ec47c\",\"passwordHash\":\"$2b$10$92wZhjrVthjcU3Y15KsCxe/jMk1v/nfZHMvwivOPj8tlj76l.vzZi\",\"status\":\"active\",\"failedLoginAttempts\":0,\"lockedUntil\":null,\"dob\":\"\",\"gender\":\"\",\"element\":\"\",\"zodiac\":\"\",\"wristSize\":\"\",\"addresses\":[],\"newsletter\":true,\"createdAt\":\"2026-11-19T17:01:25.483Z\",\"updatedAt\":\"2026-11-19T17:28:38.959Z\",\"avatar\":\"\",\"nickname\":\"An\"}}"
   },
   {
     "_id": "y39wVIUsMi_okNaH_hBtKFS6uz74zzmB",
@@ -173,5 +173,70 @@
     "_id": "2t0va6gqLC1MuvgUxrI4oNNhiCGucQac",
     "expires": "2026-11-20T16:53:51.695Z",
     "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T16:53:51.695Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "KYhMTMnCymqxcH2l8uKjkVewKZdOFrM_",
+    "expires": "2026-11-20T17:10:33.413Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:10:33.413Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "0KKbolMrpKWhpomN_miOak5V5tc8BY9G",
+    "expires": "2026-11-20T17:25:27.367Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:25:27.367Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "VZwxP_Z47wgzfQ1Oy_Fqh6tA6_7A9n1s",
+    "expires": "2026-11-20T17:25:27.383Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:25:27.383Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"},\"user\":{\"id\":\"6afd90886110da292e0b54b0\",\"_id\":\"6afd90886110da292e0b54b0\",\"email\":\"anan265464@gmail.com\",\"fullName\":\"Nguyễn Thị Thu An\",\"nickname\":\"An An\",\"phone\":\"0901234567\",\"dob\":\"2004-05-15\",\"gender\":\"Nữ\",\"element\":\"Mệnh Thủy\",\"zodiac\":\"Kim Ngưu (Taurus)\",\"wristSize\":\"15 cm\",\"avatar\":\"\",\"role\":\"customer\",\"tier\":\"Thành viên mới\",\"points\":0,\"authProvider\":\"google\",\"updatedAt\":\"2026-11-19T17:25:27.355Z\"}}"
+  },
+  {
+    "_id": "e6SzupRl3SqZzFOxrOlZ0GQHSsDgiEk2",
+    "expires": "2026-11-20T17:25:27.409Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:25:27.409Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "DaNNnmTPHwVG_9D-_ttBcxs_hziog8q8",
+    "expires": "2026-11-20T17:42:52.557Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:42:52.557Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "paqXJhI6Zi2hyzQAtWYdgLtDf8gyht5g",
+    "expires": "2026-11-20T17:42:52.582Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:42:52.582Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "E1S2dDcLM1Jx3pWNS6A0AxpbAJeAc2ht",
+    "expires": "2026-11-20T17:42:52.655Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:42:52.655Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "1J_XBM996z7sfmBg9UqNxH3ZHnl3N0uI",
+    "expires": "2026-11-20T17:42:52.663Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:42:52.663Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "WMYXv6-E_PeMzzq5nMCk3UFaDVWNebPf",
+    "expires": "2026-11-20T17:42:52.672Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:42:52.672Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "uYiQAHqalG30oPu0k5vRo1OwNTeW39Tv",
+    "expires": "2026-11-20T17:44:04.662Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:44:04.662Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"},\"user\":{\"id\":\"6aff3564cab7e1a1106425b8\",\"email\":\"test2fa_1795110244556@amules.vn\",\"fullName\":\"Test 2FA User\",\"phone\":\"0988776655\",\"tier\":\"Thành viên mới\",\"points\":0,\"role\":\"customer\"}}"
+  },
+  {
+    "_id": "CpTSP9qXRbe_dti-MOk9wz7CMA7eQlII",
+    "expires": "2026-11-20T17:44:04.673Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:44:04.673Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "uCwzhueog0uF-fLsKqbLXp7w8N4pNfEp",
+    "expires": "2026-11-20T17:44:04.750Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:44:04.750Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "pag45oV1FD7Ikwk6aqVXaWJbSeJSTd4N",
+    "expires": "2026-11-20T17:44:04.754Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T17:44:04.754Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"},\"user\":{\"id\":\"6aff3564cab7e1a1106425b8\",\"username\":\"test2fa_1795110244556@amules.vn\",\"email\":\"test2fa_1795110244556@amules.vn\",\"fullName\":\"Test 2FA User\",\"role\":\"customer\",\"tier\":\"Thành viên mới\",\"points\":0,\"avatar\":\"\",\"twoFactorEnabled\":true,\"twoFactorMethod\":\"sms\"}}"
   }
 ]
