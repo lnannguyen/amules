@@ -54,9 +54,12 @@ export class AdminLoginComponent {
       error: (err) => {
         this.submitting = false;
         this.failedAttempts++;
-        if (this.failedAttempts >= 5) {
+        if (err.status === 403 || err.error?.locked || this.failedAttempts >= 5) {
           this.isLocked = true;
-          this.errorMsg = 'Tài khoản tạm khóa 15 phút do nhập sai mật khẩu quá 5 lần liên tiếp. Để bảo vệ tài sản và dữ liệu hệ thống AMULES, cổng quản trị tạm thời đình chỉ phiên đăng nhập này.';
+          this.errorMsg = err.error?.message || 'Tài khoản tạm khóa 15 phút do nhập sai mật khẩu quá 5 lần liên tiếp. Để bảo vệ tài sản và dữ liệu hệ thống AMULES, cổng quản trị tạm thời đình chỉ phiên đăng nhập này.';
+          if (err.error?.remainingMinutes) {
+            this.lockoutTimer = err.error.remainingMinutes * 60;
+          }
           this.startLockoutCountdown();
         } else {
           this.errorMsg = err.error?.message || `Mật khẩu không chính xác (Thử lần ${this.failedAttempts}/5)`;

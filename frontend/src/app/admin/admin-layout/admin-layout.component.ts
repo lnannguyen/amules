@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminService } from '../../services/admin.service';
 
@@ -23,6 +23,52 @@ export class AdminLayoutComponent {
   adminRole = 'QUẢN TRỊ VIÊN';
   adminInitial = 'VL';
 
+  showNotifications = false;
+  unreadNotifsCount = 3;
+
+  notifications = [
+    {
+      id: 1,
+      type: 'order',
+      icon: 'package',
+      title: 'Đơn hàng mới #AMU-2026-889',
+      message: 'Khách hàng Trần Thu Hà vừa thanh toán thành công đơn hàng 1.250.000đ qua VNPay.',
+      time: '12 phút trước',
+      read: false,
+      link: '/admin/orders'
+    },
+    {
+      id: 2,
+      type: 'user',
+      icon: 'user',
+      title: 'Thành viên mới đăng ký',
+      message: 'Người dùng anan265464@gmail.com vừa hoàn tất tạo tài khoản thành viên.',
+      time: '45 phút trước',
+      read: false,
+      link: '/admin/users'
+    },
+    {
+      id: 3,
+      type: 'stock',
+      icon: 'alert-triangle',
+      title: 'Cảnh báo tồn kho thấp',
+      message: 'Bảo vật Vòng tay Đá Mặt Trăng Moonstone chỉ còn 2 chiếc trong kho.',
+      time: '2 giờ trước',
+      read: false,
+      link: '/admin/products'
+    },
+    {
+      id: 4,
+      type: 'comment',
+      icon: 'chat',
+      title: 'Câu hỏi tư vấn phong thủy mới',
+      message: 'Độc giả đặt câu hỏi dưới bài viết "Ý nghĩa của đá Amethyst".',
+      time: '4 giờ trước',
+      read: true,
+      link: '/admin/content'
+    }
+  ];
+
   constructor(
     public adminService: AdminService,
     private _router: Router
@@ -32,6 +78,34 @@ export class AdminLayoutComponent {
       this.adminName = admin.fullName;
       const parts = admin.fullName.trim().split(' ');
       this.adminInitial = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : parts[0].substring(0, 2).toUpperCase();
+    }
+  }
+
+  toggleNotifications(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.showNotifications = !this.showNotifications;
+  }
+
+  markAllAsRead(): void {
+    this.notifications.forEach(n => (n.read = true));
+    this.unreadNotifsCount = 0;
+  }
+
+  clickNotification(notif: any): void {
+    notif.read = true;
+    this.unreadNotifsCount = this.notifications.filter(n => !n.read).length;
+    this.showNotifications = false;
+    if (notif.link) {
+      this._router.navigateByUrl(notif.link);
+    }
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    if (this.showNotifications) {
+      this.showNotifications = false;
     }
   }
 

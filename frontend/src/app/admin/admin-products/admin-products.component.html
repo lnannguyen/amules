@@ -445,26 +445,26 @@
 
             <div class="form-body-fields">
               <div class="field-wrap">
-                <label>Giá niêm yết bán lẻ *</label>
+                <label>Giá niêm yết bán lẻ * (VNĐ &gt; 0)</label>
                 <div class="input-with-tag">
-                  <input type="number" [(ngModel)]="currentProduct.price" class="input-base text-price">
+                  <input type="number" [(ngModel)]="currentProduct.price" min="1000" step="1000" class="input-base text-price" placeholder="Nhập giá bán > 0">
                   <span class="tag-unit">đ</span>
                 </div>
               </div>
 
               <div class="field-wrap">
                 <div class="label-guide-row">
-                  <label>Giá gốc trước khuyến mãi</label>
+                  <label>Giá gốc trước khuyến mãi (≥ 0)</label>
                   <span class="tag-saving">-11% Tiết kiệm</span>
                 </div>
-                <input type="number" [(ngModel)]="currentProduct.compareAtPrice" class="input-base text-strike">
+                <input type="number" [(ngModel)]="currentProduct.compareAtPrice" min="0" step="1000" class="input-base text-strike" placeholder="0">
               </div>
 
               <div class="grid-two-cols">
                 <div class="field-wrap">
-                  <label>Khả năng tại kho</label>
+                  <label>Khả năng tại kho (≥ 0)</label>
                   <div class="input-unit-wrap">
-                    <input type="number" [(ngModel)]="currentProduct.stock" class="input-clean-num">
+                    <input type="number" [(ngModel)]="currentProduct.stock" min="0" step="1" class="input-clean-num" placeholder="0">
                     <span class="unit-text">chiếc</span>
                   </div>
                 </div>
@@ -472,7 +472,7 @@
                 <div class="field-wrap">
                   <label>Báo động sắp hết</label>
                   <div class="input-unit-wrap alert-input">
-                    <input type="number" [(ngModel)]="currentProduct.lowStockAlert" class="input-clean-num text-danger">
+                    <input type="number" [(ngModel)]="currentProduct.lowStockAlert" min="0" step="1" class="input-clean-num text-danger" placeholder="0">
                     <span class="unit-text text-danger">chiếc</span>
                   </div>
                 </div>

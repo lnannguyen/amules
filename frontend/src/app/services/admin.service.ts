@@ -162,4 +162,22 @@ export class AdminService {
   deleteArticle(id: string): Observable<any> {
     return this._http.delete(`/api/admin/catalog/articles/${id}`, { withCredentials: true });
   }
+
+  getBanners(): Observable<any[]> {
+    return this._http.get<any[]>('/api/banners').pipe(
+      catchError(() => of([]))
+    );
+  }
+
+  createBanner(banner: any): Observable<any> {
+    return this._http.post('/api/banners', banner, { withCredentials: true });
+  }
+
+  updateBanner(id: string, banner: any): Observable<any> {
+    return this._http.put(`/api/banners/${id}`, banner, { withCredentials: true });
+  }
+
+  deleteBanner(id: string): Observable<any> {
+    return this._http.delete(`/api/banners/${id}`, { withCredentials: true });
+  }
 }

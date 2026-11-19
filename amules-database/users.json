@@ -1,12 +1,10 @@
 [
   {
-    "_id": {
-      "$oid": "0077ee7a934a956624ff30e6"
-    },
+    "_id": "0077ee7a934a956624ff30e6",
     "fullName": "Quản trị AMULES",
     "email": "admin@amules.vn",
     "phone": "0900000001",
-    "passwordHash": "$2b$10$REPLACE_WITH_REAL_BCRYPT_HASH_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "passwordHash": "$2b$10$ChK6Ndz2inLjNN4RJN49p.ikVrU0mqYQzQkjZuo5MvNQez8toICMS",
     "avatar": null,
     "dateOfBirth": null,
     "gender": null,
@@ -22,13 +20,11 @@
     "updatedAt": "2026-09-01T00:00:00.000Z"
   },
   {
-    "_id": {
-      "$oid": "e4774cdda0793f86414e8b91"
-    },
+    "_id": "e4774cdda0793f86414e8b91",
     "fullName": "Nguyễn Hoàng Lan Anh",
     "email": "lananh.gemini@gmail.com",
     "phone": "0982456789",
-    "passwordHash": "$2b$10$REPLACE_WITH_REAL_BCRYPT_HASH_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "passwordHash": "$2b$10$9f684KV78ovoHbdvvyZd/OSEmQoarPmkZbMJkraCJ/G1rxYWrhG92",
     "avatar": "https://cdn.amules.vn/avatars/u1.jpg",
     "dateOfBirth": "2003-07-05T00:00:00.000Z",
     "gender": "Nữ",
@@ -55,13 +51,11 @@
     "updatedAt": "2026-11-08T00:00:00.000Z"
   },
   {
-    "_id": {
-      "$oid": "270c1b084f3f146eb5787075"
-    },
+    "_id": "270c1b084f3f146eb5787075",
     "fullName": "Trần Thu Hà",
     "email": "thuha.tran@gmail.com",
     "phone": "0911222333",
-    "passwordHash": null,
+    "passwordHash": "$2b$10$H/Elqev1On/dPMLIcbdUI.6w.5baKMMqVCRFjv8oiXTEw6/ow5WiS",
     "avatar": null,
     "dateOfBirth": null,
     "gender": "Nữ",
@@ -77,9 +71,7 @@
     "updatedAt": "2026-10-02T00:00:00.000Z"
   },
   {
-    "_id": {
-      "$oid": "6afcc51cff8e99cc477cf59a"
-    },
+    "_id": "6afcc51cff8e99cc477cf59a",
     "fullName": "An Nguyễn Thị Thu",
     "email": "annttk24406h1@st.uel.edu.vn",
     "phone": "0982 456 789",
@@ -89,12 +81,13 @@
     "tier": "GEMSTONE VIP",
     "points": 1250,
     "createdAt": "2026-11-17T21:20:28.406Z",
-    "updatedAt": "2026-11-17T21:20:28.406Z"
+    "updatedAt": "2026-11-17T21:20:28.406Z",
+    "failedLoginAttempts": 0,
+    "lockedUntil": null,
+    "passwordHash": "$2b$10$YBUQAy4BxnFrqFm3QSvapODLjPA83CUrc708q/O0y6sPCqq5CncNC"
   },
   {
-    "_id": {
-      "$oid": "6afd90886110da292e0b54b0"
-    },
+    "_id": "6afd90886110da292e0b54b0",
     "fullName": "Thu An",
     "email": "anan265464@gmail.com",
     "phone": "",
@@ -109,16 +102,13 @@
     "zodiac": "",
     "wristSize": "",
     "addresses": [],
-    "createdAt": {
-      "$date": "2026-11-18T11:48:24.451Z"
-    },
-    "updatedAt": {
-      "$date": "2026-11-19T09:58:32.604Z"
-    },
+    "createdAt": "2026-11-18T11:48:24.451Z",
+    "updatedAt": "2026-11-19T09:58:32.604Z",
     "nickname": "An",
-    "password": "789654123",
-    "passwordHash": "789654123",
+    "passwordHash": "$2b$10$SO2PEGZUnNTlE4HEap8mdO2K84YrgH.z4zrCdaagjMAxq5uoKvnHq",
     "resetOtp": "708323",
-    "resetOtpExpires": "2026-11-19T10:12:26.306Z"
+    "resetOtpExpires": "2026-11-19T10:12:26.306Z",
+    "failedLoginAttempts": 0,
+    "lockedUntil": null
   }
 ]

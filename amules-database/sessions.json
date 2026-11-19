@@ -118,5 +118,60 @@
     "_id": "dHTOGXYUGs7VymAWltz8nXKGtd-9pHKs",
     "expires": "2026-11-20T05:51:12.266Z",
     "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T05:51:12.266Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "ANU0zbB5xGniU4FxDMPfbhvQIiK5z-Cd",
+    "expires": "2026-11-20T16:54:35.636Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T16:13:14.729Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"},\"admin\":{\"id\":\"admin_default\",\"email\":\"admin.an@amules.com\",\"fullName\":\"Admin An\",\"role\":\"admin\"},\"user\":{\"id\":\"admin_default\",\"email\":\"admin.an@amules.com\",\"fullName\":\"Admin An\",\"role\":\"admin\"}}"
+  },
+  {
+    "_id": "y39wVIUsMi_okNaH_hBtKFS6uz74zzmB",
+    "expires": "2026-11-20T16:35:02.371Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T16:35:02.371Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "j7XCzBecOwMnEM__TIoKcVCFn-SPFSXE",
+    "expires": "2026-11-20T16:35:02.450Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T16:35:02.450Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "4DsMUqtAH0bNWTN1a7Wn-2A_0gYZ24YR",
+    "expires": "2026-11-20T16:35:02.511Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T16:35:02.511Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "j9wAatyuW9Ctdps-eeD-kl2Ry94uxpA8",
+    "expires": "2026-11-20T16:35:02.570Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T16:35:02.570Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "JCUxtzBLFMlJxrJRpPWFb0XrXjLlBPXQ",
+    "expires": "2026-11-20T16:35:02.629Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86399999,\"expires\":\"2026-11-20T16:35:02.629Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "OdM7Xr-dbwJ6v5BJfyEzR6bU2MEWQ5vF",
+    "expires": "2026-11-20T16:35:02.689Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T16:35:02.689Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "bplnR0K1jMKwiM6Uta7uW_72zdcWH3ju",
+    "expires": "2026-11-20T16:35:02.692Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T16:35:02.692Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "bgbTk7v8XOW-9sCncaevyJ2Lavgn9QZ9",
+    "expires": "2026-11-20T16:35:02.851Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T16:35:02.851Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"},\"user\":{\"id\":\"e4774cdda0793f86414e8b91\",\"username\":\"lananh.gemini@gmail.com\",\"email\":\"lananh.gemini@gmail.com\",\"fullName\":\"Nguyễn Hoàng Lan Anh\",\"role\":\"customer\",\"tier\":\"Thành viên mới\",\"points\":12000,\"avatar\":\"https://cdn.amules.vn/avatars/u1.jpg\"}}"
+  },
+  {
+    "_id": "3cN0UJv7o9L881LmkDxvo8PaOWHdtFQy",
+    "expires": "2026-11-20T16:53:17.160Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T16:53:17.160Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
+  },
+  {
+    "_id": "2t0va6gqLC1MuvgUxrI4oNNhiCGucQac",
+    "expires": "2026-11-20T16:53:51.695Z",
+    "session": "{\"cookie\":{\"originalMaxAge\":86400000,\"expires\":\"2026-11-20T16:53:51.695Z\",\"secure\":false,\"httpOnly\":true,\"path\":\"/\",\"sameSite\":\"lax\"}}"
   }
 ]

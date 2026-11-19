@@ -148,6 +148,17 @@
   place-items: center;
 }
 
+.clickable-kpi {
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.clickable-kpi:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(128, 35, 92, 0.08);
+  border-color: #80235c;
+}
+
 .ico-ticket { background: #fdf2f6; color: #80235c; }
 .ico-active { background: #f0fdf4; color: #16a34a; }
 .ico-wait { background: #fef3c7; color: #d97706; }

@@ -51,10 +51,52 @@
       </div>
 
       <div class="admin-topbar__right">
-        <button type="button" class="admin-icon-btn admin-notification-btn" title="Thông báo hệ thống">
-          <app-icon name="bell" [size]="18"></app-icon>
-          <span class="notif-counter">3</span>
-        </button>
+        <!-- Notification Dropdown Wrapper -->
+        <div class="notif-wrapper" (click)="$event.stopPropagation()">
+          <button type="button" class="admin-icon-btn admin-notification-btn" (click)="toggleNotifications($event)" title="Thông báo hệ thống">
+            <app-icon name="bell" [size]="18"></app-icon>
+            @if (unreadNotifsCount > 0) {
+              <span class="notif-counter">{{ unreadNotifsCount }}</span>
+            }
+          </button>
+
+          @if (showNotifications) {
+            <div class="notif-dropdown">
+              <div class="notif-dropdown__head">
+                <div class="notif-head-title">
+                  <app-icon name="bell" [size]="16"></app-icon>
+                  <h4>Thông báo hệ thống</h4>
+                  @if (unreadNotifsCount > 0) {
+                    <span class="badge-unread">{{ unreadNotifsCount }} mới</span>
+                  }
+                </div>
+                <button type="button" class="btn-mark-read" (click)="markAllAsRead()">Đánh dấu đã đọc</button>
+              </div>
+
+              <div class="notif-dropdown__list">
+                @for (n of notifications; track n.id) {
+                  <div class="notif-item" [class.unread]="!n.read" (click)="clickNotification(n)">
+                    <div class="notif-icon-box" [class]="'ico-' + n.type">
+                      <app-icon [name]="n.icon" [size]="15"></app-icon>
+                    </div>
+                    <div class="notif-item__body">
+                      <div class="notif-item__title">{{ n.title }}</div>
+                      <div class="notif-item__desc">{{ n.message }}</div>
+                      <div class="notif-item__time">{{ n.time }}</div>
+                    </div>
+                    @if (!n.read) {
+                      <span class="unread-dot"></span>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="notif-dropdown__foot">
+                <a routerLink="/admin/orders" (click)="showNotifications = false">Xem tất cả hoạt động &rarr;</a>
+              </div>
+            </div>
+          }
+        </div>
 
         <div class="admin-user-profile">
           <div class="admin-profile-avatar">{{ adminInitial }}</div>

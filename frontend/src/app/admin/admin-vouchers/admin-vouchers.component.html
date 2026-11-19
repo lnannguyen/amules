@@ -301,23 +301,23 @@
       <button type="button" class="content-subtab-btn" [class.active]="articleSubTab === 'banners'" (click)="articleSubTab = 'banners'">
         <app-icon name="layers" [size]="15"></app-icon>
         <span>Banner Website</span>
-        <span class="subtab-pill">3 hoạt động</span>
+        <span class="subtab-pill" [class.pill-active]="articleSubTab === 'banners'">{{ banners.length }} hoạt động</span>
       </button>
       <button type="button" class="content-subtab-btn" [class.active]="articleSubTab === 'articles'" (click)="articleSubTab = 'articles'">
         <app-icon name="book-open" [size]="15"></app-icon>
         <span>Bài Viết Cẩm Nang</span>
-        <span class="subtab-pill pill-active">{{ articles.length }} đã đăng</span>
+        <span class="subtab-pill" [class.pill-active]="articleSubTab === 'articles'">{{ articles.length }} đã đăng</span>
       </button>
       <button type="button" class="content-subtab-btn" [class.active]="articleSubTab === 'comments'" (click)="articleSubTab = 'comments'">
         <app-icon name="chat" [size]="15"></app-icon>
         <span>Bình Luận Độc Giả</span>
-        <span class="subtab-pill">286 phản hồi</span>
+        <span class="subtab-pill" [class.pill-active]="articleSubTab === 'comments'">{{ readerComments.length }} phản hồi</span>
       </button>
     </div>
 
-    <!-- 4 KPI Metric Cards (Faithful to Mockup) -->
+    <!-- 4 KPI Metric Cards (Faithful to Mockup & Interactive) -->
     <div class="vouchers-kpi-grid content-kpi-grid">
-      <div class="voucher-kpi-box">
+      <div class="voucher-kpi-box clickable-kpi" (click)="clickKpiArticles()" title="Nhấp để lọc nhanh theo trạng thái xuất bản">
         <div class="kpi-box-top">
           <span class="kpi-box-label">TỔNG QUAN TÀI LIỆU</span>
           <div class="kpi-icon-pill ico-doc"><app-icon name="book-open" [size]="15"></app-icon></div>
@@ -330,39 +330,39 @@
         </div>
       </div>
 
-      <div class="voucher-kpi-box">
+      <div class="voucher-kpi-box clickable-kpi" (click)="clickKpiViews()" title="Nhấp để sắp xếp bài viết theo lượt đọc cao nhất">
         <div class="kpi-box-top">
           <span class="kpi-box-label">LƯU LƯỢNG TRUY CẬP</span>
           <div class="kpi-icon-pill ico-trend"><app-icon name="sparkle" [size]="15"></app-icon></div>
         </div>
         <div class="kpi-box-number">
-          45.890 <small>lượt đọc</small>
+          {{ totalArticleReads | number:'1.0-0' }} <small>lượt đọc</small>
         </div>
         <div class="kpi-box-sub text-up">
-          <span>📈 +32%</span> organic traffic từ Google
+          <span>📈 TB {{ averageArticleViews | number:'1.0-0' }}</span> lượt đọc / bài viết
         </div>
       </div>
 
-      <div class="voucher-kpi-box">
+      <div class="voucher-kpi-box clickable-kpi" (click)="clickKpiComments()" title="Nhấp để chuyển sang xem bình luận & phản hồi độc giả">
         <div class="kpi-box-top">
           <span class="kpi-box-label">TƯƠNG TÁC ĐỘC GIẢ</span>
           <div class="kpi-icon-pill ico-chat"><app-icon name="chat" [size]="15"></app-icon></div>
         </div>
         <div class="kpi-box-number">
-          286 <small>hỏi đáp</small>
+          {{ readerComments.length }} <small>hỏi đáp</small>
         </div>
         <div class="kpi-box-sub text-purple-pill">
-          <span>✨ Yêu cầu thỉnh đá hộ mệnh cá nhân</span>
+          <span>✨ {{ pendingCommentsCount }} câu hỏi chờ phản hồi</span>
         </div>
       </div>
 
-      <div class="voucher-kpi-box">
+      <div class="voucher-kpi-box clickable-kpi" (click)="clickKpiCategories()" title="Nhấp để xem hệ thống phân mục cẩm nang">
         <div class="kpi-box-top">
           <span class="kpi-box-label">HỆ THỐNG PHÂN MỤC</span>
           <div class="kpi-icon-pill ico-cat"><app-icon name="layers" [size]="15"></app-icon></div>
         </div>
         <div class="kpi-box-number">
-          4 <small>chuyên mục</small>
+          {{ uniqueCategoriesCount }} <small>chuyên mục</small>
         </div>
         <div class="kpi-box-sub cat-list-pill">
           <span>Thạch học • Ngũ hành • Talisman</span>
@@ -370,188 +370,349 @@
       </div>
     </div>
 
-    <!-- Filter & Search Bar for Articles -->
-    <div class="vouchers-toolbar content-toolbar">
-      <div class="search-field">
-        <app-icon name="search" [size]="15"></app-icon>
-        <input type="text" [(ngModel)]="articleSearchQuery" placeholder="Tìm theo tiêu đề bài viết, tác giả, thẻ tag...">
-      </div>
-
-      <div class="filter-dropdowns">
-        <div class="select-pill">
-          <select [(ngModel)]="articleCategoryFilter">
-            <option value="all">Tất cả chuyên mục (4)</option>
-            <option value="Thạch học & Đá quý">Thạch học &amp; Đá quý</option>
-            <option value="Hướng dẫn Talisman">Hướng dẫn Talisman</option>
-            <option value="Phong thủy Ngũ hành">Phong thủy Ngũ hành</option>
-            <option value="Phong cách & Lối sống">Phong cách &amp; Lối sống</option>
-          </select>
+    <!-- ========================================== -->
+    <!-- 1. BÀI VIẾT CẨM NANG SUB-TAB                  -->
+    <!-- ========================================== -->
+    @if (articleSubTab === 'articles') {
+      <!-- Filter & Search Bar for Articles -->
+      <div class="vouchers-toolbar content-toolbar">
+        <div class="search-field">
+          <app-icon name="search" [size]="15"></app-icon>
+          <input type="text" [(ngModel)]="articleSearchQuery" placeholder="Tìm theo tiêu đề bài viết, tác giả, thẻ tag...">
         </div>
 
-        <div class="select-pill">
-          <select [(ngModel)]="articleStatusFilter">
-            <option value="all">Tất cả trạng thái</option>
-            <option value="published">Đã xuất bản</option>
-            <option value="draft">Bản nháp</option>
-          </select>
-        </div>
-
-        <div class="select-pill">
-          <span>Mới xuất bản gần đây</span>
-          <app-icon name="chevron-down" [size]="13"></app-icon>
-        </div>
-
-        <button type="button" class="btn-refresh-pill" (click)="loadArticles()" title="Tải lại">
-          <app-icon name="refresh" [size]="13"></app-icon>
-        </button>
-      </div>
-    </div>
-
-    <!-- Articles Table (Faithful to Mockup) -->
-    <div class="vouchers-table-card">
-      <table class="vouchers-table articles-table">
-        <thead>
-          <tr>
-            <th>BÀI VIẾT &amp; HÌNH ẢNH</th>
-            <th>CHUYÊN MỤC</th>
-            <th>TÁC GIẢ</th>
-            <th>NGÀY ĐĂNG</th>
-            <th>LƯỢT ĐỌC</th>
-            <th>SEO SCORE</th>
-            <th>TRẠNG THÁI</th>
-            <th>THAO TÁC</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (art of filteredArticles; track art._id || art.code) {
-            <tr>
-              <!-- 1. Bài viết & Hình ảnh -->
-              <td>
-                <div class="article-cell">
-                  <img [src]="art.image || 'https://i.pinimg.com/736x/47/9c/df/479cdf269b5b50948b8aef6103b475ed.jpg'" alt="thumb" class="article-thumb" (error)="art.image = 'https://i.pinimg.com/1200x/5e/19/ca/5e19cae249717d1321564c81f14a1732.jpg'">
-                  <div class="article-meta">
-                    <div class="eyebrow-row">
-                      <span class="art-eyebrow">{{ art.eyebrow || 'THẠCH HỌC TÂM LINH' }}</span>
-                      @if (art.isTopView) {
-                        <span class="badge-top-view">TOP VIEW</span>
-                      }
-                    </div>
-                    <a href="javascript:void(0)" class="article-title-link" (click)="openEditArticleModal(art)">
-                      {{ art.title }}
-                    </a>
-                    <p class="article-excerpt-text">{{ art.excerpt }}</p>
-                  </div>
-                </div>
-              </td>
-
-              <!-- 2. Chuyên mục -->
-              <td>
-                <span class="cat-pill-badge" [class.cat-gem]="(art.category || '').includes('Thạch')" [class.cat-talisman]="(art.category || '').includes('Talisman')" [class.cat-fengshui]="(art.category || '').includes('Phong')" [class.cat-style]="(art.category || '').includes('Phong cách')">
-                  {{ art.category }}
-                </span>
-              </td>
-
-              <!-- 3. Tác giả -->
-              <td>
-                <div class="author-cell">
-                  <div class="author-avatar">{{ art.authorInitial || 'VL' }}</div>
-                  <div class="author-text">
-                    <strong>{{ art.author || 'Vũ Hoàng Linh' }}</strong>
-                    <small>{{ art.authorRole || 'Admin' }}</small>
-                  </div>
-                </div>
-              </td>
-
-              <!-- 4. Ngày đăng -->
-              <td>
-                <span class="date-text">{{ art.date || '28/10/2026' }}</span>
-              </td>
-
-              <!-- 5. Lượt đọc -->
-              <td>
-                <div class="reads-cell">
-                  <strong>{{ (art.views || 8420).toLocaleString('vi-VN') }}</strong>
-                  <small [class.text-green]="(art.growthText || '').includes('+')">{{ art.growthText || '+18% tuần này' }}</small>
-                </div>
-              </td>
-
-              <!-- 6. SEO Score -->
-              <td>
-                <span class="seo-score-badge">
-                  <span class="dot-seo">●</span> {{ art.seoScore || 96 }}/100
-                </span>
-              </td>
-
-              <!-- 7. Trạng thái -->
-              <td>
-                @if (art.status === 'published') {
-                  <span class="status-pub-badge">
-                    <span class="dot-green">●</span> ĐÃ XUẤT BẢN
-                  </span>
-                } @else {
-                  <span class="status-draft-badge">
-                    <span class="dot-gold">●</span> BẢN NHÁP
-                  </span>
-                }
-              </td>
-
-              <!-- 8. Thao tác -->
-              <td>
-                <div class="article-actions-cell">
-                  <button type="button" class="btn-table-icon" (click)="openEditArticleModal(art)" title="Chỉnh sửa bài viết">
-                    <app-icon name="edit" [size]="14"></app-icon>
-                  </button>
-                  <button type="button" class="btn-table-icon" (click)="toggleArticlePublish(art)" [title]="art.status === 'published' ? 'Chuyển về bản nháp' : 'Xuất bản ngay'">
-                    <app-icon [name]="art.status === 'published' ? 'eye-off' : 'eye'" [size]="14"></app-icon>
-                  </button>
-                  <button type="button" class="btn-table-icon btn-delete" (click)="deleteArticle(art)" title="Xóa bài viết">
-                    <app-icon name="trash" [size]="14"></app-icon>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="8" class="empty-table-row">
-                Không tìm thấy bài viết cẩm nang nào phù hợp bộ lọc.
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-
-      <div class="table-foot-pag">
-        <span>Hiển thị 1 - {{ filteredArticles.length }} trong tổng số {{ articles.length }} bài viết cẩm nang</span>
-        <div class="pag-btns">
-          <span>Trang 1 / 1</span>
-          <button type="button" class="btn-pag">&lsaquo;</button>
-          <button type="button" class="btn-pag active">1</button>
-          <button type="button" class="btn-pag">&rsaquo;</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom Advisory Card (Faithful to Mockup) -->
-    <div class="article-advice-card">
-      <div class="advice-left">
-        <div class="advice-bulb-icon"><app-icon name="sparkle" [size]="20"></app-icon></div>
-        <div class="advice-text">
-          <div class="advice-title-row">
-            <h4>Mẹo Tối Ưu Hóa Bài Viết Cẩm Nang AMULES</h4>
-            <span class="badge-seo-fengshui">SEO PHONG THỦY</span>
+        <div class="filter-dropdowns">
+          <div class="select-pill">
+            <select [(ngModel)]="articleCategoryFilter">
+              <option value="all">Tất cả chuyên mục (4)</option>
+              <option value="Thạch học & Đá quý">Thạch học &amp; Đá quý</option>
+              <option value="Hướng dẫn Talisman">Hướng dẫn Talisman</option>
+              <option value="Phong thủy Ngũ hành">Phong thủy Ngũ hành</option>
+              <option value="Phong cách & Lối sống">Phong cách &amp; Lối sống</option>
+            </select>
           </div>
-          <p>Các bài viết có liên kết sản phẩm đá phong thủy tương ứng đạt tỷ lệ chuyển đổi cao hơn <strong>+48%</strong> so với bài viết thông thường. Hãy nhớ gắn thẻ sản phẩm vào phần cuối mỗi bài viết.</p>
+
+          <div class="select-pill">
+            <select [(ngModel)]="articleStatusFilter">
+              <option value="all">Tất cả trạng thái</option>
+              <option value="published">Đã xuất bản</option>
+              <option value="draft">Bản nháp</option>
+            </select>
+          </div>
+
+          <div class="select-pill">
+            <span>Mới xuất bản gần đây</span>
+            <app-icon name="chevron-down" [size]="13"></app-icon>
+          </div>
+
+          <button type="button" class="btn-refresh-pill" (click)="loadArticles()" title="Tải lại">
+            <app-icon name="refresh" [size]="13"></app-icon>
+          </button>
         </div>
       </div>
-      <div class="advice-right-actions">
-        <button type="button" class="btn-advice-outline" (click)="showToast('Mở tài liệu quy chuẩn viết bài chuẩn SEO')">
-          Xem hướng dẫn viết bài
-        </button>
-        <button type="button" class="btn-advice-solid" (click)="showToast('Chỉ số SEO tổng thể đạt 94.6/100!')">
-          Kiểm tra chỉ số SEO tổng thể
-        </button>
+
+      <!-- Articles Table (Faithful to Mockup) -->
+      <div class="vouchers-table-card">
+        <table class="vouchers-table articles-table">
+          <thead>
+            <tr>
+              <th>BÀI VIẾT &amp; HÌNH ẢNH</th>
+              <th>CHUYÊN MỤC</th>
+              <th>TÁC GIẢ</th>
+              <th>NGÀY ĐĂNG</th>
+              <th>LƯỢT ĐỌC</th>
+              <th>SEO SCORE</th>
+              <th>TRẠNG THÁI</th>
+              <th>THAO TÁC</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (art of filteredArticles; track art._id || art.code) {
+              <tr>
+                <!-- 1. Bài viết & Hình ảnh -->
+                <td>
+                  <div class="article-cell">
+                    <img [src]="art.image || 'https://i.pinimg.com/736x/47/9c/df/479cdf269b5b50948b8aef6103b475ed.jpg'" alt="thumb" class="article-thumb" (error)="art.image = 'https://i.pinimg.com/1200x/5e/19/ca/5e19cae249717d1321564c81f14a1732.jpg'">
+                    <div class="article-meta">
+                      <div class="eyebrow-row">
+                        <span class="art-eyebrow">{{ art.eyebrow || 'THẠCH HỌC TÂM LINH' }}</span>
+                        @if (art.isTopView) {
+                          <span class="badge-top-view">TOP VIEW</span>
+                        }
+                      </div>
+                      <a href="javascript:void(0)" class="article-title-link" (click)="openEditArticleModal(art)">
+                        {{ art.title }}
+                      </a>
+                      <p class="article-excerpt-text">{{ art.excerpt }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- 2. Chuyên mục -->
+                <td>
+                  <span class="cat-pill-badge" [class.cat-gem]="(art.category || '').includes('Thạch')" [class.cat-talisman]="(art.category || '').includes('Talisman')" [class.cat-fengshui]="(art.category || '').includes('Phong')" [class.cat-style]="(art.category || '').includes('Phong cách')">
+                    {{ art.category }}
+                  </span>
+                </td>
+
+                <!-- 3. Tác giả -->
+                <td>
+                  <div class="author-cell">
+                    <div class="author-avatar">{{ art.authorInitial || 'PT' }}</div>
+                    <div class="author-text">
+                      <strong>{{ art.author || 'Ban Cố Vấn Phong Thủy AMULES' }}</strong>
+                      <small>{{ art.authorRole || 'Chuyên gia phong thủy' }}</small>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- 4. Ngày đăng -->
+                <td>
+                  <span class="date-text">{{ art.date || '28/10/2026' }}</span>
+                </td>
+
+                <!-- 5. Lượt đọc -->
+                <td>
+                  <div class="reads-cell">
+                    <strong>{{ (art.views || 8420).toLocaleString('vi-VN') }}</strong>
+                    <small [class.text-green]="(art.growthText || '').includes('+')">{{ art.growthText || '+18% tuần này' }}</small>
+                  </div>
+                </td>
+
+                <!-- 6. SEO Score -->
+                <td>
+                  <span class="seo-score-badge">
+                    <span class="dot-seo">●</span> {{ art.seoScore || 96 }}/100
+                  </span>
+                </td>
+
+                <!-- 7. Trạng thái -->
+                <td>
+                  @if (art.status === 'published') {
+                    <span class="status-pub-badge">
+                      <span class="dot-green">●</span> ĐÃ XUẤT BẢN
+                    </span>
+                  } @else {
+                    <span class="status-draft-badge">
+                      <span class="dot-gold">●</span> BẢN NHÁP
+                    </span>
+                  }
+                </td>
+
+                <!-- 8. Thao tác -->
+                <td>
+                  <div class="article-actions-cell">
+                    <button type="button" class="btn-table-icon" (click)="openEditArticleModal(art)" title="Chỉnh sửa bài viết">
+                      <app-icon name="edit" [size]="14"></app-icon>
+                    </button>
+                    <button type="button" class="btn-table-icon" (click)="toggleArticlePublish(art)" [title]="art.status === 'published' ? 'Chuyển về bản nháp' : 'Xuất bản ngay'">
+                      <app-icon [name]="art.status === 'published' ? 'eye-off' : 'eye'" [size]="14"></app-icon>
+                    </button>
+                    <button type="button" class="btn-table-icon btn-delete" (click)="deleteArticle(art)" title="Xóa bài viết">
+                      <app-icon name="trash" [size]="14"></app-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="empty-table-row">
+                  Không tìm thấy bài viết cẩm nang nào phù hợp bộ lọc.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <div class="table-foot-pag">
+          <span>Hiển thị 1 - {{ filteredArticles.length }} trong tổng số {{ articles.length }} bài viết cẩm nang</span>
+          <div class="pag-btns">
+            <span>Trang 1 / 1</span>
+            <button type="button" class="btn-pag">&lsaquo;</button>
+            <button type="button" class="btn-pag active">1</button>
+            <button type="button" class="btn-pag">&rsaquo;</button>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <!-- Bottom Advisory Card (Faithful to Mockup) -->
+      <div class="article-advice-card">
+        <div class="advice-left">
+          <div class="advice-bulb-icon"><app-icon name="sparkle" [size]="20"></app-icon></div>
+          <div class="advice-text">
+            <div class="advice-title-row">
+              <h4>Mẹo Tối Ưu Hóa Bài Viết Cẩm Nang AMULES</h4>
+              <span class="badge-seo-fengshui">SEO PHONG THỦY</span>
+            </div>
+            <p>Các bài viết có liên kết sản phẩm đá phong thủy tương ứng đạt tỷ lệ chuyển đổi cao hơn <strong>+48%</strong> so với bài viết thông thường. Hãy nhớ gắn thẻ sản phẩm vào phần cuối mỗi bài viết.</p>
+          </div>
+        </div>
+        <div class="advice-right-actions">
+          <button type="button" class="btn-advice-outline" (click)="showToast('Mở tài liệu quy chuẩn viết bài chuẩn SEO')">
+            Xem hướng dẫn viết bài
+          </button>
+          <button type="button" class="btn-advice-solid" (click)="showToast('Chỉ số SEO tổng thể đạt 94.6/100!')">
+            Kiểm tra chỉ số SEO tổng thể
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- 2. BANNER WEBSITE SUB-TAB                     -->
+    <!-- ========================================== -->
+    @if (articleSubTab === 'banners') {
+      <div class="vouchers-toolbar content-toolbar">
+        <div class="toolbar-title-left">
+          <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #4a1836;">Danh Sách Banner Website</h3>
+          <span style="font-size: 12px; color: #8e7582;">Quản lý banner trang chủ, thanh khuyến mãi và tiêu điểm bộ sưu tập</span>
+        </div>
+        <div class="toolbar-actions-right">
+          <button type="button" class="btn-primary-action" (click)="openCreateBannerModal()">
+            <app-icon name="plus" [size]="14"></app-icon>
+            <span>+ Thêm Banner Mới</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="vouchers-table-card">
+        <table class="vouchers-table">
+          <thead>
+            <tr>
+              <th>HÌNH ẢNH BANNER</th>
+              <th>TIÊU ĐỀ &amp; CHI TIẾT</th>
+              <th>VỊ TRÍ HIỂN THỊ</th>
+              <th>ĐƯỜNG DẪN ĐÍCH</th>
+              <th>THỨ TỰ</th>
+              <th>TRẠNG THÁI</th>
+              <th>THAO TÁC</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of banners; track b._id) {
+              <tr>
+                <td>
+                  <img [src]="b.image" alt="banner" style="width: 130px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #efe3eb;">
+                </td>
+                <td>
+                  <strong style="color: #2b1a26; font-size: 13.5px;">{{ b.title }}</strong>
+                </td>
+                <td>
+                  <span class="cat-pill-badge cat-gem">{{ b.positionLabel || b.position }}</span>
+                </td>
+                <td>
+                  <code style="background: #faf2f6; padding: 3px 6px; border-radius: 6px; font-size: 11.5px; color: #7b1e58;">{{ b.linkUrl }}</code>
+                </td>
+                <td>
+                  <strong style="color: #64555f;">#{{ b.displayOrder || 1 }}</strong>
+                </td>
+                <td>
+                  @if (b.status === 'active') {
+                    <span class="status-pub-badge"><span class="dot-green">●</span> HIỂN THỊ</span>
+                  } @else {
+                    <span class="status-draft-badge"><span class="dot-gold">●</span> TẠM ẨN</span>
+                  }
+                </td>
+                <td>
+                  <div class="article-actions-cell">
+                    <button type="button" class="btn-table-icon" (click)="openEditBannerModal(b)" title="Chỉnh sửa banner">
+                      <app-icon name="edit" [size]="14"></app-icon>
+                    </button>
+                    <button type="button" class="btn-table-icon" (click)="toggleBannerStatus(b)" [title]="b.status === 'active' ? 'Tạm ẩn' : 'Hiển thị ngay'">
+                      <app-icon [name]="b.status === 'active' ? 'eye-off' : 'eye'" [size]="14"></app-icon>
+                    </button>
+                    <button type="button" class="btn-table-icon btn-delete" (click)="deleteBanner(b)" title="Xóa banner">
+                      <app-icon name="trash" [size]="14"></app-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- 3. BÌNH LUẬN ĐỘC GIẢ SUB-TAB                 -->
+    <!-- ========================================== -->
+    @if (articleSubTab === 'comments') {
+      <div class="vouchers-toolbar content-toolbar">
+        <div class="toolbar-title-left">
+          <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #4a1836;">Tương Tác &amp; Câu Hỏi Tư Vấn Phong Thủy</h3>
+          <span style="font-size: 12px; color: #8e7582;">Tổng hợp câu hỏi và phản hồi của độc giả dưới các bài viết cẩm nang</span>
+        </div>
+      </div>
+
+      <div class="vouchers-table-card">
+        <table class="vouchers-table">
+          <thead>
+            <tr>
+              <th>ĐỘC GIẢ</th>
+              <th>BÀI VIẾT LIÊN QUAN</th>
+              <th>CÂU HỎI / BÌNH LUẬN</th>
+              <th>PHẢN HỒI CỦA CHUYÊN GIA</th>
+              <th>THỜI GIAN</th>
+              <th>TRẠNG THÁI</th>
+              <th>THAO TÁC</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of readerComments; track c.id) {
+              <tr>
+                <td>
+                  <div class="author-cell">
+                    <div class="author-avatar" style="background: #fdf2f8; color: #be185d;">{{ c.readerName.charAt(0) }}</div>
+                    <div class="author-text">
+                      <strong>{{ c.readerName }}</strong>
+                      <small>{{ c.readerEmail }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span style="font-size: 12.5px; font-weight: 600; color: #4a1836;">{{ c.articleTitle }}</span>
+                </td>
+                <td>
+                  <p style="margin: 0; font-size: 12.5px; color: #2b1a26; max-width: 280px; line-height: 1.4;">{{ c.comment }}</p>
+                </td>
+                <td>
+                  @if (c.reply) {
+                    <p style="margin: 0; font-size: 12px; color: #047857; background: #ecfdf5; padding: 4px 8px; border-radius: 6px; line-height: 1.35;">💬 {{ c.reply }}</p>
+                  } @else {
+                    <span style="font-size: 11.5px; color: #a4919c; font-style: italic;">Chưa có phản hồi</span>
+                  }
+                </td>
+                <td>
+                  <span class="date-text">{{ c.date }}</span>
+                </td>
+                <td>
+                  @if (c.status === 'approved') {
+                    <span class="status-pub-badge"><span class="dot-green">●</span> ĐÃ DUYỆT</span>
+                  } @else {
+                    <span class="status-draft-badge"><span class="dot-gold">●</span> CHỜ DUYỆT</span>
+                  }
+                </td>
+                <td>
+                  <div class="article-actions-cell">
+                    <button type="button" class="btn-table-icon" (click)="replyComment(c)" title="Trả lời tư vấn cho độc giả">
+                      <app-icon name="chat" [size]="14"></app-icon>
+                    </button>
+                    @if (c.status === 'pending') {
+                      <button type="button" class="btn-table-icon" (click)="approveComment(c)" title="Duyệt bình luận">
+                        <app-icon name="check" [size]="14"></app-icon>
+                      </button>
+                    }
+                    <button type="button" class="btn-table-icon btn-delete" (click)="deleteComment(c)" title="Xóa bình luận">
+                      <app-icon name="trash" [size]="14"></app-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   }
 </div>
 
@@ -670,8 +831,9 @@
               </div>
 
               <div class="form-group">
-                <label>LỊCH XUẤT BẢN TRÊN WEB</label>
-                <input type="text" [(ngModel)]="currentEditingArticle.date" class="input-side">
+                <label>LỊCH XUẤT BẢN TRÊN WEB * (Không chọn quá khứ)</label>
+                <input type="datetime-local" [(ngModel)]="currentEditingArticle.publishDateTime" [min]="minPublishDateTime" class="input-side">
+                <small class="field-hint" style="display:block; font-size:11px; color:#8e7582; margin-top:4px;">* Tính từ thời điểm hiện tại hoặc hẹn giờ xuất bản sau đó.</small>
               </div>
 
               <div class="seo-readiness-box">
@@ -922,6 +1084,75 @@
         </button>
         <button type="button" class="btn-publish-modal" (click)="saveVoucher()">
           <app-icon name="check" [size]="14"></app-icon> Lưu &amp; Phát Hành Voucher
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ======================================================== -->
+<!-- MODAL THÊM / SỬA BANNER WEBSITE                         -->
+<!-- ======================================================== -->
+@if (showBannerModal) {
+  <div class="modal-overlay" (click)="closeBannerModal()">
+    <div class="voucher-modal-card" (click)="$event.stopPropagation()" style="max-width: 580px;">
+      <div class="voucher-modal-head">
+        <div>
+          <span class="modal-badge-tag">HỆ THỐNG BANNER WEBSITE</span>
+          <h3 class="serif" style="margin-top: 4px;">{{ isEditingBanner ? 'Chỉnh Sửa Banner' : 'Tạo Banner Mới' }}</h3>
+        </div>
+        <button type="button" class="btn-close-modal" (click)="closeBannerModal()">&times;</button>
+      </div>
+
+      <div class="voucher-modal-body">
+        <div class="form-group">
+          <label>Tiêu Đề Banner *</label>
+          <input type="text" [(ngModel)]="currentEditingBanner.title" placeholder="Ví dụ: Một nét chạm, một câu chuyện riêng" class="input-base">
+        </div>
+
+        <div class="form-group">
+          <label>URL Hình Ảnh Banner *</label>
+          <input type="text" [(ngModel)]="currentEditingBanner.image" placeholder="https://..." class="input-base">
+          @if (currentEditingBanner.image) {
+            <div style="margin-top: 8px;">
+              <img [src]="currentEditingBanner.image" alt="preview" style="width: 100%; height: 110px; object-fit: cover; border-radius: 8px; border: 1px solid #efe3eb;">
+            </div>
+          }
+        </div>
+
+        <div class="grid-two-cols">
+          <div class="form-group">
+            <label>Vị Trí Hiển Thị</label>
+            <select [(ngModel)]="currentEditingBanner.position" class="input-base">
+              <option value="home_hero">Hero Banner Trang Chủ</option>
+              <option value="home_promo">Thanh Ưu Đãi Đầu Trang</option>
+              <option value="home_featured">Tiêu Điểm Bộ Sưu Tập</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Thứ Tự Ưu Tiên</label>
+            <input type="number" [(ngModel)]="currentEditingBanner.displayOrder" min="1" class="input-base">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Đường Dẫn Đích (Link URL)</label>
+          <input type="text" [(ngModel)]="currentEditingBanner.linkUrl" placeholder="/bo-suu-tap" class="input-base">
+        </div>
+
+        <div class="form-group">
+          <label>Trạng Thái Banner</label>
+          <select [(ngModel)]="currentEditingBanner.status" class="input-base">
+            <option value="active">Hiển thị công khai (Active)</option>
+            <option value="inactive">Tạm ẩn (Inactive)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="voucher-modal-foot">
+        <button type="button" class="btn-cancel-modal" (click)="closeBannerModal()">Hủy bỏ</button>
+        <button type="button" class="btn-publish-modal" (click)="saveBanner()">
+          <app-icon name="check" [size]="14"></app-icon> Lưu Banner
         </button>
       </div>
     </div>

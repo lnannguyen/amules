@@ -16,9 +16,18 @@
     "image": "https://i.pinimg.com/736x/08/d5/4f/08d54f54d14f6f18b98012a178aa0869.jpg",
     "linkUrl": "/chinh-sach-van-chuyen",
     "position": "home_promo",
-    "displayOrder": 1,
+    "displayOrder": 2,
     "startDate": "2026-11-01T00:00:00.000Z",
     "endDate": "2027-01-31T00:00:00.000Z",
+    "status": "active"
+  },
+  {
+    "_id": "6aff26a87951880542ca4d74",
+    "title": "Bộ Sưu Tập Mystic Moonstone - Ánh Sáng Huyền Diệu",
+    "displayOrder": 3,
+    "image": "https://i.pinimg.com/736x/d4/3c/3d/d43c3d69296b0badad1636033dd34e9c.jpg",
+    "linkUrl": "/collections/mystic-moonstone",
+    "position": "home_featured",
     "status": "active"
   }
 ]

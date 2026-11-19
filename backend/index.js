@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const { MongoStore } = require('connect-mongo');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
 // Load .env configuration
 try {
@@ -292,13 +293,22 @@ function registerStandardCollectionRoute(endpoint, collectionName) {
           if (!img || img.startsWith('images/')) {
             img = fallbackImgs[idx % fallbackImgs.length];
           }
+          let resolvedAuthor = a.author;
+          if (!resolvedAuthor || resolvedAuthor === '0077ee7a934a956624ff30e6' || (typeof resolvedAuthor === 'string' && resolvedAuthor.length === 24 && /^[0-9a-fA-F]+$/.test(resolvedAuthor))) {
+            resolvedAuthor = 'Ban Cố Vấn Phong Thủy AMULES';
+          }
           return {
             ...a,
             image: img,
             thumbnail: img,
+            author: resolvedAuthor,
+            authorRole: a.authorRole || 'Chuyên gia phong thủy',
+            authorInitial: resolvedAuthor.includes('Phong Thủy') ? 'PT' : 'AM',
             tag: a.tag || a.category || 'Cẩm nang năng lượng',
             read: a.read || '5 phút đọc',
-            date: a.date || '12 Tháng 10, 2025'
+            views: a.views !== undefined ? Number(a.views) : (idx === 0 ? 8420 : idx === 1 ? 5120 : 11850),
+            seoScore: a.seoScore !== undefined ? Number(a.seoScore) : (idx === 0 ? 96 : idx === 1 ? 92 : 95),
+            date: a.publishedAt ? new Date(a.publishedAt).toLocaleDateString('vi-VN') : (a.date || '20/10/2026')
           };
         });
       }
@@ -782,6 +792,29 @@ app.post('/api/products', async (req, res) => {
     const db = getDB();
     const newProduct = { ...req.body, createdAt: new Date() };
 
+    // Ràng buộc tính hợp lệ của giá bán và số lượng sản phẩm
+    const rawPrice = Number(newProduct.price);
+    if (isNaN(rawPrice) || rawPrice <= 0) {
+      return res.status(400).json({ message: 'Giá niêm yết bán lẻ phải là số dương lớn hơn 0 VNĐ!' });
+    }
+    newProduct.price = rawPrice;
+
+    if (newProduct.stock !== undefined && newProduct.stock !== null && newProduct.stock !== '') {
+      const rawStock = Number(newProduct.stock);
+      if (isNaN(rawStock) || rawStock < 0) {
+        return res.status(400).json({ message: 'Số lượng tồn kho không được âm (phải lớn hơn hoặc bằng 0)!' });
+      }
+      newProduct.stock = rawStock;
+    }
+
+    if (newProduct.compareAtPrice !== undefined && newProduct.compareAtPrice !== null && newProduct.compareAtPrice !== '') {
+      const rawCompare = Number(newProduct.compareAtPrice);
+      if (isNaN(rawCompare) || rawCompare < 0) {
+        return res.status(400).json({ message: 'Giá gốc so sánh không được là số âm!' });
+      }
+      newProduct.compareAtPrice = rawCompare;
+    }
+
     // Handle base64 image if uploaded
     if (newProduct.imageBase64) {
       const base64Data = newProduct.imageBase64.replace(/^data:image\/\w+;base64,/, '');
@@ -805,6 +838,31 @@ app.put('/api/products/:id', async (req, res) => {
     const o_id = toObjectId(req.params.id);
     const updateData = { ...req.body };
     delete updateData._id;
+
+    // Ràng buộc tính hợp lệ của giá bán và số lượng sản phẩm
+    if (updateData.price !== undefined) {
+      const rawPrice = Number(updateData.price);
+      if (isNaN(rawPrice) || rawPrice <= 0) {
+        return res.status(400).json({ message: 'Giá niêm yết bán lẻ phải là số dương lớn hơn 0 VNĐ!' });
+      }
+      updateData.price = rawPrice;
+    }
+
+    if (updateData.stock !== undefined && updateData.stock !== null && updateData.stock !== '') {
+      const rawStock = Number(updateData.stock);
+      if (isNaN(rawStock) || rawStock < 0) {
+        return res.status(400).json({ message: 'Số lượng tồn kho không được âm (phải lớn hơn hoặc bằng 0)!' });
+      }
+      updateData.stock = rawStock;
+    }
+
+    if (updateData.compareAtPrice !== undefined && updateData.compareAtPrice !== null && updateData.compareAtPrice !== '') {
+      const rawCompare = Number(updateData.compareAtPrice);
+      if (isNaN(rawCompare) || rawCompare < 0) {
+        return res.status(400).json({ message: 'Giá gốc so sánh không được là số âm!' });
+      }
+      updateData.compareAtPrice = rawCompare;
+    }
 
     if (updateData.imageBase64) {
       const base64Data = updateData.imageBase64.replace(/^data:image\/\w+;base64,/, '');
@@ -863,13 +921,72 @@ app.post('/api/auth/login', async (req, res) => {
       );
     }
 
-    const isDemoPass = password === '123456' || password === 'admin123' || password === 'admin' || password === 'AmulesVault2026!';
-    const passwordMatch = user && (
-      (user.password && user.password === password) ||
-      (user.passwordHash && (user.passwordHash === password || isDemoPass))
-    );
+    if (!user) {
+      return res.status(401).json({ message: 'Tài khoản không tồn tại trong hệ thống!' });
+    }
 
-    if (user && passwordMatch) {
+    // 1. Kiểm tra tài khoản có đang bị tạm khóa do nhập sai quá 5 lần hay không
+    if (user.lockedUntil) {
+      const lockUntilDate = new Date(user.lockedUntil);
+      if (lockUntilDate > new Date()) {
+        const remainingMinutes = Math.max(1, Math.ceil((lockUntilDate.getTime() - Date.now()) / (60 * 1000)));
+        return res.status(403).json({
+          message: `Tài khoản tạm thời bị khóa do nhập sai mật khẩu quá 5 lần liên tiếp. Vui lòng thử lại sau ${remainingMinutes} phút hoặc dùng chức năng Quên mật khẩu.`,
+          locked: true,
+          remainingMinutes
+        });
+      }
+    }
+
+    // 2. Xác thực mật khẩu với bcrypt (hỗ trợ hash $2a$/$2b$ và backward compatibility)
+    const isDemoPass = password === '123456' || password === 'admin123' || password === 'admin' || password === 'AmulesVault2026!';
+    const storedHash = user.passwordHash || user.password || '';
+    let passwordMatch = false;
+
+    if (storedHash.startsWith('$2a$') || storedHash.startsWith('$2b$')) {
+      try {
+        passwordMatch = await bcrypt.compare(password, storedHash);
+      } catch (err) {
+        passwordMatch = false;
+      }
+    } else {
+      // Khớp trực tiếp mật khẩu plaintext cũ
+      passwordMatch = (user.password && user.password === password) ||
+                      (user.passwordHash && user.passwordHash === password) ||
+                      (isDemoPass && (user.role === 'admin' || !user.password));
+
+      // Tự động nâng cấp mã hóa lên bcrypt an toàn
+      if (passwordMatch) {
+        try {
+          const newHash = await bcrypt.hash(password, 10);
+          user.passwordHash = newHash;
+          user.password = undefined;
+          if (db) {
+            await db.collection('users').updateOne(
+              { _id: user._id },
+              { $set: { passwordHash: newHash }, $unset: { password: '' } }
+            );
+          }
+        } catch (e) { }
+      }
+    }
+
+    // 3. Xử lý kết quả đăng nhập
+    if (passwordMatch) {
+      // Đăng nhập thành công: Reset số lần nhập sai và hủy khóa
+      if (user.failedLoginAttempts || user.lockedUntil) {
+        user.failedLoginAttempts = 0;
+        user.lockedUntil = null;
+        if (db) {
+          try {
+            await db.collection('users').updateOne(
+              { _id: user._id },
+              { $set: { failedLoginAttempts: 0, lockedUntil: null } }
+            );
+          } catch (e) { }
+        }
+      }
+
       req.session.user = {
         id: user._id,
         username: user.username || user.email,
@@ -895,7 +1012,39 @@ app.post('/api/auth/login', async (req, res) => {
         user: req.session.user
       });
     } else {
-      res.status(401).json({ message: 'Tên đăng nhập hoặc mật khẩu không chính xác!' });
+      // Đăng nhập thất bại: Tăng biến đếm và khóa nếu đạt 5 lần
+      const attempts = (user.failedLoginAttempts || 0) + 1;
+      const updates = { failedLoginAttempts: attempts };
+
+      if (attempts >= 5) {
+        const lockDuration = 15 * 60 * 1000; // 15 phút
+        const lockUntil = new Date(Date.now() + lockDuration);
+        updates.lockedUntil = lockUntil;
+
+        if (db) {
+          try {
+            await db.collection('users').updateOne({ _id: user._id }, { $set: updates });
+          } catch (e) { }
+        }
+
+        return res.status(403).json({
+          message: 'Bạn đã nhập sai mật khẩu 5 lần liên tiếp. Tài khoản đã bị tạm khóa 15 phút vì lý do an toàn bảo mật!',
+          locked: true,
+          remainingMinutes: 15
+        });
+      } else {
+        if (db) {
+          try {
+            await db.collection('users').updateOne({ _id: user._id }, { $set: updates });
+          } catch (e) { }
+        }
+
+        const remaining = 5 - attempts;
+        return res.status(401).json({
+          message: `Mật khẩu không chính xác! Bạn còn ${remaining} lần thử trước khi tài khoản bị tạm khóa 15 phút.`,
+          remainingAttempts: remaining
+        });
+      }
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -995,16 +1144,19 @@ app.post('/api/auth/register', async (req, res) => {
       return res.status(400).json({ message: 'Email hoặc số điện thoại này đã được đăng ký!' });
     }
 
+    const passwordHash = await bcrypt.hash(password, 10);
+
     const newUser = {
       fullName: fullName || 'Khách hàng mới',
       email: cleanEmail,
       phone: phone ? phone.trim() : '',
-      password: password,
-      passwordHash: password,
+      passwordHash: passwordHash, // Đã băm chuẩn Bcrypt salt rounds 10
       role: 'customer',
       status: 'active',
       tier: 'Thành viên mới',
       points: 0,
+      failedLoginAttempts: 0,
+      lockedUntil: null,
       dob: '',
       gender: '',
       element: '',
@@ -1152,15 +1304,29 @@ app.put('/api/auth/password', async (req, res) => {
     }
     if (!user) return res.status(404).json({ message: 'Không tìm thấy tài khoản' });
 
-    if (user.password && user.password !== currentPassword && user.passwordHash !== currentPassword) {
+    const stored = user.passwordHash || user.password || '';
+    let isCurrentMatch = false;
+    if (stored.startsWith('$2a$') || stored.startsWith('$2b$')) {
+      try {
+        isCurrentMatch = await bcrypt.compare(currentPassword, stored);
+      } catch (e) {
+        isCurrentMatch = false;
+      }
+    } else {
+      isCurrentMatch = (user.password === currentPassword || user.passwordHash === currentPassword);
+    }
+
+    if (!isCurrentMatch) {
       return res.status(400).json({ message: 'Mật khẩu hiện tại không chính xác!' });
     }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
     if (db) {
       try {
         await db.collection('users').updateOne(
           { _id: user._id },
-          { $set: { password: newPassword, passwordHash: newPassword, updatedAt: new Date() } }
+          { $set: { passwordHash: newPasswordHash, updatedAt: new Date() }, $unset: { password: '' } }
         );
       } catch (e) { }
     }
@@ -1176,8 +1342,8 @@ app.put('/api/auth/password', async (req, res) => {
       }
       const idx = allUsers.findIndex(u => u.email === userEmail);
       if (idx >= 0) {
-        allUsers[idx].password = newPassword;
-        allUsers[idx].passwordHash = newPassword;
+        delete allUsers[idx].password;
+        allUsers[idx].passwordHash = newPasswordHash;
         allUsers[idx].updatedAt = new Date();
       }
       syncUsersToJson(allUsers);
@@ -2164,6 +2330,8 @@ app.post('/api/auth/reset-password', async (req, res) => {
       $or: [{ email: cleanEmail }, { username: cleanEmail }]
     });
 
+    const newHash = await bcrypt.hash(newPassword, 10);
+
     if (!user) {
       const isSuperAdmin = cleanEmail.includes('admin');
       const insertRes = await db.collection('users').insertOne({
@@ -2173,9 +2341,9 @@ app.post('/api/auth/reset-password', async (req, res) => {
         authProvider: 'local',
         role: isSuperAdmin ? 'admin' : 'customer',
         status: 'active',
-        password: newPassword,
-        passwordHash: newPassword,
+        passwordHash: newHash,
         failedLoginAttempts: 0,
+        lockedUntil: null,
         createdAt: new Date(),
         updatedAt: new Date()
       });
@@ -2200,18 +2368,17 @@ app.post('/api/auth/reset-password', async (req, res) => {
       return res.status(400).json({ message: 'Mã OTP đã hết hạn (quá 15 phút). Vui lòng yêu cầu mã mới.' });
     }
 
-    // Cập nhật mật khẩu mới vào MongoDB
+    // Cập nhật mật khẩu mới đã băm Bcrypt vào MongoDB và mở khóa tài khoản
     await db.collection('users').updateOne(
       { _id: user._id },
       {
         $set: {
-          password: newPassword,
-          passwordHash: newPassword,
+          passwordHash: newHash,
           failedLoginAttempts: 0,
           lockedUntil: null,
           updatedAt: new Date()
         },
-        $unset: { resetOtp: '', resetOtpExpires: '' }
+        $unset: { password: '', resetOtp: '', resetOtpExpires: '' }
       }
     );
 
@@ -2905,45 +3072,76 @@ app.post('/api/admin/login', async (req, res) => {
   try {
     const { username, password } = req.body || {};
     const cleanUser = (username || '').trim().toLowerCase();
+    const db = getDB();
+
+    let user = null;
+    if (db) {
+      try {
+        user = await db.collection('users').findOne({
+          $or: [{ email: cleanUser }, { username: cleanUser }]
+        });
+      } catch (e) { }
+    }
+    if (!user) {
+      const fallbackUsers = loadFallbackJsonData('users') || [];
+      user = fallbackUsers.find(u =>
+        (u.email && u.email.toLowerCase() === cleanUser) ||
+        (u.username && u.username.toLowerCase() === cleanUser)
+      );
+    }
+
+    // 1. Kiểm tra tài khoản Quản trị có đang bị tạm khóa 15 phút do nhập sai 5 lần không
+    if (user && user.lockedUntil) {
+      const lockUntilDate = new Date(user.lockedUntil);
+      if (lockUntilDate > new Date()) {
+        const remainingMinutes = Math.max(1, Math.ceil((lockUntilDate.getTime() - Date.now()) / (60 * 1000)));
+        return res.status(403).json({
+          message: `Cổng Quản trị: Tài khoản tạm thời bị khóa do nhập sai mật khẩu quá 5 lần liên tiếp. Vui lòng thử lại sau ${remainingMinutes} phút!`,
+          locked: true,
+          remainingMinutes
+        });
+      }
+    }
 
     const isExplicitAdmin = cleanUser === 'admin@amules.vn' || cleanUser === 'admin' || cleanUser === 'admin.an@amules.com';
     const isSpecialPass = password === 'admin' || password === 'admin123' || password === '123456' || password === 'AmulesVault2026!';
 
-    // 1. FAST PATH: Master admin with special password
-    if (isExplicitAdmin && isSpecialPass) {
-      const adminData = {
-        id: 'admin_default',
-        email: cleanUser.includes('@') ? cleanUser : 'admin@amules.vn',
-        fullName: cleanUser.includes('an@') ? 'Admin An' : 'Quản trị viên AMULES',
-        role: 'admin'
-      };
-      if (req.session) {
-        req.session.admin = adminData;
-        req.session.user = adminData;
+    // 2. Xác thực mật khẩu Bcrypt hoặc master demo password
+    let passwordMatch = false;
+    const storedHash = (user && (user.passwordHash || user.password)) || '';
+
+    if (storedHash.startsWith('$2a$') || storedHash.startsWith('$2b$')) {
+      try {
+        passwordMatch = await bcrypt.compare(password, storedHash);
+      } catch (e) {
+        passwordMatch = false;
       }
-      return res.json({
-        message: 'Đăng nhập Quản trị viên thành công!',
-        admin: adminData
-      });
+    } else {
+      passwordMatch = (user && (user.password === password || user.passwordHash === password)) ||
+                      (isExplicitAdmin && isSpecialPass);
     }
 
-    // 2. Query DB for database user
-    const db = getDB();
-    const user = await db.collection('users').findOne({
-      $or: [{ email: cleanUser }, { username: cleanUser }]
-    });
+    const isAdminRole = (user && user.role === 'admin') || isExplicitAdmin;
 
-    // STRICT password check: match plaintext password, match passwordHash, or if user is admin role and provided isSpecialPass
-    const passwordMatch = user && (
-      (user.password && user.password === password) ||
-      (user.passwordHash && (user.passwordHash === password || (isSpecialPass && user.role === 'admin')))
-    );
+    if (isAdminRole && (passwordMatch || (isExplicitAdmin && isSpecialPass))) {
+      // Đăng nhập thành công: Reset biến đếm nhập sai
+      if (user && (user.failedLoginAttempts || user.lockedUntil)) {
+        user.failedLoginAttempts = 0;
+        user.lockedUntil = null;
+        if (db) {
+          try {
+            await db.collection('users').updateOne(
+              { _id: user._id },
+              { $set: { failedLoginAttempts: 0, lockedUntil: null } }
+            );
+          } catch (e) { }
+        }
+      }
 
-    if (user && user.role === 'admin' && passwordMatch) {
       const adminData = {
-        id: user._id ? user._id.toString() : 'admin_default',
-        email: user.email || cleanUser,
-        fullName: user.fullName || 'Quản trị viên AMULES',
+        id: (user && user._id) ? user._id.toString() : 'admin_default',
+        email: (user && user.email) || (cleanUser.includes('@') ? cleanUser : 'admin@amules.vn'),
+        fullName: (user && user.fullName) || (cleanUser.includes('an@') ? 'Admin An' : 'Quản trị viên AMULES'),
         role: 'admin'
       };
       if (req.session) {
@@ -2955,30 +3153,38 @@ app.post('/api/admin/login', async (req, res) => {
         admin: adminData
       });
     } else {
+      // Đăng nhập thất bại: Tăng biến đếm và khóa nếu đạt 5 lần
+      if (user) {
+        const attempts = (user.failedLoginAttempts || 0) + 1;
+        const updates = { failedLoginAttempts: attempts };
+
+        if (attempts >= 5) {
+          const lockUntil = new Date(Date.now() + 15 * 60 * 1000); // Khóa 15 phút
+          updates.lockedUntil = lockUntil;
+          if (db) {
+            try { await db.collection('users').updateOne({ _id: user._id }, { $set: updates }); } catch (e) { }
+          }
+          return res.status(403).json({
+            message: 'Tài khoản Quản trị tạm khóa 15 phút do nhập sai mật khẩu quá 5 lần liên tiếp. Cổng quản trị tạm thời đình chỉ phiên đăng nhập này vì lý do bảo mật!',
+            locked: true,
+            remainingMinutes: 15
+          });
+        } else {
+          if (db) {
+            try { await db.collection('users').updateOne({ _id: user._id }, { $set: updates }); } catch (e) { }
+          }
+          const remaining = 5 - attempts;
+          return res.status(401).json({
+            message: `Tài khoản hoặc mật khẩu Quản trị không chính xác! Bạn còn ${remaining} lần thử trước khi tài khoản bị tạm khóa 15 phút.`,
+            remainingAttempts: remaining
+          });
+        }
+      }
+
       return res.status(401).json({ message: 'Tài khoản Quản trị hoặc mật khẩu không chính xác!' });
     }
   } catch (error) {
-    const { username, password } = req.body || {};
-    const cleanUser = (username || '').trim().toLowerCase();
-    const isExplicitAdmin = cleanUser === 'admin@amules.vn' || cleanUser === 'admin' || cleanUser === 'admin.an@amules.com';
-    const isSpecialPass = password === 'admin' || password === 'admin123' || password === '123456' || password === 'AmulesVault2026!';
-    if (isExplicitAdmin && isSpecialPass) {
-      const adminData = {
-        id: 'admin_default',
-        email: cleanUser.includes('@') ? cleanUser : 'admin@amules.vn',
-        fullName: cleanUser.includes('an@') ? 'Admin An' : 'Quản trị viên AMULES',
-        role: 'admin'
-      };
-      if (req.session) {
-        req.session.admin = adminData;
-        req.session.user = adminData;
-      }
-      return res.json({
-        message: 'Đăng nhập Quản trị viên thành công!',
-        admin: adminData
-      });
-    }
-    return res.status(401).json({ message: 'Tài khoản Quản trị hoặc mật khẩu không chính xác!' });
+    return res.status(500).json({ error: error.message });
   }
 });
 

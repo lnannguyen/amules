@@ -103,9 +103,34 @@ export class AdminProductsComponent implements OnInit {
   }
 
   saveProduct(): void {
-    if (!this.currentProduct.name) {
+    if (!this.currentProduct.name || !this.currentProduct.name.trim()) {
       this.showToast('Vui lòng nhập tên tác phẩm!');
       return;
+    }
+
+    // Ràng buộc giá bán lẻ bắt buộc phải lớn hơn 0
+    const price = Number(this.currentProduct.price);
+    if (isNaN(price) || price <= 0) {
+      this.showToast('Giá niêm yết bán lẻ phải là số dương lớn hơn 0 VNĐ!');
+      return;
+    }
+
+    // Ràng buộc số lượng tồn kho không âm
+    if (this.currentProduct.stock !== undefined && this.currentProduct.stock !== null && this.currentProduct.stock !== '') {
+      const stock = Number(this.currentProduct.stock);
+      if (isNaN(stock) || stock < 0) {
+        this.showToast('Số lượng tồn kho không được âm (>= 0)!');
+        return;
+      }
+    }
+
+    // Ràng buộc giá so sánh không âm
+    if (this.currentProduct.compareAtPrice !== undefined && this.currentProduct.compareAtPrice !== null && this.currentProduct.compareAtPrice !== '') {
+      const comparePrice = Number(this.currentProduct.compareAtPrice);
+      if (isNaN(comparePrice) || comparePrice < 0) {
+        this.showToast('Giá gốc trước khuyến mãi không được là số âm (>= 0)!');
+        return;
+      }
     }
 
     if (this.isEditing) {
@@ -116,11 +141,9 @@ export class AdminProductsComponent implements OnInit {
           this.closeModal();
           this.loadProducts();
         },
-        error: () => {
-          const found = this.products.find(x => (x._id && x._id === id) || x.productCode === this.currentProduct.productCode);
-          if (found) Object.assign(found, this.currentProduct);
-          this.showToast('Cập nhật tác phẩm thành công!');
-          this.closeModal();
+        error: (err) => {
+          const msg = err?.error?.message || 'Có lỗi xảy ra khi cập nhật tác phẩm!';
+          this.showToast(msg);
         }
       });
     } else {
@@ -130,10 +153,9 @@ export class AdminProductsComponent implements OnInit {
           this.closeModal();
           this.loadProducts();
         },
-        error: () => {
-          this.products.unshift({ ...this.currentProduct });
-          this.showToast('Thêm tác phẩm mới thành công!');
-          this.closeModal();
+        error: (err) => {
+          const msg = err?.error?.message || 'Có lỗi xảy ra khi thêm tác phẩm mới!';
+          this.showToast(msg);
         }
       });
     }

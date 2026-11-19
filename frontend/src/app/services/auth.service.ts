@@ -92,8 +92,8 @@ export class AuthService {
         }
       }),
       catchError((err: HttpErrorResponse) => {
-        // Giữ nguyên lỗi xác thực 400 / 401 khi backend có phản hồi
-        if ((err.status === 401 || err.status === 400) && err.error?.message) {
+        // Giữ nguyên lỗi xác thực 400 / 401 / 403 (khóa tài khoản) khi backend có phản hồi
+        if ((err.status === 401 || err.status === 400 || err.status === 403) && err.error?.message) {
           return throwError(() => new Error(err.error.message));
         }
 
@@ -110,7 +110,7 @@ export class AuthService {
               localStorage.setItem('amules_user', JSON.stringify(cleanUser));
               return of({ message: 'Đăng nhập thành công!', user: cleanUser });
             }
-          } catch (e) {}
+          } catch (e) { }
 
           const lastUserStr = localStorage.getItem('amules_user');
           if (lastUserStr) {
@@ -121,7 +121,7 @@ export class AuthService {
                 this.isLoggedIn.set(true);
                 return of({ message: 'Đăng nhập thành công!', user: lastUser });
               }
-            } catch (e) {}
+            } catch (e) { }
           }
         }
 
@@ -177,7 +177,7 @@ export class AuthService {
               localUsers.push({ ...fallbackUser, password: body.password });
               localStorage.setItem('amules_registered_users', JSON.stringify(localUsers));
             }
-          } catch (e) {}
+          } catch (e) { }
 
           return of({
             message: 'Đăng ký tài khoản thành công! Chào mừng bạn đến với AMULES.',

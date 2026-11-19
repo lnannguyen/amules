@@ -112,22 +112,104 @@ export class AdminVouchersComponent implements OnInit {
   showArticleModal: boolean = false;
   isEditingArticle: boolean = false;
 
+  // Banner Management State
+  banners: any[] = [];
+  showBannerModal: boolean = false;
+  isEditingBanner: boolean = false;
+  currentEditingBanner: any = {
+    title: 'Một nét chạm, một câu chuyện riêng',
+    image: 'https://i.pinimg.com/736x/8b/56/4e/8b564e66f5a26e5a7761873879e15a44.jpg',
+    linkUrl: '/bo-suu-tap',
+    position: 'home_hero',
+    displayOrder: 1,
+    status: 'active'
+  };
+
+  mockBanners: any[] = [
+    {
+      _id: 'bn_1',
+      title: 'Một nét chạm, một câu chuyện riêng',
+      image: 'https://i.pinimg.com/736x/8b/56/4e/8b564e66f5a26e5a7761873879e15a44.jpg',
+      linkUrl: '/bo-suu-tap',
+      position: 'home_hero',
+      positionLabel: 'Hero Banner Trang Chủ',
+      displayOrder: 1,
+      status: 'active'
+    },
+    {
+      _id: 'bn_2',
+      title: 'Miễn phí vận chuyển đơn từ 500.000đ',
+      image: 'https://i.pinimg.com/736x/08/d5/4f/08d54f54d14f6f18b98012a178aa0869.jpg',
+      linkUrl: '/chinh-sach-van-chuyen',
+      position: 'home_promo',
+      positionLabel: 'Thanh Ưu Đãi Đầu Trang',
+      displayOrder: 2,
+      status: 'active'
+    },
+    {
+      _id: 'bn_3',
+      title: 'Bộ Sưu Tập Mystic Moonstone - Ánh Sáng Huyền Diệu',
+      image: 'https://i.pinimg.com/736x/d4/3c/3d/d43c3d69296b0badad1636033dd34e9c.jpg',
+      linkUrl: '/collections/mystic-moonstone',
+      position: 'home_featured',
+      positionLabel: 'Tiêu Điểm Bộ Sưu Tập',
+      displayOrder: 3,
+      status: 'active'
+    }
+  ];
+
+  // Reader Comments State
+  readerComments: any[] = [
+    {
+      id: 1,
+      readerName: 'Nguyễn Thu An',
+      readerEmail: 'anan265464@gmail.com',
+      articleTitle: 'Ý nghĩa của đá Amethyst: Năng lượng thanh tẩy tâm trí và giấc ngủ an lành',
+      comment: 'Mình mệnh Hỏa đeo thạch anh tím có hợp phong thủy không ạ? Shop tư vấn giúp mình với.',
+      date: '19/11/2026 15:20',
+      status: 'approved',
+      reply: 'Chào bạn, Thạch Anh Tím thuộc ngũ hành Hỏa tương hợp rất tốt với bản mệnh Hỏa của bạn nhé!'
+    },
+    {
+      id: 2,
+      readerName: 'Trần Thu Hà',
+      readerEmail: 'thuha.tran@gmail.com',
+      articleTitle: '5 bước thanh tẩy và nạp năng lượng tâm đá quý tại nhà',
+      comment: 'Bài viết rất hữu ích và dễ làm theo. Cho mình hỏi thêm là phơi trăng rằm thì để ngoài trời bao lâu là tốt nhất ạ?',
+      date: '18/11/2026 21:05',
+      status: 'pending',
+      reply: ''
+    },
+    {
+      id: 3,
+      readerName: 'Lê Hoàng Lan Anh',
+      readerEmail: 'lananh.gemini@gmail.com',
+      articleTitle: 'Moonstone: Vẻ đẹp dịu dàng và năng lượng soi dưỡng tâm hồn',
+      comment: 'Đá Moonstone của AMULES ánh lam siêu đẹp, đeo vào cảm giác rất thư thái và bình yên.',
+      date: '17/11/2026 10:14',
+      status: 'approved',
+      reply: 'AMULES cảm ơn bạn rất nhiều! Chúc bạn luôn an yên và tràn đầy năng lượng tích cực.'
+    }
+  ];
+
   currentEditingArticle: any = {
     code: '882',
     title: 'Ý nghĩa của đá Amethyst: Năng lượng thanh tẩy tâm trí và giấc ngủ an lành',
     slug: 'y-nghia-da-amethyst-thanh-tay-tam-tri',
     category: 'Thạch học & Đá quý',
     eyebrow: 'THẠCH HỌC TÂM LINH',
-    author: 'Vũ Hoàng Linh (Quản trị viên)',
-    authorInitial: 'VL',
-    date: '28/10/2026 14:32',
+    author: 'Ban Cố Vấn Phong Thủy AMULES',
+    authorRole: 'Chuyên gia phong thủy',
+    authorInitial: 'PT',
+    publishDateTime: '',
+    date: '28/10/2026',
     views: 8420,
     growthText: '+18% tuần này',
     seoScore: 96,
     status: 'published',
     image: 'https://i.pinimg.com/736x/47/9c/df/479cdf269b5b50948b8aef6103b475ed.jpg',
     excerpt: 'Khám phá nguồn gốc, thuộc tính quang học và sức mạnh phong thủy kỳ diệu của Thạch Anh Tím (Amethyst) trong việc xoa dịu âu lo, kích hoạt luân xa vương miện và mang lại luồng sinh khí quý phái cho gia chủ.',
-    content: 'Được mệnh danh là viên đá của sự thức tỉnh tâm linh, Amethyst từ thời cổ đại đã được các bậc đế vương Hy Lạp và La Mã tôn sùng như một lá bùa hộ thân chống lại sự mê muội và giữ cho tâm trí luôn giữ vững trạng thái tĩnh tại sâu thẳm. Theo các nhà ngọc học hiện đại, sắc tím huyền ảo của đá bắt nguồn từ các tạp chất sắt kết hợp cùng quá trình chiếu xạ tự nhiên qua hàng triệu năm trong lòng đất bazan.\n\nTrong ngũ hành phương Đông, sắc tím thẫm của thạch anh tím dung hòa năng lượng giữa Hỏa và Thủy, tạo thành chu kỳ tương sinh kỳ diệu. Đây là bảo vật tương hợp lý tưởng dành cho người mang mệnh Hỏa và mệnh Thổ.',
+    content: 'Được mệnh danh là viên đá của sự thức tỉnh tâm linh, Amethyst từ thời cổ đại đã được các bậc đế vương Hy Lạp và La Mã tôn sùng như một lá bùa hộ thân chống lại sự mê muội và giữ cho tâm trí luôn giữ vững trạng thái tĩnh tại sâu thẳm.',
     tags: ['#Amethyst', '#ThachAnhTim', '#MenhThuy', '#MenhHoa', '#CungBaoBinh', '#ThanhTayNangLuong'],
     allowComments: true
   };
@@ -140,9 +222,9 @@ export class AdminVouchersComponent implements OnInit {
       slug: 'moonstone-ve-dep-an-nhien',
       category: 'Kiến thức đá',
       eyebrow: 'BẢO VẬT ÁNH TRĂNG',
-      author: 'Quản trị viên AMULES',
-      authorRole: 'Admin',
-      authorInitial: 'AM',
+      author: 'Ban Cố Vấn Phong Thủy AMULES',
+      authorRole: 'Chuyên gia phong thủy',
+      authorInitial: 'PT',
       date: '20/10/2026',
       views: 8420,
       growthText: '+18% xem lượng',
@@ -159,9 +241,9 @@ export class AdminVouchersComponent implements OnInit {
       slug: '5-buoc-thanh-tay-nap-nang-luong',
       category: 'Chăm sóc đá',
       eyebrow: 'HƯỚNG DẪN CHĂM SÓC',
-      author: 'Quản trị viên AMULES',
-      authorRole: 'Admin',
-      authorInitial: 'AM',
+      author: 'Ban Cố Vấn Phong Thủy AMULES',
+      authorRole: 'Chuyên gia phong thủy',
+      authorInitial: 'PT',
       date: '20/10/2026',
       views: 5120,
       growthText: 'Bán chạy',
@@ -178,9 +260,9 @@ export class AdminVouchersComponent implements OnInit {
       slug: 'cach-phoi-trang-suc',
       category: 'Phối đồ',
       eyebrow: 'PHONG CÁCH & LỐI SỐNG',
-      author: 'Quản trị viên AMULES',
-      authorRole: 'Admin',
-      authorInitial: 'AM',
+      author: 'Ban Cố Vấn Phong Thủy AMULES',
+      authorRole: 'Chuyên gia phong thủy',
+      authorInitial: 'PT',
       date: '20/10/2026',
       views: 11850,
       growthText: '+32% tương tác',
@@ -205,6 +287,26 @@ export class AdminVouchersComponent implements OnInit {
     return this.articles.reduce((sum, a) => sum + (Number(a.views) || 0), 0);
   }
 
+  get averageArticleViews(): number {
+    if (this.articles.length === 0) return 0;
+    return Math.round(this.totalArticleReads / this.articles.length);
+  }
+
+  get uniqueCategoriesCount(): number {
+    const cats = new Set(this.articles.map(a => a.category).filter(Boolean));
+    return cats.size || 4;
+  }
+
+  get pendingCommentsCount(): number {
+    return this.readerComments.filter(c => c.status === 'pending').length;
+  }
+
+  get minPublishDateTime(): string {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 16);
+  }
+
   constructor(
     private _adminService: AdminService,
     private _router: Router
@@ -217,11 +319,13 @@ export class AdminVouchersComponent implements OnInit {
     // Khởi tạo sẵn sàng để không bao giờ bị chớp màn hình trắng 0 bản ghi
     this.vouchers = this.mockVouchers.map((v, i) => this.formatVoucher(v, i));
     this.articles = this.mockArticles.map((a, i) => this.formatArticle(a, i));
+    this.banners = [...this.mockBanners];
   }
 
   ngOnInit(): void {
     this.loadVouchers();
     this.loadArticles();
+    this.loadBanners();
   }
 
   // -------------------------------------------------------------
@@ -410,17 +514,27 @@ export class AdminVouchersComponent implements OnInit {
   // -------------------------------------------------------------
   formatArticle(a: any, index: number = 0): any {
     const fallback = this.mockArticles[index % this.mockArticles.length] || {};
+    let author = a.author || fallback.author || 'Ban Cố Vấn Phong Thủy AMULES';
+    if (author === '0077ee7a934a956624ff30e6' || (typeof author === 'string' && author.length === 24 && /^[0-9a-fA-F]+$/.test(author))) {
+      author = 'Ban Cố Vấn Phong Thủy AMULES';
+    }
+    const authorRole = a.authorRole || fallback.authorRole || 'Chuyên gia phong thủy';
+    const authorInitial = author.includes('Phong Thủy') ? 'PT' : author.includes('Admin') ? 'AD' : 'AM';
+
     return {
       ...fallback,
       ...a,
       title: a.title || fallback.title,
+      author,
+      authorRole,
+      authorInitial,
       category: a.category || fallback.category,
       excerpt: a.summary || a.excerpt || fallback.excerpt,
       status: a.status || fallback.status || 'published',
       views: a.views !== undefined ? Number(a.views) : fallback.views,
       seoScore: a.seoScore !== undefined ? Number(a.seoScore) : fallback.seoScore,
       image: (a.thumbnail && !a.thumbnail.includes('drive.google.com')) ? a.thumbnail : fallback.image,
-      date: a.publishedAt ? new Date(a.publishedAt).toLocaleDateString('vi-VN') : (fallback.date || '28/10/2026')
+      date: a.publishedAt ? new Date(a.publishedAt).toLocaleDateString('vi-VN') : (fallback.date || '20/10/2026')
     };
   }
 
@@ -433,6 +547,34 @@ export class AdminVouchersComponent implements OnInit {
       },
       error: () => {}
     });
+  }
+
+  loadBanners(): void {
+    this._adminService.getBanners().subscribe({
+      next: (data) => {
+        if (data && data.length > 0) {
+          this.banners = data.map((b: any, i: number) => ({
+            ...this.mockBanners[i % this.mockBanners.length],
+            ...b,
+            positionLabel: this.getBannerPositionLabel(b.position)
+          }));
+        } else {
+          this.banners = [...this.mockBanners];
+        }
+      },
+      error: () => {
+        this.banners = [...this.mockBanners];
+      }
+    });
+  }
+
+  getBannerPositionLabel(pos: string): string {
+    switch (pos) {
+      case 'home_hero': return 'Hero Banner Trang Chủ';
+      case 'home_promo': return 'Thanh Ưu Đãi Đầu Trang';
+      case 'home_featured': return 'Tiêu Điểm Bộ Sưu Tập';
+      default: return 'Banner Website';
+    }
   }
 
   get filteredArticles(): any[] {
@@ -467,10 +609,10 @@ export class AdminVouchersComponent implements OnInit {
       slug: 'y-nghia-da-amethyst-thanh-tay-tam-tri',
       category: 'Thạch học & Đá quý',
       eyebrow: 'THẠCH HỌC TÂM LINH',
-      author: 'Vũ Hoàng Linh (Quản trị viên)',
-      authorRole: 'Admin',
-      authorInitial: 'VL',
-      date: '28/10/2026 14:32',
+      author: 'Ban Cố Vấn Phong Thủy AMULES',
+      authorRole: 'Chuyên gia phong thủy',
+      authorInitial: 'PT',
+      publishDateTime: this.minPublishDateTime,
       views: 8420,
       growthText: '+18% tuần này',
       seoScore: 96,
@@ -486,10 +628,18 @@ export class AdminVouchersComponent implements OnInit {
 
   openEditArticleModal(art: any): void {
     this.isEditingArticle = true;
+    let publishDateTime = this.minPublishDateTime;
+    if (art.publishedAt) {
+      const dt = new Date(art.publishedAt);
+      dt.setMinutes(dt.getMinutes() - dt.getTimezoneOffset());
+      publishDateTime = dt.toISOString().slice(0, 16);
+    }
     this.currentEditingArticle = {
       ...art,
-      authorInitial: art.authorInitial || 'VL',
-      authorRole: art.authorRole || 'Admin'
+      publishDateTime,
+      author: art.author || 'Ban Cố Vấn Phong Thủy AMULES',
+      authorInitial: art.authorInitial || 'PT',
+      authorRole: art.authorRole || 'Chuyên gia phong thủy'
     };
     this.showArticleModal = true;
   }
@@ -499,9 +649,19 @@ export class AdminVouchersComponent implements OnInit {
   }
 
   saveArticle(publishNow: boolean = false): void {
-    if (!this.currentEditingArticle.title.trim()) {
-      alert('Vui lòng nhập tiêu đề bài viết!');
+    if (!this.currentEditingArticle.title || !this.currentEditingArticle.title.trim()) {
+      this.showToast('Vui lòng nhập tiêu đề bài viết!');
       return;
+    }
+
+    // Ràng buộc quy tắc thời gian xuất bản: phải từ thời điểm hiện tại trở đi
+    if (this.currentEditingArticle.publishDateTime) {
+      const chosen = new Date(this.currentEditingArticle.publishDateTime).getTime();
+      const nowAllowed = Date.now() - 2 * 60 * 1000; // Cho phép sai số 2 phút
+      if (chosen < nowAllowed) {
+        this.showToast('Lịch xuất bản không hợp lệ! Thời gian xuất bản phải tính ngay lúc đăng bài hoặc sau đó, không được chọn ngày giờ trong quá khứ.');
+        return;
+      }
     }
 
     if (publishNow) {
@@ -510,7 +670,9 @@ export class AdminVouchersComponent implements OnInit {
 
     const payload = {
       ...this.currentEditingArticle,
-      slug: this.currentEditingArticle.slug || this.generateSlug(this.currentEditingArticle.title)
+      slug: this.currentEditingArticle.slug || this.generateSlug(this.currentEditingArticle.title),
+      publishedAt: this.currentEditingArticle.publishDateTime ? new Date(this.currentEditingArticle.publishDateTime) : new Date(),
+      date: new Date(this.currentEditingArticle.publishDateTime || Date.now()).toLocaleDateString('vi-VN')
     };
 
     if (this.isEditingArticle && this.currentEditingArticle._id) {
@@ -523,7 +685,7 @@ export class AdminVouchersComponent implements OnInit {
         error: () => {
           const idx = this.articles.findIndex(a => a._id === this.currentEditingArticle._id);
           if (idx !== -1) {
-            this.articles[idx] = { ...this.currentEditingArticle };
+            this.articles[idx] = { ...this.currentEditingArticle, ...payload };
           }
           this.showToast('Cập nhật bài viết thành công!');
           this.closeArticleModal();
@@ -539,8 +701,8 @@ export class AdminVouchersComponent implements OnInit {
         error: () => {
           this.articles.unshift({
             ...this.currentEditingArticle,
-            _id: 'art_' + Date.now(),
-            date: 'Hôm nay lúc 14:30'
+            ...payload,
+            _id: 'art_' + Date.now()
           });
           this.showToast('Đã lưu và xuất bản bài viết thành công!');
           this.closeArticleModal();
@@ -570,6 +732,118 @@ export class AdminVouchersComponent implements OnInit {
         }
       });
     }
+  }
+
+  // Banner Actions
+  openCreateBannerModal(): void {
+    this.isEditingBanner = false;
+    this.currentEditingBanner = {
+      title: 'Khuyến Mãi Đặc Quyền AMULES 2026',
+      image: 'https://i.pinimg.com/736x/d4/3c/3d/d43c3d69296b0badad1636033dd34e9c.jpg',
+      linkUrl: '/bo-suu-tap',
+      position: 'home_hero',
+      displayOrder: this.banners.length + 1,
+      status: 'active'
+    };
+    this.showBannerModal = true;
+  }
+
+  openEditBannerModal(b: any): void {
+    this.isEditingBanner = true;
+    this.currentEditingBanner = { ...b };
+    this.showBannerModal = true;
+  }
+
+  closeBannerModal(): void {
+    this.showBannerModal = false;
+  }
+
+  saveBanner(): void {
+    if (!this.currentEditingBanner.title?.trim()) {
+      this.showToast('Vui lòng nhập tiêu đề banner!');
+      return;
+    }
+    if (this.isEditingBanner) {
+      const idx = this.banners.findIndex(x => x._id === this.currentEditingBanner._id);
+      if (idx !== -1) {
+        this.banners[idx] = {
+          ...this.currentEditingBanner,
+          positionLabel: this.getBannerPositionLabel(this.currentEditingBanner.position)
+        };
+      }
+      this.showToast('Cập nhật Banner thành công!');
+      this.closeBannerModal();
+    } else {
+      this.banners.unshift({
+        ...this.currentEditingBanner,
+        _id: 'bn_' + Date.now(),
+        positionLabel: this.getBannerPositionLabel(this.currentEditingBanner.position)
+      });
+      this.showToast('Tạo Banner mới thành công!');
+      this.closeBannerModal();
+    }
+  }
+
+  toggleBannerStatus(b: any): void {
+    b.status = b.status === 'active' ? 'inactive' : 'active';
+    this.showToast(`Banner "${b.title}" đã chuyển sang trạng thái ${b.status === 'active' ? 'Hiển thị' : 'Tạm ẩn'}!`);
+  }
+
+  deleteBanner(b: any): void {
+    if (confirm(`Bạn có chắc chắn muốn xóa banner "${b.title}"?`)) {
+      this.banners = this.banners.filter(x => x !== b);
+      this.showToast('Đã xóa banner thành công!');
+    }
+  }
+
+  // Reader Comments Actions
+  approveComment(c: any): void {
+    c.status = 'approved';
+    this.showToast(`Đã duyệt hiển thị câu hỏi của độc giả "${c.readerName}"!`);
+  }
+
+  deleteComment(c: any): void {
+    if (confirm(`Bạn có chắc chắn muốn xóa phản hồi của "${c.readerName}"?`)) {
+      this.readerComments = this.readerComments.filter(x => x !== c);
+      this.showToast('Đã xóa phản hồi thành công!');
+    }
+  }
+
+  replyComment(c: any): void {
+    const rep = prompt('Nhập câu trả lời tư vấn phong thủy cho độc giả:', c.reply || '');
+    if (rep !== null && rep.trim()) {
+      c.reply = rep.trim();
+      c.status = 'approved';
+      this.showToast('Đã gửi câu trả lời tư vấn cho độc giả!');
+    }
+  }
+
+  // Interactive KPI Cards Actions
+  clickKpiArticles(): void {
+    if (this.articleStatusFilter === 'all') {
+      this.articleStatusFilter = 'published';
+      this.showToast('Đang lọc danh sách: Các bài viết ĐÃ XUẤT BẢN');
+    } else if (this.articleStatusFilter === 'published') {
+      this.articleStatusFilter = 'draft';
+      this.showToast('Đang lọc danh sách: Các bài viết BẢN NHÁP');
+    } else {
+      this.articleStatusFilter = 'all';
+      this.showToast('Hiển thị tất cả bài viết cẩm nang');
+    }
+  }
+
+  clickKpiViews(): void {
+    this.articles.sort((a, b) => (Number(b.views) || 0) - (Number(a.views) || 0));
+    this.showToast('Đã sắp xếp danh sách theo bài viết có LƯỢT ĐỌC CAO NHẤT!');
+  }
+
+  clickKpiComments(): void {
+    this.articleSubTab = 'comments';
+    this.showToast('Đã chuyển sang mục Tương Tác & Bình Luận Độc GiẢ');
+  }
+
+  clickKpiCategories(): void {
+    this.showToast(`Hệ thống đang quản lý ${this.uniqueCategoriesCount} chuyên mục kiến thức đá & phong thủy`);
   }
 
   generateSlug(text: string): string {
