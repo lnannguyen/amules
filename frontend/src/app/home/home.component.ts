@@ -71,8 +71,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     this._productService.getProducts().pipe(takeUntil(this._destroy$)).subscribe({
       next: (data) => {
         if (data && data.length > 0) {
-          // Ánh xạ sang cấu trúc giao diện
-          this.products = data.slice(0, 8).map(p => ({
+          // Lọc chỉ lấy các kiệt tác trang sức thực thụ (loại trừ các gói hộp quà phụ kiện)
+          const jewelryOnly = data.filter(p => !(p as any).isGiftPackage && p.category !== 'Set quà tặng');
+          const sourceList = jewelryOnly.length >= 4 ? jewelryOnly : data;
+
+          this.products = sourceList.slice(0, 8).map(p => ({
             id: p.id || (p._id ? p._id.toString() : ''),
             slug: p.slug || p.id || 'lac-tay-hoi-tho-bien-xanh',
             name: p.name,
@@ -81,7 +84,7 @@ export class HomeComponent implements OnInit, OnDestroy {
             sold: p.sold ? `${p.sold}+` : '100+',
             badge: p.badge || 'Nổi bật',
             element: p.element || '',
-            image: p.image || (p.images && p.images[0]) || '',
+            image: p.image || (p.images && p.images[0]) || 'https://i.pinimg.com/736x/d4/3c/3d/d43c3d69296b0badad1636033dd34e9c.jpg',
             liked: false
           }));
         }
@@ -128,4 +131,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   toggleLike(p: ProductItem) { p.liked = !p.liked; }
   subscribe() { if (this.email.includes('@')) { this.subscribed = true; } }
+
+  onImgError(event: any): void {
+    if (event && event.target) {
+      event.target.src = 'https://i.pinimg.com/736x/d4/3c/3d/d43c3d69296b0badad1636033dd34e9c.jpg';
+    }
+  }
 }

@@ -1,9 +1,12 @@
 [
   {
-    "_id": "0077ee7a934a956624ff30e6",
+    "_id": {
+      "$oid": "0077ee7a934a956624ff30e6"
+    },
     "fullName": "Quản trị AMULES",
     "email": "admin@amules.vn",
     "phone": "0900000001",
+    "passwordHash": "$2b$10$REPLACE_WITH_REAL_BCRYPT_HASH_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
     "avatar": null,
     "dateOfBirth": null,
     "gender": null,
@@ -19,10 +22,13 @@
     "updatedAt": "2026-09-01T00:00:00.000Z"
   },
   {
-    "_id": "e4774cdda0793f86414e8b91",
+    "_id": {
+      "$oid": "e4774cdda0793f86414e8b91"
+    },
     "fullName": "Nguyễn Hoàng Lan Anh",
     "email": "lananh.gemini@gmail.com",
     "phone": "0982456789",
+    "passwordHash": "$2b$10$REPLACE_WITH_REAL_BCRYPT_HASH_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
     "avatar": "https://cdn.amules.vn/avatars/u1.jpg",
     "dateOfBirth": "2003-07-05T00:00:00.000Z",
     "gender": "Nữ",
@@ -49,10 +55,13 @@
     "updatedAt": "2026-11-08T00:00:00.000Z"
   },
   {
-    "_id": "270c1b084f3f146eb5787075",
+    "_id": {
+      "$oid": "270c1b084f3f146eb5787075"
+    },
     "fullName": "Trần Thu Hà",
     "email": "thuha.tran@gmail.com",
     "phone": "0911222333",
+    "passwordHash": null,
     "avatar": null,
     "dateOfBirth": null,
     "gender": "Nữ",
@@ -68,7 +77,9 @@
     "updatedAt": "2026-10-02T00:00:00.000Z"
   },
   {
-    "_id": "6afcc51cff8e99cc477cf59a",
+    "_id": {
+      "$oid": "6afcc51cff8e99cc477cf59a"
+    },
     "fullName": "An Nguyễn Thị Thu",
     "email": "annttk24406h1@st.uel.edu.vn",
     "phone": "0982 456 789",
@@ -81,11 +92,13 @@
     "updatedAt": "2026-11-17T21:20:28.406Z"
   },
   {
-    "_id": "6afd90886110da292e0b54b0",
+    "_id": {
+      "$oid": "6afd90886110da292e0b54b0"
+    },
     "fullName": "Thu An",
     "email": "anan265464@gmail.com",
     "phone": "",
-    "avatar": "",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIkn8Tyt55pJ3SuwS_y72gvhcS1mlCCRCdUy2le0olfl3QcSCKxCA=s96-c",
     "authProvider": "google",
     "role": "customer",
     "tier": "Thành viên mới",
@@ -96,8 +109,14 @@
     "zodiac": "",
     "wristSize": "",
     "addresses": [],
-    "createdAt": "2026-11-18T11:48:24.451Z",
-    "updatedAt": "2026-11-18T11:48:31.991Z",
-    "nickname": "An"
+    "createdAt": {
+      "$date": "2026-11-18T11:48:24.451Z"
+    },
+    "updatedAt": {
+      "$date": "2026-11-19T09:39:53.241Z"
+    },
+    "nickname": "An",
+    "password": "789654123",
+    "passwordHash": "789654123"
   }
 ]
