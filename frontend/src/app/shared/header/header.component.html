@@ -41,7 +41,7 @@
             @if (_authService.isLoggedIn()) {
               <div class="user-dropdown__header">
                 <div class="user-dropdown__name">{{ _authService.currentUser()?.fullName || 'Khách hàng VIP' }}</div>
-                <div class="user-dropdown__email">{{ _authService.currentUser()?.email || 'lananh.gemini@gmail.com' }}</div>
+                <div class="user-dropdown__email">{{ _authService.currentUser()?.email || '' }}</div>
               </div>
               <div class="user-dropdown__divider"></div>
               <a routerLink="/account/overview" (click)="closeDropdown()" class="user-dropdown__item">

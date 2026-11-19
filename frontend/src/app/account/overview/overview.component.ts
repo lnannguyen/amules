@@ -28,16 +28,14 @@ export class OverviewComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const isDemo = this._auth.currentUser()?.email === 'lananh.gemini@gmail.com';
-
     // 1. Đồng bộ thông tin người dùng từ AuthService / Profile MongoDB
     const u = this._auth.currentUser();
     if (u) {
       this.user.name = u.fullName || u.name || '';
       this.user.email = u.email || '';
       this.user.phone = u.phone || '';
-      this.user.tier = u.tier || (isDemo ? 'GEMSTONE VIP' : 'Thành viên mới');
-      this.user.points = u.points !== undefined ? Number(u.points) : (isDemo ? 1250 : 0);
+      this.user.tier = u.tier || 'Thành viên mới';
+      this.user.points = u.points !== undefined ? Number(u.points) : 0;
     }
 
     this._http.get<any>('/api/auth/profile', { withCredentials: true }).subscribe({
@@ -68,25 +66,13 @@ export class OverviewComponent implements OnInit {
             itemCount: (top.items && top.items.length) || 1
           };
         } else {
-          this.user.orderCount = isDemo ? 1 : 0;
-          this.recentOrder = isDemo ? {
-            code: '#AMU-2025-8942',
-            date: '28/10/2025',
-            status: 'Đang giao hàng • Hỏa tốc',
-            total: 1200000,
-            itemCount: 2
-          } : null;
+          this.user.orderCount = 0;
+          this.recentOrder = null;
         }
       },
       error: () => {
-        this.user.orderCount = isDemo ? 1 : 0;
-        this.recentOrder = isDemo ? {
-          code: '#AMU-2025-8942',
-          date: '28/10/2025',
-          status: 'Đang giao hàng • Hỏa tốc',
-          total: 1200000,
-          itemCount: 2
-        } : null;
+        this.user.orderCount = 0;
+        this.recentOrder = null;
       }
     });
 
@@ -96,7 +82,7 @@ export class OverviewComponent implements OnInit {
         if (addrs) this.user.addressCount = addrs.length;
       },
       error: () => {
-        this.user.addressCount = isDemo ? 2 : 0;
+        this.user.addressCount = 0;
       }
     });
 

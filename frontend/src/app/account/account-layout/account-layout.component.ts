@@ -76,14 +76,13 @@ export class AccountLayoutComponent implements OnInit {
     if (current) {
       this.user.name = current.fullName || current.name || 'Thành viên AMULES';
       this.user.avatar = current.avatar || '';
-      const isDemo = current.email === 'lananh.gemini@gmail.com';
-      this.user.tier = current.tier || (isDemo ? 'GEMSTONE VIP' : 'Thành viên mới');
-      const pts = current.points !== undefined ? Number(current.points) : (isDemo ? 1250 : 0);
+      this.user.tier = current.tier || 'Thành viên mới';
+      const pts = current.points !== undefined ? Number(current.points) : 0;
       this.user.points = `${pts.toLocaleString('vi-VN')} LT`;
-      this.user.progress = isDemo ? 83 : Math.min(100, Math.round((pts / 1000) * 100));
-      this.user.nextTierNote = isDemo
-        ? 'Còn 250 điểm để chạm mốc Ngọc Bích Thiên Hà'
-        : (pts > 0 ? `Tích lũy thêm ${Math.max(0, 500 - pts)} điểm để lên hạng Bạc` : 'Khởi đầu tích lũy năng lượng bảo mệnh');
+      this.user.progress = Math.min(100, Math.round((pts / 1000) * 100));
+      this.user.nextTierNote = pts > 0
+        ? `Tích lũy thêm ${Math.max(0, 500 - pts)} điểm để lên hạng Bạc`
+        : 'Khởi đầu tích lũy năng lượng bảo mệnh';
     }
   }
 

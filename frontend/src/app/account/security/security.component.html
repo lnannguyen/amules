@@ -3,7 +3,7 @@
   <div>
     <span class="eyebrow"><app-icon name="shield" [size]="12"></app-icon> BẢO MẬT DỮ LIỆU THÀNH VIÊN</span>
     <h1 class="acc-page-head__title">Bảo Mật Tài Khoản</h1>
-    <p class="acc-page-head__desc">Quản lý mật khẩu, phiên đăng nhập đa thiết bị và kích hoạt các lớp bảo vệ thiêng liêng cho hồ sơ trang sức phong thủy của bạn.</p>
+    <p class="acc-page-head__desc">Quản lý mật khẩu, phiên đăng nhập đa thiết bị và kích hoạt các lớp bảo vệ cho hồ sơ trang sức phong thủy của bạn.</p>
   </div>
 
   <div class="score-pill">
@@ -11,8 +11,8 @@
     <div>
       <small>CHỈ SỐ AN TOÀN</small>
       <div class="score-pill__val">
-        <strong>92%</strong>
-        <span class="acc-badge acc-badge--ok">Tối ưu</span>
+        <strong>{{ securityScore }}%</strong>
+        <span class="acc-badge" [class.acc-badge--ok]="securityScore >= 70">{{ securityScoreLabel }}</span>
       </div>
     </div>
   </div>
@@ -43,7 +43,7 @@
       <div class="field">
         <label>Mật khẩu hiện tại</label>
         <div class="input-wrap no-left-icon">
-          <input [type]="showCurrent ? 'text' : 'password'" [(ngModel)]="currentPassword">
+          <input [type]="showCurrent ? 'text' : 'password'" [(ngModel)]="currentPassword" placeholder="Nhập mật khẩu hiện tại (nếu có)">
           <button type="button" class="suffix" (click)="showCurrent = !showCurrent">
             <app-icon [name]="showCurrent ? 'eye-off' : 'eye'" [size]="16"></app-icon>
           </button>
@@ -56,12 +56,12 @@
       <div class="field">
         <label>Mật khẩu mới</label>
         <div class="input-wrap no-left-icon">
-          <input [type]="showNew ? 'text' : 'password'" [(ngModel)]="newPassword" placeholder="Nhập mật khẩu mới">
+          <input [type]="showNew ? 'text' : 'password'" [(ngModel)]="newPassword" placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)">
           <button type="button" class="suffix" (click)="showNew = !showNew">
             <app-icon [name]="showNew ? 'eye-off' : 'eye'" [size]="16"></app-icon>
           </button>
         </div>
-        <!-- Thanh đo độ mạnh tái sử dụng từ styles.css -->
+        <!-- Thanh đo độ mạnh -->
         <div class="strength">
           <i [class.on]="passwordStrength >= 1"></i>
           <i [class.on]="passwordStrength >= 2"></i>
@@ -70,7 +70,7 @@
         </div>
         <div class="strength-meta">
           <span>ĐỘ MẠNH MẬT KHẨU</span>
-          <span>Tối thiểu 8 ký tự (Hoa, thường &amp; số)</span>
+          <span>Tối thiểu 6 ký tự (Hoa, thường &amp; số)</span>
         </div>
       </div>
 
@@ -84,16 +84,24 @@
         </div>
       </div>
 
+      @if (passwordSaved) {
+        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+          <app-icon name="check-circle" [size]="16"></app-icon>
+          <span>Đã cập nhật mật khẩu thành công! Khóa bảo mật mới đã được lưu vào CSDL.</span>
+        </div>
+      }
+
+      @if (errorMsg) {
+        <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+          <app-icon name="alert" [size]="16"></app-icon>
+          <span>{{ errorMsg }}</span>
+        </div>
+      }
+
       <div class="sec-form-foot">
-        @if (passwordSaved) {
-          <span style="color: var(--ok); font-size: 12.5px; font-weight: 600;">✓ Đã cập nhật mật khẩu thành công!</span>
-        }
-        @if (errorMsg) {
-          <span style="color: var(--danger); font-size: 12.5px; font-weight: 600;">{{ errorMsg }}</span>
-        }
         <button type="button" class="btn btn--outline btn--xs" (click)="currentPassword=''; newPassword=''; confirmPassword=''; errorMsg=''">Hủy bỏ</button>
         <button type="button" class="btn btn--primary btn--xs" (click)="updatePassword()" [disabled]="saving">
-          <app-icon name="check-circle" [size]="14"></app-icon> {{ saving ? 'Đang lưu...' : 'Cập nhật mật khẩu' }}
+          <app-icon name="check-circle" [size]="14"></app-icon> {{ saving ? 'Đang cập nhật...' : 'Cập nhật mật khẩu' }}
         </button>
       </div>
     </section>
@@ -105,25 +113,41 @@
           <div class="acc-card__title">
             <span class="ico-box"><app-icon name="shield-check" [size]="16"></app-icon></span>
             <span>Xác Thực Hai Yếu Tố (2FA)</span>
-            <span class="acc-badge">ĐÃ KÍCH HOẠT ✓</span>
+            @if (userPhone && twoFactorEnabled) {
+              <span class="acc-badge">ĐÃ KÍCH HOẠT ✓</span>
+            } @else {
+              <span class="acc-badge" style="background: #fef3c7; color: #92400e;">CHƯA KÍCH HOẠT</span>
+            }
           </div>
           <p class="acc-card__sub">Tạo lớp bảo vệ kép cho tài khoản qua mã tin nhắn SMS</p>
         </div>
 
-        <button type="button" class="toggle-switch" [class.on]="twoFactorEnabled" (click)="twoFactorEnabled = !twoFactorEnabled" aria-label="Bật tắt 2FA">
+        <button type="button" class="toggle-switch" [class.on]="twoFactorEnabled && !!userPhone" (click)="toggle2FA()" aria-label="Bật tắt 2FA">
           <i></i>
         </button>
       </div>
 
+      @if (twoFactorNotice) {
+        <div style="background: #fffbeb; border: 1px solid #fef3c7; color: #92400e; padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 12px;">
+          <app-icon name="info" [size]="13"></app-icon> {{ twoFactorNotice }}
+        </div>
+      }
+
       <div class="twofa-grid">
-        <div class="twofa-box active">
+        <div class="twofa-box" [class.active]="userPhone && twoFactorEnabled">
           <div class="twofa-box__top">
             <strong><app-icon name="smartphone" [size]="14"></app-icon> Mã OTP qua SMS</strong>
-            <span class="acc-badge">Mặc định</span>
+            <span class="acc-badge">{{ userPhone ? 'Mặc định' : 'Cần liên kết SĐT' }}</span>
           </div>
-          <p>Gửi mã xác minh 6 số về số điện thoại <b>{{ maskedPhone }}</b> khi đăng nhập trên trình duyệt lạ.</p>
+          <p>
+            @if (userPhone) {
+              Gửi mã xác minh 6 số về số điện thoại <b>{{ maskedPhone }}</b> khi đăng nhập trên trình duyệt lạ.
+            } @else {
+              <span style="color: #c2410c;">Tài khoản chưa liên kết số điện thoại. Bổ sung ngay để nhận mã OTP SMS.</span>
+            }
+          </p>
           <a routerLink="/account/profile" class="link-arrow">
-            Thay đổi số điện thoại <app-icon name="arrow-right" [size]="12"></app-icon>
+            {{ userPhone ? 'Thay đổi số điện thoại' : 'Liên kết số điện thoại ngay' }} <app-icon name="arrow-right" [size]="12"></app-icon>
           </a>
         </div>
 
@@ -131,7 +155,7 @@
           <div class="twofa-box__top">
             <strong><app-icon name="qrcode" [size]="14"></app-icon> Ứng dụng tạo mã (TOTP)</strong>
           </div>
-          <p>Sử dụng Google Authenticator hoặc iCloud Keychain để tạo mã 30 giây ngoại tuyến.</p>
+          <p>Sử dụng Google Authenticator hoặc iCloud Keychain để tạo mã xác thực 30 giây.</p>
           <button type="button" (click)="configureTotp()" class="link-arrow" style="color: var(--muted); background: none; border: none; cursor: pointer; padding: 0;">
             {{ totpNotice || 'Cấu hình ứng dụng' }} <app-icon name="chevron-right" [size]="12"></app-icon>
           </button>
@@ -142,7 +166,7 @@
 
   <!-- CỘT PHẢI -->
   <aside class="sec-right">
-    <!-- 3. Phiên đăng nhập -->
+    <!-- 3. Phiên đăng nhập THỰC TẾ -->
     <section class="acc-card">
       <div class="acc-card__head">
         <div>
@@ -173,9 +197,9 @@
       </div>
 
       <div class="session-foot">
-        <span>Bảo vệ khỏi đăng nhập lạ?</span>
+        <span>Bảo mật phiên làm việc</span>
         <button type="button" class="revoke-all-btn" (click)="revokeAllOther()">
-          <app-icon name="logout" [size]="13"></app-icon> Đăng xuất tất cả thiết bị khác
+          <app-icon name="logout" [size]="13"></app-icon> Làm mới phiên
         </button>
       </div>
     </section>
@@ -200,7 +224,7 @@
         <span>Các đơn hàng đang trong quá trình gia công hoặc vận chuyển vẫn sẽ được hoàn tất theo hợp đồng bảo mật.</span>
       </div>
 
-      <button type="button" class="btn-danger-outline">
+      <button type="button" class="btn-danger-outline" (click)="onDeleteAccountRequest()">
         <app-icon name="trash" [size]="14"></app-icon> Yêu cầu xóa tài khoản
       </button>
     </section>
