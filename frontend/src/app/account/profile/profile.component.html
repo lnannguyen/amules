@@ -166,7 +166,10 @@
 
   <div class="mystic-grid-3">
     <div class="field">
-      <label><app-icon name="drop" [size]="13"></app-icon> Mệnh Ngũ Hành</label>
+      <label>
+        <span>Mệnh Ngũ Hành</span>
+        <span class="label-icon"><app-icon name="drop" [size]="14"></app-icon></span>
+      </label>
       <div class="input-wrap no-left-icon">
         <input type="text" [value]="profile.element || 'Chưa thiết lập'" readonly [style.color]="profile.element ? 'var(--plum)' : '#888'" class="readonly-calc">
       </div>
@@ -176,7 +179,10 @@
     </div>
 
     <div class="field">
-      <label><app-icon name="sparkle" [size]="13"></app-icon> Cung Hoàng Đạo</label>
+      <label>
+        <span>Cung Hoàng Đạo</span>
+        <span class="label-icon"><app-icon name="sparkle" [size]="14"></app-icon></span>
+      </label>
       <div class="input-wrap no-left-icon">
         <input type="text" [value]="profile.zodiac || 'Chưa thiết lập'" readonly [style.color]="profile.zodiac ? 'var(--plum)' : '#888'" class="readonly-calc">
       </div>
