@@ -515,10 +515,13 @@ export class AdminVouchersComponent implements OnInit {
   formatArticle(a: any, index: number = 0): any {
     const fallback = this.mockArticles[index % this.mockArticles.length] || {};
     let author = a.author || fallback.author || 'Ban Cố Vấn Phong Thủy AMULES';
-    if (author === '0077ee7a934a956624ff30e6' || (typeof author === 'string' && author.length === 24 && /^[0-9a-fA-F]+$/.test(author))) {
+    if (!author || author === '0077ee7a934a956624ff30e6' || (typeof author === 'string' && (author.length === 24 && /^[0-9a-fA-F]+$/.test(author) || author.includes('0077ee')))) {
       author = 'Ban Cố Vấn Phong Thủy AMULES';
     }
-    const authorRole = a.authorRole || fallback.authorRole || 'Chuyên gia phong thủy';
+    let authorRole = a.authorRole || fallback.authorRole || 'Chuyên gia phong thủy';
+    if (authorRole === 'Admin') {
+      authorRole = 'Chuyên gia phong thủy';
+    }
     const authorInitial = author.includes('Phong Thủy') ? 'PT' : author.includes('Admin') ? 'AD' : 'AM';
 
     return {

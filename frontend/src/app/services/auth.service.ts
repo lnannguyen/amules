@@ -69,9 +69,17 @@ export class AuthService {
             return;
           } catch (e) { }
         }
+        const userSaved = localStorage.getItem('amules_user');
+        if (userSaved) {
+          try {
+            const user = JSON.parse(userSaved);
+            this.currentUser.set(user);
+            this.isLoggedIn.set(true);
+            return;
+          } catch (e) { }
+        }
         this.currentUser.set(null);
         this.isLoggedIn.set(false);
-        localStorage.removeItem('amules_user');
       }
     });
   }
@@ -242,7 +250,13 @@ export class AuthService {
   }
 
   getProfile(): Observable<any> {
-    return this._http.get(`${this.API}/profile`, { withCredentials: true }).pipe(
+    const cur = this.currentUser();
+    const headers: any = {};
+    if (cur?.email) {
+      headers['x-user-email'] = cur.email;
+    }
+    const params: any = cur?.email ? { email: cur.email } : {};
+    return this._http.get(`${this.API}/profile`, { withCredentials: true, headers, params }).pipe(
       catchError(this.handleError)
     );
   }

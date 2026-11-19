@@ -1056,35 +1056,49 @@ app.get('/api/auth/profile', async (req, res) => {
     let sessionUser = (req.session && req.session.user) || (req.session && req.session.admin);
     const db = getDB();
 
-    // Khôi phục session từ cookie remember_user nếu session bộ nhớ bị xóa
-    if (!sessionUser && req.cookies && req.cookies.remember_user) {
-      const emailOrUser = (req.cookies.remember_user || '').trim().toLowerCase();
+    const lookupEmail = (
+      (req.query && req.query.email) ||
+      (req.headers && req.headers['x-user-email']) ||
+      (req.cookies && req.cookies.remember_user) ||
+      ''
+    ).trim().toLowerCase();
+
+    // Khôi phục session từ email (query/header/cookie) nếu session bộ nhớ chưa có
+    if (!sessionUser && lookupEmail) {
       let found = null;
       if (db) {
         try {
           found = await db.collection('users').findOne({
-            $or: [{ email: emailOrUser }, { username: emailOrUser }]
+            $or: [{ email: lookupEmail }, { username: lookupEmail }]
           });
         } catch (e) { }
       }
       if (!found) {
         const fallbackUsers = loadFallbackJsonData('users') || [];
         found = fallbackUsers.find(u =>
-          (u.email && u.email.toLowerCase() === emailOrUser) ||
-          (u.username && u.username.toLowerCase() === emailOrUser)
+          (u.email && u.email.toLowerCase() === lookupEmail) ||
+          (u.username && u.username.toLowerCase() === lookupEmail)
         );
       }
       if (found) {
         sessionUser = {
           id: found._id,
+          _id: found._id,
           email: found.email,
           fullName: found.fullName || found.name,
+          nickname: found.nickname || '',
           phone: found.phone || '',
+          dob: found.dob || '',
+          gender: found.gender || '',
+          element: found.element || '',
+          zodiac: found.zodiac || '',
+          wristSize: found.wristSize || '',
           avatar: found.avatar || '',
           role: found.role || 'customer',
           tier: found.tier || 'Thành viên mới',
           points: found.points !== undefined ? found.points : 0,
-          authProvider: found.authProvider || 'local'
+          authProvider: found.authProvider || 'local',
+          updatedAt: found.updatedAt || found.createdAt
         };
         if (req.session) {
           req.session.user = sessionUser;
@@ -1097,7 +1111,7 @@ app.get('/api/auth/profile', async (req, res) => {
       if (db) {
         try {
           u = await db.collection('users').findOne({
-            $or: [{ _id: toObjectId(sessionUser.id) }, { email: sessionUser.email }]
+            $or: [{ _id: toObjectId(sessionUser.id || sessionUser._id) }, { email: sessionUser.email }]
           });
         } catch (err) { }
       }
@@ -1218,9 +1232,10 @@ app.put('/api/auth/profile', async (req, res) => {
     const db = getDB();
     const currentUserId = req.session && req.session.user ? req.session.user.id : null;
     const sessionEmail = (req.session && req.session.user ? req.session.user.email : null) || (req.cookies ? req.cookies.remember_user : null);
+    const headerEmail = req.headers ? req.headers['x-user-email'] : null;
     const { email, fullName, nickname, phone, dob, gender, element, zodiac, wristSize, avatar } = req.body;
 
-    const targetEmail = (email || sessionEmail || '').trim().toLowerCase();
+    const targetEmail = (email || headerEmail || sessionEmail || '').trim().toLowerCase();
     const filter = currentUserId
       ? { $or: [{ _id: toObjectId(currentUserId) }, { email: targetEmail }] }
       : { email: targetEmail };
@@ -1281,6 +1296,108 @@ app.put('/api/auth/profile', async (req, res) => {
     res.json({ message: 'Cập nhật hồ sơ thành công!', user: updated });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Admin notifications API
+app.get('/api/admin/notifications', async (req, res) => {
+  try {
+    const db = getDB();
+    const notifs = [];
+
+    // 1. Đơn hàng mới
+    if (db) {
+      try {
+        const recentOrders = await db.collection('orders').find({}).sort({ createdAt: -1 }).limit(2).toArray();
+        recentOrders.forEach(ord => {
+          const totalStr = Number(ord.total || ord.finalTotal || 0).toLocaleString('vi-VN') + 'đ';
+          const code = ord.orderCode || ord.code || ('#AMU-' + (ord._id || '').toString().slice(-4));
+          notifs.push({
+            id: 'ord_' + ord._id,
+            type: 'order',
+            icon: 'package',
+            title: `Đơn hàng mới ${code}`,
+            message: `Khách hàng ${ord.customerName || ord.shippingAddress?.fullName || 'Khách hàng'} đặt đơn ${totalStr} (${ord.paymentMethod || 'COD'}).`,
+            time: '12 phút trước',
+            read: false,
+            link: '/admin/orders'
+          });
+        });
+      } catch (e) { }
+
+      // 2. Tồn kho thấp
+      try {
+        const lowStock = await db.collection('products').find({ stock: { $lte: 5 } }).limit(2).toArray();
+        lowStock.forEach(prd => {
+          notifs.push({
+            id: 'stk_' + prd._id,
+            type: 'stock',
+            icon: 'alert-triangle',
+            title: 'Cảnh báo tồn kho thấp',
+            message: `Bảo vật "${prd.name}" chỉ còn ${prd.stock} sản phẩm trong kho.`,
+            time: '1 giờ trước',
+            read: false,
+            link: '/admin/products'
+          });
+        });
+      } catch (e) { }
+
+      // 3. Khách hàng mới
+      try {
+        const recentUsers = await db.collection('users').find({ role: 'customer' }).sort({ createdAt: -1 }).limit(2).toArray();
+        recentUsers.forEach(u => {
+          notifs.push({
+            id: 'usr_' + u._id,
+            type: 'user',
+            icon: 'user',
+            title: 'Thành viên mới đăng ký',
+            message: `Thành viên ${u.fullName || u.email} vừa gia nhập cộng đồng AMULES.`,
+            time: '2 giờ trước',
+            read: false,
+            link: '/admin/users'
+          });
+        });
+      } catch (e) { }
+    }
+
+    if (notifs.length === 0) {
+      notifs.push(
+        {
+          id: 1,
+          type: 'order',
+          icon: 'package',
+          title: 'Đơn hàng mới #AMU-2026-889',
+          message: 'Khách hàng Trần Thu Hà vừa thanh toán thành công đơn hàng 1.250.000đ qua VNPay.',
+          time: '12 phút trước',
+          read: false,
+          link: '/admin/orders'
+        },
+        {
+          id: 2,
+          type: 'user',
+          icon: 'user',
+          title: 'Thành viên mới đăng ký',
+          message: 'Người dùng anan265464@gmail.com vừa hoàn tất tạo tài khoản thành viên.',
+          time: '45 phút trước',
+          read: false,
+          link: '/admin/users'
+        },
+        {
+          id: 3,
+          type: 'stock',
+          icon: 'alert-triangle',
+          title: 'Cảnh báo tồn kho thấp',
+          message: 'Bảo vật Vòng tay Đá Mặt Trăng Moonstone chỉ còn 2 chiếc trong kho.',
+          time: '2 giờ trước',
+          read: false,
+          link: '/admin/products'
+        }
+      );
+    }
+
+    res.json({ notifications: notifs, unreadCount: notifs.filter(n => !n.read).length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

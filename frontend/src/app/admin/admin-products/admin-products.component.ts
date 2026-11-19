@@ -195,29 +195,31 @@ export class AdminProductsComponent implements OnInit {
   }
 
   private getEmptyProduct(): any {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
     return {
-      name: 'Vòng tay Đá Mặt Trăng Moonstone Ánh Lam Celestial',
-      productCode: `AMU-VT-${Date.now().toString().slice(-3)}`,
-      slug: 'vong-tay-moonstone-anh-lam-celestial',
+      name: '',
+      productCode: `AMU-PRD-${Date.now().toString().slice(-4)}`,
+      slug: '',
       category: 'Vòng tay & Lắc tay',
       collection: 'Moonlight & Stars Collection',
-      shortDesc: 'Chiếc vòng tay thủ công đính kết từng viên đá Mặt Trăng nguyên bản từ Sri Lanka, mang dải quang phổ xanh lam huyền ảo, biểu trưng cho sự bình yên và trực giác thức tỉnh.',
+      shortDesc: '',
       stone: 'Moonstone (Đá Mặt Trăng)',
       mohs: '6.0 - 6.5',
       metal: 'Bạc Ý 925 mạ Rhodium bạch kim 3 lớp',
       compatibleElements: ['Mệnh Thủy (Tương Hợp)', 'Mệnh Kim (Tương Sinh)'],
       compatibleZodiacs: ['Cự Giải (Cancer)', 'Song Ngư (Pisces)'],
-      spectrumColors: ['Trắng ánh lam', 'Ánh xà cừ ngọc'],
-      styles: ['Vintage Minimal', 'Thanh lịch hoàng gia', 'Talisman bảo hộ'],
+      spectrumColors: ['Trắng ánh lam'],
+      styles: ['Vintage Minimal'],
       listingStatus: 'active',
-      price: 580000,
-      compareAtPrice: 650000,
-      stock: 24,
-      lowStockAlert: 5,
+      price: 0,
+      compareAtPrice: 0,
+      stock: 10,
+      lowStockAlert: 3,
       weight: 'Khối lượng tịnh tiêu chuẩn 12 gam (~3.2 chỉ)',
-      image: 'https://i.pinimg.com/736x/d4/3c/3d/d43c3d69296b0badad1636033dd34e9c.jpg',
+      image: '',
       badge: 'Mới',
-      lastSaved: '14:38 hôm nay'
+      lastSaved: `${timeStr} hôm nay`
     };
   }
 }

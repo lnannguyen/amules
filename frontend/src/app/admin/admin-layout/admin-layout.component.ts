@@ -1,5 +1,6 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { AdminService } from '../../services/admin.service';
 
 @Component({
@@ -8,7 +9,7 @@ import { AdminService } from '../../services/admin.service';
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.css'
 })
-export class AdminLayoutComponent {
+export class AdminLayoutComponent implements OnInit {
   navItems = [
     { label: 'Tổng quan', icon: 'grid', route: '/admin/dashboard' },
     { label: 'Sản phẩm', icon: 'gem', route: '/admin/products' },
@@ -71,7 +72,9 @@ export class AdminLayoutComponent {
 
   constructor(
     public adminService: AdminService,
-    private _router: Router
+    private _router: Router,
+    private _http: HttpClient,
+    private _cdr: ChangeDetectorRef
   ) {
     const admin = this.adminService.currentAdmin();
     if (admin && admin.fullName) {
@@ -81,22 +84,43 @@ export class AdminLayoutComponent {
     }
   }
 
+  ngOnInit(): void {
+    this.fetchNotifications();
+  }
+
+  fetchNotifications(): void {
+    this._http.get<any>('/api/admin/notifications', { withCredentials: true }).subscribe({
+      next: (res) => {
+        if (res && res.notifications && res.notifications.length > 0) {
+          this.notifications = res.notifications;
+          this.unreadNotifsCount = res.unreadCount !== undefined ? res.unreadCount : this.notifications.filter(n => !n.read).length;
+          this._cdr.detectChanges();
+        }
+      },
+      error: () => {}
+    });
+  }
+
   toggleNotifications(event?: Event): void {
     if (event) {
+      event.preventDefault();
       event.stopPropagation();
     }
     this.showNotifications = !this.showNotifications;
+    this._cdr.detectChanges();
   }
 
   markAllAsRead(): void {
     this.notifications.forEach(n => (n.read = true));
     this.unreadNotifsCount = 0;
+    this._cdr.detectChanges();
   }
 
   clickNotification(notif: any): void {
     notif.read = true;
     this.unreadNotifsCount = this.notifications.filter(n => !n.read).length;
     this.showNotifications = false;
+    this._cdr.detectChanges();
     if (notif.link) {
       this._router.navigateByUrl(notif.link);
     }
@@ -106,6 +130,7 @@ export class AdminLayoutComponent {
   onDocumentClick(): void {
     if (this.showNotifications) {
       this.showNotifications = false;
+      this._cdr.detectChanges();
     }
   }
 

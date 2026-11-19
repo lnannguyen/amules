@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 
@@ -13,7 +13,7 @@ export class ProfileComponent implements OnInit {
   savedNotice = false;
   saving = false;
   errorMsg = '';
-  lastUpdateText = 'Hôm nay, 14:30 bởi bạn';
+  lastUpdateText = 'Chưa có cập nhật';
 
   // Tất cả trường thông tin mặc định để TRỐNG đối với tài khoản mới chưa cập nhật
   profile = {
@@ -31,7 +31,8 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     private _http: HttpClient,
-    private _auth: AuthService
+    private _auth: AuthService,
+    private _cdr: ChangeDetectorRef
   ) {}
 
   populateUser(u: any): void {
@@ -54,6 +55,17 @@ export class ProfileComponent implements OnInit {
     if (this.profile.dob && (!this.profile.element || !this.profile.zodiac)) {
       this.onDobChange();
     }
+    if (u.updatedAt) {
+      const d = new Date(u.updatedAt);
+      if (!isNaN(d.getTime())) {
+        const timeStr = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        const dateStr = d.toLocaleDateString('vi-VN');
+        this.lastUpdateText = `${dateStr} lúc ${timeStr} bởi bạn`;
+      }
+    } else {
+      this.lastUpdateText = 'Chưa có cập nhật';
+    }
+    this._cdr.detectChanges();
   }
 
   ngOnInit(): void {
@@ -64,15 +76,20 @@ export class ProfileComponent implements OnInit {
     }
 
     // 2. Đồng bộ thêm dữ liệu người dùng từ cơ sở dữ liệu MongoDB Backend
-    this._http.get<any>('/api/auth/profile', { withCredentials: true }).subscribe({
+    const email = cur?.email || '';
+    const headers: any = email ? { 'x-user-email': email } : {};
+    const params: any = email ? { email } : {};
+    this._http.get<any>('/api/auth/profile', { withCredentials: true, headers, params }).subscribe({
       next: (res) => {
         if (res && res.user) {
           this.populateUser(res.user);
         }
+        this._cdr.detectChanges();
       },
       error: () => {
         const c = this._auth.currentUser();
         if (c) this.populateUser(c);
+        this._cdr.detectChanges();
       }
     });
   }
@@ -212,26 +229,61 @@ export class ProfileComponent implements OnInit {
   saveProfile(): void {
     this.saving = true;
     this.errorMsg = '';
-    this._http.put('/api/auth/profile', this.profile, { withCredentials: true }).subscribe({
+    this._cdr.detectChanges();
+
+    const cur = this._auth.currentUser() || {};
+    const emailToSave = (this.profile.email || cur.email || '').trim().toLowerCase();
+    const bodyToSend = {
+      ...this.profile,
+      email: emailToSave
+    };
+
+    const headers: any = emailToSave ? { 'x-user-email': emailToSave } : {};
+
+    this._http.put('/api/auth/profile', bodyToSend, { withCredentials: true, headers }).subscribe({
       next: (res: any) => {
         this.saving = false;
         this.savedNotice = true;
-        this.lastUpdateText = 'Vừa xong';
-        const cur = this._auth.currentUser() || {};
-        const updated = { ...cur, ...this.profile };
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        const dateStr = now.toLocaleDateString('vi-VN');
+        this.lastUpdateText = `${dateStr} lúc ${timeStr} bởi bạn`;
+
+        const updated = {
+          ...cur,
+          ...this.profile,
+          email: emailToSave,
+          updatedAt: (res && res.user && res.user.updatedAt) || now.toISOString()
+        };
         this._auth.currentUser.set(updated);
         localStorage.setItem('amules_user', JSON.stringify(updated));
-        setTimeout(() => (this.savedNotice = false), 4000);
+        this._cdr.detectChanges();
+        setTimeout(() => {
+          this.savedNotice = false;
+          this._cdr.detectChanges();
+        }, 4000);
       },
       error: (err) => {
-        const cur = this._auth.currentUser() || {};
-        const updated = { ...cur, ...this.profile };
-        this._auth.currentUser.set(updated);
-        localStorage.setItem('amules_user', JSON.stringify(updated));
         this.saving = false;
         this.savedNotice = true;
-        this.lastUpdateText = 'Vừa xong';
-        setTimeout(() => (this.savedNotice = false), 4000);
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        const dateStr = now.toLocaleDateString('vi-VN');
+        this.lastUpdateText = `${dateStr} lúc ${timeStr} bởi bạn`;
+
+        const updated = {
+          ...cur,
+          ...this.profile,
+          email: emailToSave,
+          updatedAt: now.toISOString()
+        };
+        this._auth.currentUser.set(updated);
+        localStorage.setItem('amules_user', JSON.stringify(updated));
+        this._cdr.detectChanges();
+        setTimeout(() => {
+          this.savedNotice = false;
+          this._cdr.detectChanges();
+        }, 4000);
       }
     });
   }
