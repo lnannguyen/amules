@@ -35,6 +35,30 @@ export class ProfileComponent implements OnInit {
     private _cdr: ChangeDetectorRef
   ) {}
 
+  // Ràng buộc quy tắc: phải trước ngày hôm nay (không được chọn hôm nay hoặc tương lai)
+  get maxDob(): string {
+    const d = new Date();
+    d.setDate(d.getDate() - 1); // Ngày hôm qua
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  openDatePicker(inputEl?: HTMLInputElement): void {
+    if (inputEl) {
+      try {
+        if (typeof inputEl.showPicker === 'function') {
+          inputEl.showPicker();
+        } else {
+          inputEl.focus();
+        }
+      } catch (e) {
+        inputEl.focus();
+      }
+    }
+  }
+
   populateUser(u: any): void {
     if (!u) return;
     this.profile.fullName = u.fullName || this.profile.fullName || '';
@@ -46,7 +70,29 @@ export class ProfileComponent implements OnInit {
     }
     this.profile.email = u.email || this.profile.email || '';
     this.profile.phone = u.phone || '';
-    this.profile.dob = u.dob || '';
+    
+    // Chuẩn hóa định dạng yyyy-mm-dd cho input date
+    if (u.dob) {
+      const rawDob = String(u.dob).trim();
+      if (rawDob.includes('/')) {
+        const parts = rawDob.split('/').map(p => p.trim());
+        if (parts.length === 3) {
+          const day = parts[0].padStart(2, '0');
+          const month = parts[1].padStart(2, '0');
+          const year = parts[2];
+          this.profile.dob = `${year}-${month}-${day}`;
+        } else {
+          this.profile.dob = rawDob;
+        }
+      } else if (rawDob.length >= 10 && rawDob.includes('-')) {
+        this.profile.dob = rawDob.slice(0, 10);
+      } else {
+        this.profile.dob = rawDob;
+      }
+    } else {
+      this.profile.dob = '';
+    }
+
     this.profile.gender = u.gender || '';
     this.profile.element = u.element || '';
     this.profile.zodiac = u.zodiac || '';
@@ -126,24 +172,35 @@ export class ProfileComponent implements OnInit {
     this.errorMsg = '';
   }
 
-  // Tự động tính toán Mệnh Ngũ Hành & Cung Hoàng Đạo khi người dùng nhập ngày sinh
+  // Tự động tính toán Mệnh Ngũ Hành & Cung Hoàng Đạo khi người dùng chọn ngày sinh
   onDobChange(): void {
     const dob = (this.profile.dob || '').trim();
     if (!dob) {
       this.profile.element = '';
       this.profile.zodiac = '';
+      this.errorMsg = '';
+      this._cdr.detectChanges();
       return;
     }
-    // Hỗ trợ cả định dạng dd/mm/yyyy, dd-mm-yyyy và yyyy-mm-dd
+
+    // Ràng buộc quy tắc: Ngày sinh phải trước ngày hôm nay (không được chọn hôm nay hoặc tương lai)
+    const selectedDate = new Date(dob);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (!isNaN(selectedDate.getTime()) && selectedDate >= today) {
+      this.errorMsg = 'Ngày sinh không hợp lệ! Vui lòng chọn ngày trước ngày hôm nay (không được chọn hôm nay hoặc ngày tương lai).';
+      this.profile.dob = '';
+      this.profile.element = '';
+      this.profile.zodiac = '';
+      this._cdr.detectChanges();
+      return;
+    }
+    this.errorMsg = '';
+
+    // Hỗ trợ cả định dạng yyyy-mm-dd, dd/mm/yyyy và dd-mm-yyyy
     let day = 0, month = 0, year = 0;
-    if (dob.includes('/')) {
-      const parts = dob.split('/').map(p => parseInt(p.trim(), 10));
-      if (parts.length === 3) {
-        day = parts[0];
-        month = parts[1];
-        year = parts[2];
-      }
-    } else if (dob.includes('-')) {
+    if (dob.includes('-')) {
       const parts = dob.split('-').map(p => parseInt(p.trim(), 10));
       if (parts.length === 3) {
         if (parts[0] > 1000) {
@@ -156,6 +213,13 @@ export class ProfileComponent implements OnInit {
           year = parts[2];
         }
       }
+    } else if (dob.includes('/')) {
+      const parts = dob.split('/').map(p => parseInt(p.trim(), 10));
+      if (parts.length === 3) {
+        day = parts[0];
+        month = parts[1];
+        year = parts[2];
+      }
     }
 
     if (day && month && day > 0 && day <= 31 && month > 0 && month <= 12) {
@@ -164,6 +228,7 @@ export class ProfileComponent implements OnInit {
         this.profile.element = this.calcElement(year);
       }
     }
+    this._cdr.detectChanges();
   }
 
   private calcZodiac(day: number, month: number): string {
@@ -227,6 +292,17 @@ export class ProfileComponent implements OnInit {
   }
 
   saveProfile(): void {
+    if (this.profile.dob) {
+      const selectedDate = new Date(this.profile.dob);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (!isNaN(selectedDate.getTime()) && selectedDate >= today) {
+        this.errorMsg = 'Ngày sinh không hợp lệ! Vui lòng chọn ngày trước ngày hôm nay.';
+        this._cdr.detectChanges();
+        return;
+      }
+    }
+
     this.saving = true;
     this.errorMsg = '';
     this._cdr.detectChanges();

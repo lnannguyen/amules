@@ -13,6 +13,10 @@
 .avatar-row__info small { font-size: 10px; letter-spacing: .08em; color: #a98d9f; }
 
 .no-left-icon input { padding-left: 16px !important; background: #fff !important; }
+.date-input-wrap { cursor: pointer; position: relative; }
+.date-picker-input { cursor: pointer; font-family: inherit; font-size: 14px; color: var(--ink); }
+.date-picker-input::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0; width: 40px; height: 100%; position: absolute; right: 0; top: 0; }
+.date-suffix-btn { cursor: pointer; pointer-events: auto; }
 .verified-tag { display: inline-flex; align-items: center; gap: 4px; color: var(--plum); font-weight: 600 !important; }
 .field-hint { display: block; margin-top: 5px; font-size: 11px; color: var(--muted); }
 .field-hint i { color: var(--plum); font-style: normal; margin-right: 4px; }

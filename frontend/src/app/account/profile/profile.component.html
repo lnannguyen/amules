@@ -109,11 +109,28 @@
 
     <div class="field">
       <label>Ngày sinh</label>
-      <div class="input-wrap no-left-icon">
-        <input type="text" [(ngModel)]="profile.dob" (input)="onDobChange()" (change)="onDobChange()" placeholder="DD/MM/YYYY (Ví dụ: 15/08/1998)">
-        <span class="suffix"><app-icon name="calendar" [size]="15"></app-icon></span>
+      <div class="input-wrap no-left-icon date-input-wrap" (click)="openDatePicker(dobInput)">
+        <input
+          #dobInput
+          type="date"
+          [(ngModel)]="profile.dob"
+          [max]="maxDob"
+          (input)="onDobChange()"
+          (change)="onDobChange()"
+          (click)="openDatePicker(dobInput)"
+          class="date-picker-input"
+          placeholder="Chọn ngày sinh"
+        >
+        <span class="suffix date-suffix-btn" (click)="openDatePicker(dobInput); $event.stopPropagation()">
+          <app-icon name="calendar" [size]="15"></app-icon>
+        </span>
       </div>
-      <small class="field-hint">Dùng để gợi ý cung hoàng đạo &amp; nhận quà tặng sinh nhật.</small>
+      @if (errorMsg) {
+        <small class="error-msg" style="color: #e11d48; font-weight: 500; font-size: 11.5px; margin-top: 4px; display: block;">
+          {{ errorMsg }}
+        </small>
+      }
+      <small class="field-hint">Dùng để gợi ý cung hoàng đạo &amp; nhận quà tặng sinh nhật (Bắt buộc trước ngày hôm nay).</small>
     </div>
 
     <div class="field">
