@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { CartService, CartItem } from '../services/cart.service';
 import { AuthService } from '../services/auth.service';
@@ -19,7 +19,14 @@ export class CartComponent implements OnInit {
     public _cartService: CartService,
     public _authService: AuthService,
     private _router: Router
-  ) {}
+  ) {
+    // Tự động kiểm tra và chuyển hướng ngay nếu trạng thái đăng nhập thay đổi
+    effect(() => {
+      if (!this._authService.isLoggedIn()) {
+        this._router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+      }
+    });
+  }
 
   ngOnInit(): void {
     if (!this._authService.isLoggedIn()) {
@@ -112,6 +119,10 @@ export class CartComponent implements OnInit {
         this.voucherError = err.message || 'Mã ưu đãi không hợp lệ.';
       }
     });
+  }
+
+  applyVoucher(): void {
+    this.onApplyVoucher();
   }
 
   removeVoucher(): void {

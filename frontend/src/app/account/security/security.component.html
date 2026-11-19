@@ -121,7 +121,7 @@
             <strong><app-icon name="smartphone" [size]="14"></app-icon> Mã OTP qua SMS</strong>
             <span class="acc-badge">Mặc định</span>
           </div>
-          <p>Gửi mã xác minh 6 số về số điện thoại <b>******* 886</b> khi đăng nhập trên trình duyệt lạ.</p>
+          <p>Gửi mã xác minh 6 số về số điện thoại <b>{{ maskedPhone }}</b> khi đăng nhập trên trình duyệt lạ.</p>
           <a routerLink="/account/profile" class="link-arrow">
             Thay đổi số điện thoại <app-icon name="arrow-right" [size]="12"></app-icon>
           </a>
@@ -193,7 +193,7 @@
       </div>
 
       <h4 class="danger-sub-title">Xóa vĩnh viễn tài khoản AMULES</h4>
-      <p class="danger-desc">Khi xóa tài khoản, toàn bộ <b>1.250 Linh Thạch (LT)</b> tích lũy, các chứng thư bảo hành trang sức trọn đời và danh sách linh phù yêu thích sẽ bị hủy vĩnh viễn không thể phục hồi.</p>
+      <p class="danger-desc">Khi xóa tài khoản, toàn bộ <b>{{ userPoints | number }} Linh Thạch (LT)</b> tích lũy, các chứng thư bảo hành trang sức trọn đời và danh sách linh phù yêu thích sẽ bị hủy vĩnh viễn không thể phục hồi.</p>
 
       <div class="danger-warn">
         <app-icon name="alert" [size]="14"></app-icon>

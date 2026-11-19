@@ -127,6 +127,14 @@ export class ProductListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // 0. Nạp ngay cache nếu có từ ProductService để 0ms hiển thị, không bị kẹt loading
+    const cachedProds = this._productService.products();
+    if (cachedProds && cachedProds.length > 0) {
+      this.allProducts = [...cachedProds];
+      this.applyFilters();
+      this.loading = false;
+    }
+
     // 1. Tải danh mục thực tế từ CSDL MongoDB
     this._http.get<any[]>('/api/categories').subscribe({
       next: (data) => {
@@ -180,10 +188,11 @@ export class ProductListComponent implements OnInit {
     // 4. Luôn tải danh sách TOÀN BỘ sản phẩm của cửa hàng để tính badge và phục vụ lọc
     this._http.get<IProduct[]>('/api/products').subscribe({
       next: (items) => {
-        if (items && Array.isArray(items)) {
+        if (items && Array.isArray(items) && items.length > 0) {
           this.allProducts = items;
           this.applyFilters();
         }
+        this.loading = false;
       },
       error: () => {
         this.loading = false;
@@ -214,6 +223,7 @@ export class ProductListComponent implements OnInit {
   // Áp dụng bộ lọc tức thì trên allProducts
   applyFilters(): void {
     if (this.allProducts.length === 0) {
+      this.loading = false;
       return;
     }
     this.products = this.filterLocalProducts(this.allProducts, this.filters);
@@ -314,9 +324,9 @@ export class ProductListComponent implements OnInit {
     return this.allProducts.filter(p => {
       const pEls = (p.element || '').toLowerCase();
       const pComp = (p.compatibleElements || []).map(c => String(c).toLowerCase()).join(' ');
-      const pAll = `${pEls} ${pComp}`;
-      const eKey = normalizeElementKey(pAll);
-      return eKey === targetKey || pAll.includes(targetKey);
+      const rawAll = `${pEls} ${pComp} ${p.name || ''}`;
+      const normalizedAll = rawAll.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').toLowerCase();
+      return normalizedAll.includes(targetKey);
     }).length;
   }
 
@@ -453,9 +463,9 @@ export class ProductListComponent implements OnInit {
       list = list.filter(p => {
         const pEls = (p.element || '').toLowerCase();
         const pComp = (p.compatibleElements || []).map(c => String(c).toLowerCase()).join(' ');
-        const pAll = `${pEls} ${pComp}`;
-        const eKey = normalizeElementKey(pAll);
-        return eKey === targetElemKey || pAll.includes(targetElemKey);
+        const rawAll = `${pEls} ${pComp} ${p.name || ''}`;
+        const normalizedAll = rawAll.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').toLowerCase();
+        return normalizedAll.includes(targetElemKey);
       });
     }
 
@@ -550,5 +560,11 @@ export class ProductListComponent implements OnInit {
     product.liked = added;
     this.addedToast = added ? `Đã thêm "${product.name}" vào yêu thích!` : `Đã bỏ yêu thích "${product.name}"`;
     setTimeout(() => (this.addedToast = null), 2500);
+  }
+
+  onImgError(event: any): void {
+    if (event && event.target) {
+      event.target.src = 'https://i.pinimg.com/736x/d4/3c/3d/d43c3d69296b0badad1636033dd34e9c.jpg';
+    }
   }
 }

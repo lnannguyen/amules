@@ -304,7 +304,7 @@
           <!-- Media -->
           <div class="p-card__media">
             <a [routerLink]="['/products', p.slug || p.id]">
-              <img [src]="p.image" [alt]="p.name" loading="lazy">
+              <img [src]="p.image" [alt]="p.name" (error)="onImgError($event)" loading="lazy">
             </a>
 
             <!-- Badge nhãn nổi bật -->

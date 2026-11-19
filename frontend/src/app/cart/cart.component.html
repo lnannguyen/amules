@@ -5,201 +5,211 @@
     <a routerLink="/">Trang chủ</a> <span>/</span> <b>Giỏ hàng bảo vật</b>
   </nav>
 
-  <header class="cart-head">
-    <span class="eyebrow"><app-icon name="bag" [size]="14"></app-icon> Hành trình bảo vật</span>
-    <h1 class="cart-title serif">Giỏ Hàng Của Bạn</h1>
-    <p class="cart-sub">Kiểm tra lại các tạo tác phong thủy trước khi hoàn tất thủ tục thanh tẩy và gửi trao vận mệnh.</p>
-  </header>
+  @if (!_authService.isLoggedIn()) {
+    <!-- Màn hình bảo mật: Bắt buộc đăng nhập tài khoản trước khi xem giỏ hàng -->
+    <div class="empty-cart-card" style="max-width: 620px; margin: 40px auto; text-align: center; padding: 48px 32px; background: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(128, 35, 92, 0.08); border: 1px solid rgba(128, 35, 92, 0.12);">
+      <div class="empty-cart-icon" style="width: 72px; height: 72px; margin: 0 auto 20px; background: #fdf2f7; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #80235c;">
+        <app-icon name="lock" [size]="36"></app-icon>
+      </div>
+      <span class="eyebrow" style="color: #80235c; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-size: 13px;">Bảo Mật Tài Khoản Thành Viên</span>
+      <h2 class="serif" style="margin: 12px 0 16px; font-size: 26px; color: #2d1822;">Vui Lòng Đăng Nhập Để Xem Giỏ Hàng</h2>
+      <p style="color: #665b61; font-size: 15px; line-height: 1.6; margin-bottom: 28px;">
+        Để bảo mật thông tin các bảo vật hộ mệnh đã chọn và đồng bộ ưu đãi tích điểm Linh Thạch, quý khách vui lòng đăng nhập tài khoản AMULES.
+      </p>
 
-  @if (cartItems.length > 0) {
-    <div class="cart-grid">
-
-      <!-- CỘT TRÁI: DANH SÁCH BẢO VẬT TRONG GIỎ -->
-      <section class="cart-list-col">
-        <div class="cart-table-head">
-          <label class="col-check" title="Chọn hoặc bỏ chọn tất cả">
-            <input type="checkbox" class="custom-chk" [checked]="isAllSelected" (change)="toggleSelectAll($event)">
-            <span>Tất cả</span>
-          </label>
-          <span class="col-product">Bảo vật</span>
-          <span class="col-price">Đơn giá</span>
-          <span class="col-qty">Số lượng</span>
-          <span class="col-total">Tạm tính</span>
-          <span class="col-action">Thao tác</span>
-        </div>
-
-        <div class="cart-items">
-          @for (item of cartItems; track $index) {
-            <article class="cart-item" [class.item-unselected]="item.selected === false">
-              <div class="item-check">
-                <input
-                  type="checkbox"
-                  class="custom-chk"
-                  [checked]="item.selected !== false"
-                  (change)="toggleItemSelect($index, $event)"
-                  [title]="'Tích chọn ' + item.name"
-                >
-              </div>
-
-              <div class="item-info">
-                <img [src]="item.image" [alt]="item.name" class="item-img">
-                <div>
-                  <h3 class="item-name">{{ item.name }}</h3>
-                  <div class="item-variants">
-                    @if (item.stone) { <span>{{ item.stone }}</span> }
-                    @if (item.size) { <span>Size: {{ item.size }}</span> }
-                  </div>
-                </div>
-              </div>
-
-              <div class="item-price">
-                <strong>{{ item.price | number }}đ</strong>
-              </div>
-
-              <div class="item-qty">
-                <div class="qty-ctrl">
-                  <button type="button" (click)="updateQuantity($index, item.quantity - 1)" [disabled]="item.quantity <= 1">-</button>
-                  <span>{{ item.quantity }}</span>
-                  <button type="button" (click)="updateQuantity($index, item.quantity + 1)">+</button>
-                </div>
-              </div>
-
-              <div class="item-total">
-                <strong>{{ (item.price * item.quantity) | number }}đ</strong>
-              </div>
-
-              <div class="item-action">
-                <button type="button" class="btn-remove" (click)="removeItem($index)" [title]="'Xóa ' + item.name + ' khỏi giỏ'">
-                  <app-icon name="trash" [size]="15"></app-icon>
-                  <span class="btn-remove-text">Xóa</span>
-                </button>
-              </div>
-            </article>
-          }
-        </div>
-
-        <div class="cart-bottom-bar">
-          <a routerLink="/products" class="btn-continue">
-            &larr; Tiếp tục khám phá bảo vật
-          </a>
-          <div class="bottom-actions">
-            @if (selectedCount > 0) {
-              <button type="button" class="btn-remove-selected" (click)="removeSelected()">
-                <app-icon name="trash" [size]="14"></app-icon> Xóa mục đã chọn ({{ selectedCount }})
-              </button>
-            }
-            <button type="button" class="btn-clear" (click)="clearCart()">
-              Xóa toàn bộ giỏ
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- CỘT PHẢI: TỔNG KẾT & MÃ GIẢM GIÁ -->
-      <aside class="cart-summary-col">
-        <div class="summary-card">
-          <h2 class="summary-title serif">Tóm Tắt Đơn Hàng</h2>
-
-          <!-- Shipping Progress -->
-          <div class="free-ship-box">
-            @if (subtotal >= 500000) {
-              <div class="free-ship-alert ok">
-                <app-icon name="check" [size]="16"></app-icon> Bạn đã đủ điều kiện <b>Miễn phí vận chuyển toàn quốc!</b>
-              </div>
-            } @else {
-              <div class="free-ship-alert">
-                Mua thêm <b>{{ (500000 - subtotal) | number }}đ</b> để được <b>Miễn phí giao hàng</b>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" [style.width.%]="(subtotal / 500000) * 100"></div>
-              </div>
-            }
-          </div>
-
-          <!-- Chi tiết giá tiền -->
-          <div class="summary-rows">
-            <div class="row">
-              <span>Tạm tính ({{ selectedCount }}/{{ cartItems.length }} sản phẩm đã chọn):</span>
-              <strong>{{ subtotal | number }}đ</strong>
-            </div>
-
-            @if (discount > 0) {
-              <div class="row discount-row">
-                <span>Ưu đãi áp dụng:</span>
-                <strong>-{{ discount | number }}đ</strong>
-              </div>
-            }
-
-            <div class="row">
-              <span>Phí vận chuyển:</span>
-              <strong>{{ shippingFee === 0 ? 'Miễn phí' : (shippingFee | number) + 'đ' }}</strong>
-            </div>
-
-            <div class="row total-row">
-              <span>Tổng thanh toán:</span>
-              <strong class="total-price">{{ totalAmount | number }}đ</strong>
-            </div>
-            <small class="tax-note">(Đã bao gồm thuế GTGT và phí đóng gói hộp nhung)</small>
-          </div>
-
-          <!-- Áp mã giảm giá -->
-          <div class="voucher-box">
-            @if (_cartService.appliedVoucher()) {
-              <div class="applied-voucher">
-                <app-icon name="sparkle" [size]="15"></app-icon>
-                <span>Mã: <b>{{ _cartService.appliedVoucher()?.code }}</b> (-{{ discount | number }}đ)</span>
-                <button type="button" class="btn-remove-v" (click)="removeVoucher()">&times;</button>
-              </div>
-            } @else {
-              <div class="voucher-form">
-                <input type="text" [(ngModel)]="voucherCode" placeholder="Nhập mã ưu đãi (AMU50K, VIP...)" (keyup.enter)="onApplyVoucher()">
-                <button type="button" class="btn-apply-v" (click)="onApplyVoucher()" [disabled]="applyingVoucher || !voucherCode.trim()">
-                  {{ applyingVoucher ? 'Đang kiểm tra...' : 'Áp dụng' }}
-                </button>
-              </div>
-              @if (voucherMsg) { <div class="voucher-ok">{{ voucherMsg }}</div> }
-              @if (voucherError) { <div class="voucher-err">{{ voucherError }}</div> }
-            }
-          </div>
-
-          @if (selectedCount === 0) {
-            <div class="selection-notice">
-              <app-icon name="sparkle" [size]="14"></app-icon>
-              <span>Vui lòng tích chọn bảo vật để đặt hàng.</span>
-            </div>
-          }
-
-          <!-- Nút Đặt Hàng -->
-          <button type="button" class="btn-checkout" (click)="goToCheckout()" [disabled]="selectedCount === 0">
-            Tiến Hành Đặt Hàng ({{ selectedCount }}) <app-icon name="arrow-right" [size]="18"></app-icon>
-          </button>
-
-          <div class="trust-badges">
-            <span><app-icon name="check" [size]="14"></app-icon> Bảo mật SSL 256-bit</span>
-            <span><app-icon name="gift" [size]="14"></app-icon> Hộp quà cao cấp</span>
-          </div>
-        </div>
-      </aside>
-
+      <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+        <a routerLink="/login" [queryParams]="{ returnUrl: '/cart' }" class="btn btn--primary" style="padding: 12px 28px; font-weight: 600; border-radius: 30px;">
+          <app-icon name="user" [size]="16"></app-icon> Đăng Nhập Ngay
+        </a>
+        <a routerLink="/register" class="btn btn--soft" style="padding: 12px 28px; font-weight: 600; border-radius: 30px;">
+          Đăng Ký Thành Viên Mới
+        </a>
+      </div>
     </div>
   } @else {
-    <!-- Empty State -->
-    <div class="empty-cart-card">
-      <div class="empty-cart-icon"><app-icon name="bag" [size]="40"></app-icon></div>
-      <h2 class="serif">Giỏ hàng của bạn đang trống</h2>
-      <p>Hãy dạo một vòng thánh đường AMULES để chọn lựa những vị bùa hộ mệnh tương hợp nhất với tần số của bạn.</p>
 
-      @if (!_authService.isLoggedIn()) {
-        <div class="guest-cart-notice">
-          <app-icon name="user" [size]="15"></app-icon>
-          <span>Đã có tài khoản AMULES? <a routerLink="/login" [queryParams]="{ returnUrl: '/cart' }">Đăng nhập ngay</a> để xem lại các bảo vật đã lưu trong tài khoản.</span>
-        </div>
-      }
+    <header class="cart-head">
+      <span class="eyebrow"><app-icon name="bag" [size]="14"></app-icon> Hành trình bảo vật</span>
+      <h1 class="cart-title serif">Giỏ Hàng Của Bạn</h1>
+      <p class="cart-sub">Kiểm tra lại các tạo tác phong thủy trước khi hoàn tất thủ tục thanh tẩy và gửi trao vận mệnh.</p>
+    </header>
 
-      <a routerLink="/products" class="btn btn--primary" style="margin-top: 14px;">
-        <app-icon name="sparkle" [size]="16"></app-icon> Khám Phá Cửa Hàng Ngay
-      </a>
-    </div>
+    @if (cartItems.length > 0) {
+      <div class="cart-grid">
+
+        <!-- CỘT TRÁI: DANH SÁCH BẢO VẬT TRONG GIỎ -->
+        <section class="cart-list-col">
+          <div class="cart-table-head">
+            <label class="col-check" title="Chọn hoặc bỏ chọn tất cả">
+              <input type="checkbox" class="custom-chk" [checked]="isAllSelected" (change)="toggleSelectAll($event)">
+              <span>Tất cả</span>
+            </label>
+            <span class="col-product">Bảo vật</span>
+            <span class="col-price">Đơn giá</span>
+            <span class="col-qty">Số lượng</span>
+            <span class="col-total">Tạm tính</span>
+            <span class="col-action">Thao tác</span>
+          </div>
+
+          <div class="cart-items">
+            @for (item of cartItems; track $index) {
+              <article class="cart-item" [class.item-unselected]="item.selected === false">
+                <div class="item-check">
+                  <input
+                    type="checkbox"
+                    class="custom-chk"
+                    [checked]="item.selected !== false"
+                    (change)="toggleItemSelect($index, $event)"
+                    [title]="'Tích chọn ' + item.name"
+                  >
+                </div>
+
+                <div class="item-info">
+                  <img [src]="item.image" [alt]="item.name" class="item-img">
+                  <div>
+                    <h3 class="item-name">{{ item.name }}</h3>
+                    <div class="item-variants">
+                      @if (item.stone) { <span>{{ item.stone }}</span> }
+                      @if (item.size) { <span>Size: {{ item.size }}</span> }
+                    </div>
+                  </div>
+                </div>
+
+                <div class="item-price">
+                  <strong>{{ item.price | number }}đ</strong>
+                </div>
+
+                <div class="item-qty">
+                  <div class="qty-ctrl">
+                    <button type="button" (click)="updateQuantity($index, item.quantity - 1)" [disabled]="item.quantity <= 1">-</button>
+                    <span>{{ item.quantity }}</span>
+                    <button type="button" (click)="updateQuantity($index, item.quantity + 1)">+</button>
+                  </div>
+                </div>
+
+                <div class="item-total">
+                  <strong>{{ (item.price * item.quantity) | number }}đ</strong>
+                </div>
+
+                <div class="item-remove">
+                  <button type="button" class="btn-del" (click)="removeItem($index)" title="Xóa khỏi giỏ">
+                    <app-icon name="trash" [size]="16"></app-icon>
+                  </button>
+                </div>
+              </article>
+            }
+          </div>
+
+          <!-- Ghi chú năng lượng & thanh tẩy -->
+          <div class="cart-extra-card">
+            <div class="extra-head">
+              <span class="ico"><app-icon name="sparkle" [size]="16"></app-icon></span>
+              <div>
+                <strong>Thanh Tẩy Năng Lượng Miễn Phí</strong>
+                <p>Mỗi tác phẩm trước khi đóng gói đều được làm sạch bằng chuông xoay Tây Tạng và khói trầm hương tự nhiên.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CỘT PHẢI: TỔNG QUAN ĐƠN HÀNG & MÃ GIẢM GIÁ -->
+        <aside class="cart-summary-col">
+          <div class="summary-card">
+            <h2 class="summary-title serif">Tổng quan đơn hàng</h2>
+
+            <!-- Ô nhập Voucher -->
+            <div class="voucher-box">
+              <label for="vCode">Mã ưu đãi / Voucher:</label>
+              <div class="voucher-input-row">
+                <input
+                  id="vCode"
+                  type="text"
+                  [(ngModel)]="voucherCode"
+                  placeholder="Nhập mã (VD: AMULES50)"
+                  (keyup.enter)="onApplyVoucher()"
+                >
+                <button type="button" class="btn-apply-v" (click)="onApplyVoucher()" [disabled]="applyingVoucher || !voucherCode.trim()">
+                  Áp dụng
+                </button>
+              </div>
+              @if (voucherMsg) {
+                <p class="voucher-msg-success"><app-icon name="check" [size]="13"></app-icon> {{ voucherMsg }}</p>
+              }
+              @if (voucherError) {
+                <p class="voucher-msg-error"><app-icon name="alert" [size]="13"></app-icon> {{ voucherError }}</p>
+              }
+            </div>
+
+            <!-- Các dòng tính toán -->
+            <div class="calc-rows">
+              <div class="calc-row">
+                <span>Tạm tính ({{ selectedCount }} món):</span>
+                <strong>{{ subtotal | number }}đ</strong>
+              </div>
+
+              <div class="calc-row">
+                <span>Phí vận chuyển linh vật:</span>
+                <span>
+                  @if (shippingFee === 0) {
+                    <b class="free-ship">Miễn phí toàn quốc</b>
+                  } @else {
+                    <strong>{{ shippingFee | number }}đ</strong>
+                  }
+                </span>
+              </div>
+
+              @if (discount > 0) {
+                <div class="calc-row row-discount">
+                  <span>Ưu đãi áp dụng:</span>
+                  <strong class="discount-val">-{{ discount | number }}đ</strong>
+                </div>
+              }
+
+              <div class="calc-divider"></div>
+
+              <div class="calc-row row-total">
+                <div>
+                  <span class="total-label">Tổng thanh toán:</span>
+                  <span class="total-vat">(Đã bao gồm VAT & Hộp bảo quản)</span>
+                </div>
+                <strong class="total-amount">{{ totalAmount | number }}đ</strong>
+              </div>
+            </div>
+
+            <!-- Gợi ý tích lũy Linh Thạch -->
+            @if (_authService.isLoggedIn()) {
+              <div class="points-gain-hint">
+                <app-icon name="sparkle" [size]="13"></app-icon>
+                <span>Bạn sẽ tích lũy được <b>+{{ (totalAmount / 1000) | number:'1.0-0' }} LT</b> với đơn hàng này.</span>
+              </div>
+            }
+
+            <!-- Nút Đặt Hàng -->
+            <button type="button" class="btn-checkout" (click)="goToCheckout()" [disabled]="selectedCount === 0">
+              Tiến Hành Đặt Hàng ({{ selectedCount }}) <app-icon name="arrow-right" [size]="18"></app-icon>
+            </button>
+
+            <div class="trust-badges">
+              <span><app-icon name="check" [size]="14"></app-icon> Bảo mật SSL 256-bit</span>
+              <span><app-icon name="gift" [size]="14"></app-icon> Hộp quà cao cấp</span>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    } @else {
+      <!-- Empty State -->
+      <div class="empty-cart-card">
+        <div class="empty-cart-icon"><app-icon name="bag" [size]="40"></app-icon></div>
+        <h2 class="serif">Giỏ hàng của bạn đang trống</h2>
+        <p>Hãy dạo một vòng thánh đường AMULES để chọn lựa những vị bùa hộ mệnh tương hợp nhất với tần số của bạn.</p>
+
+        <a routerLink="/products" class="btn btn--primary" style="margin-top: 14px;">
+          <app-icon name="sparkle" [size]="16"></app-icon> Khám Phá Cửa Hàng Ngay
+        </a>
+      </div>
+    }
+
   }
 
 </div>

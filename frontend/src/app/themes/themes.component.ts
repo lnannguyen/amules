@@ -13,6 +13,57 @@ interface IThemeItem {
   productIds?: any[];
 }
 
+const DEFAULT_THEMES: IThemeItem[] = [
+  {
+    name: 'Tình yêu & Kết nối',
+    slug: 'tinh-yeu-ket-noi',
+    tag: 'TÌNH DUYÊN & HÀN GẮN',
+    description: 'Thạch anh hồng dịu dàng, khơi mở luồng yêu thương thuần khiết và gắn kết tâm hồn tri kỷ.',
+    image: 'https://i.pinimg.com/736x/47/9c/df/479cdf269b5b50948b8aef6103b475ed.jpg',
+    productCodes: ['AM-RQ020', 'AM-CH002']
+  },
+  {
+    name: 'Bình an & Cân bằng',
+    slug: 'binh-an-can-bang',
+    tag: 'TĨNH TÂM & NĂNG LƯỢNG',
+    description: 'Aquamarine và Moonstone làm dịu tâm trí, giữ sự tĩnh tại, thông suốt trước mọi thử thách.',
+    image: 'https://i.pinimg.com/736x/d4/3c/3d/d43c3d69296b0badad1636033dd34e9c.jpg',
+    productCodes: ['AM-AQ001', 'AM-MS042', 'AM-CH001', 'AM-AQ003']
+  },
+  {
+    name: 'Tự tin & Tỏa sáng',
+    slug: 'tu-tin-toa-sang',
+    tag: 'DŨNG KHÍ & TỎA SÁNG',
+    description: 'Citrine thắp sáng nguồn năng lượng thái dương, tiếp thêm dũng khí và sức hút rực rỡ.',
+    image: 'https://i.pinimg.com/736x/8b/56/4e/8b564e66f5a26e5a7761873879e15a44.jpg',
+    productCodes: ['AM-CT005', 'AM-CH003']
+  },
+  {
+    name: 'Tài lộc & May mắn',
+    slug: 'tai-loc-may-man',
+    tag: 'THỊNH VƯỢNG & TÀI LỘC',
+    description: 'Thạch anh tóc vàng và Ngọc Bích chiêu cảm vận may tài chính và thịnh vượng bền lâu.',
+    image: 'https://i.pinimg.com/736x/11/72/72/117272714c69b2d8ddb16167812f80eb.jpg',
+    productCodes: ['AM-RQ021', 'AM-CH004']
+  },
+  {
+    name: 'Trực giác & Trí tuệ',
+    slug: 'truc-giac-tri-tue',
+    tag: 'MINH TRIẾT & TRỰC GIÁC',
+    description: 'Amethyst thanh tẩy tư duy, khơi mở luân xa con mắt thứ ba cho trực giác nhạy bén.',
+    image: 'https://i.pinimg.com/736x/ec/d7/ae/ecd7aed714bc1bb78a5763df4735c05c.jpg',
+    productCodes: ['AM-AM008', 'AM-CH005']
+  },
+  {
+    name: 'Bảo hộ & Trừ tà',
+    slug: 'bao-ho-tru-ta',
+    tag: 'BẢO VỆ & THANH TẨY',
+    description: 'Obsidian và Tourmaline đen tạo lớp màng bảo hộ vững chắc, đẩy lùi ám khí và tiêu cực.',
+    image: 'https://i.pinimg.com/736x/67/6f/76/676f7614d93ee44fa73ec0b2b8e88e1e.jpg',
+    productCodes: ['AM-OB012', 'AM-TM001']
+  }
+];
+
 @Component({
   selector: 'app-themes',
   standalone: false,
@@ -20,7 +71,7 @@ interface IThemeItem {
   styleUrl: './themes.component.css'
 })
 export class ThemesComponent implements OnInit {
-  themes: IThemeItem[] = [];
+  themes: IThemeItem[] = [...DEFAULT_THEMES];
   selectedTheme: IThemeItem | null = null;
   allProducts: IProduct[] = [];
   products: IProduct[] = [];
@@ -84,8 +135,6 @@ export class ThemesComponent implements OnInit {
               productIds: t.productIds || []
             };
           });
-        } else {
-          this.themes = [];
         }
 
         this.syncSelectedTheme();
@@ -96,7 +145,10 @@ export class ThemesComponent implements OnInit {
         this._cdr.detectChanges();
       },
       error: () => {
-        this.themes = [];
+        if (!this.themes || this.themes.length === 0) {
+          this.themes = [...DEFAULT_THEMES];
+        }
+        this.syncSelectedTheme();
         this.loading = false;
         this._cdr.detectChanges();
       }

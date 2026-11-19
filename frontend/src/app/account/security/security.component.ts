@@ -43,8 +43,20 @@ export class SecurityComponent {
 
   constructor(
     private _http: HttpClient,
-    private _auth: AuthService
+    public _auth: AuthService
   ) {}
+
+  get userPoints(): number {
+    return this._auth.currentUser()?.points || 0;
+  }
+
+  get maskedPhone(): string {
+    const p = this._auth.currentUser()?.phone || '0982456789';
+    if (p.length >= 7) {
+      return p.substring(0, 3) + ' **** ' + p.substring(p.length - 3);
+    }
+    return p;
+  }
 
   get passwordStrength(): number {
     const p = this.newPassword;

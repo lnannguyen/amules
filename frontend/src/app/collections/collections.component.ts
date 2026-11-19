@@ -3,6 +3,30 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MasterDataService } from '../services/master-data.service';
 import { ProductService, IProduct } from '../services/product.service';
 
+const DEFAULT_COLLECTIONS = [
+  {
+    name: 'Mystical Vintage',
+    slug: 'mystical-vintage',
+    tag: 'Cổ điển & Huyền bí',
+    desc: 'Phong cách cổ điển huyền bí.',
+    image: 'https://i.pinimg.com/736x/d2/c1/cd/d2c1cd50bee4cf66b8a095b253a55beb.jpg'
+  },
+  {
+    name: 'Moon & Stars',
+    slug: 'moon-and-stars',
+    tag: 'Thiên thể & Chiêm tinh',
+    desc: 'Bộ sưu tập lấy cảm hứng từ mặt trăng và tinh tú.',
+    image: 'https://i.pinimg.com/736x/53/a4/0f/53a40fcf65d77d5dcc8a9efcb531ac32.jpg'
+  },
+  {
+    name: 'Nàng Thơ (The Muse)',
+    slug: 'nang-tho',
+    tag: 'Dịu dàng & Lãng mạn',
+    desc: 'Vẻ đẹp dịu dàng, lãng mạn.',
+    image: 'https://i.pinimg.com/736x/88/cc/a9/88cca9873ac223970e511970e84f478d.jpg'
+  }
+];
+
 @Component({
   selector: 'app-collections',
   standalone: false,
@@ -10,7 +34,7 @@ import { ProductService, IProduct } from '../services/product.service';
   styleUrl: './collections.component.css'
 })
 export class CollectionsComponent implements OnInit {
-  collections: any[] = [];
+  collections: any[] = [...DEFAULT_COLLECTIONS];
   featuredProducts: IProduct[] = [];
   allProducts: IProduct[] = [];
   selectedCollection: any = null;
@@ -43,15 +67,14 @@ export class CollectionsComponent implements OnInit {
             image: c.image || (c as any).coverImage || '',
             slug: c.slug || c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
           }));
-        } else {
-          this.collections = [];
         }
         this.syncSelectedCollection();
         this.filterProductsForCollection();
         this._cdr.detectChanges();
       },
       error: () => {
-        this.collections = [];
+        this.syncSelectedCollection();
+        this.filterProductsForCollection();
         this._cdr.detectChanges();
       }
     });
