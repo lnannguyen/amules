@@ -81,3 +81,8 @@
   .mm-trio, .mm-prod-grid { grid-template-columns: 1fr; }
   .mm-hero__top, .mm-hero__foot, .moon-msg { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
+
+@media (max-width: 500px) {
+  .mm-pillars { grid-template-columns: 1fr; }
+  .mm-hero__title { font-size: 20px; }
+}

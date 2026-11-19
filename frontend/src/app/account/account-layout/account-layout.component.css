@@ -40,6 +40,83 @@
 .artisan-card p { font-size: 11.5px; color: var(--muted); line-height: 1.55; margin-bottom: 10px; }
 
 @media (max-width: 960px) {
-  .acc-grid { grid-template-columns: 1fr; }
-  .acc-sidebar { position: static; }
+  .acc-wrap { padding-top: 14px; padding-bottom: 40px; }
+  .acc-grid { grid-template-columns: 1fr; gap: 14px; }
+  .acc-sidebar { position: static; gap: 12px; }
+
+  .vip-box {
+    padding: 16px 14px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+  }
+  .vip-avatar {
+    width: 54px;
+    height: 54px;
+    margin: 0;
+    flex-shrink: 0;
+  }
+  .vip-avatar__monogram {
+    font-size: 18px;
+  }
+  .vip-avatar__dot {
+    width: 18px;
+    height: 18px;
+  }
+  .vip-name {
+    font-size: 16px;
+    margin-bottom: 2px;
+  }
+  .vip-tier {
+    margin-bottom: 6px;
+  }
+  .vip-energy {
+    display: none;
+  }
+
+  .acc-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 8px;
+    gap: 6px;
+    border-radius: 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .acc-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .acc-nav__link {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    border-radius: 999px;
+    background: #fdf5f9;
+  }
+  .acc-nav__link.active {
+    background: var(--plum);
+    color: #fff;
+  }
+  .acc-nav__link.active app-icon:first-child,
+  .acc-nav__link.active .acc-nav__arrow {
+    color: #fff;
+  }
+  .acc-nav__arrow {
+    display: none;
+  }
+  .acc-nav__logout {
+    margin-top: 0;
+    border-top: 0;
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #fff0f3;
+  }
+
+  .artisan-card {
+    display: none;
+  }
 }

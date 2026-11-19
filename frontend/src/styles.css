@@ -302,3 +302,97 @@ ul { list-style: none; }
   place-items: center;
   flex-shrink: 0;
 }
+
+/* ==========================================================
+   RESPONSIVE TOÀN HỆ THỐNG ĐA THIẾT BỊ (Mobile, Tablet, Laptop)
+   ========================================================== */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 960px) {
+  .auth-card {
+    grid-template-columns: 1fr;
+    border-radius: 20px;
+    padding: 12px;
+    gap: 16px;
+  }
+  .auth-card--split {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .auth-visual {
+    min-height: 280px;
+    padding: 20px;
+    border-radius: 18px;
+  }
+  .auth-visual__quote {
+    font-size: 24px;
+  }
+  .auth-visual__desc {
+    font-size: 12.5px;
+    margin-bottom: 12px;
+  }
+  .watermark {
+    font-size: 44px;
+    top: 24px;
+  }
+  .auth-panel--card {
+    padding: 22px 20px 20px;
+    border-radius: 20px;
+  }
+  .auth-title {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 0 14px;
+  }
+  .auth-wrap {
+    padding-top: 14px;
+    padding-bottom: 24px;
+  }
+  .auth-panel {
+    padding: 14px 10px;
+  }
+  .auth-panel--card {
+    padding: 18px 14px;
+    border-radius: 16px;
+  }
+  .auth-title {
+    font-size: 22px;
+  }
+  .auth-sub {
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+  .btn {
+    padding: 11px 18px;
+    font-size: 13px;
+  }
+  .acc-card {
+    padding: 16px 14px;
+    border-radius: 16px;
+  }
+  .acc-page-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .acc-page-head__title {
+    font-size: 22px;
+  }
+  .acc-pill-tabs {
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .acc-pill-tabs button {
+    padding: 7px 13px;
+    font-size: 12px;
+  }
+}

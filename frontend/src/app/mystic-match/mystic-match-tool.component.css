@@ -836,5 +836,13 @@
   .result-layout { grid-template-columns: 1fr; }
   .date-pickers-grid, .wish-chips { grid-template-columns: 1fr; }
   .quiz-card { padding: 24px 20px; }
-  .mm-mode-bar { flex-direction: column; align-items: flex-start; }
+  .mm-mode-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+
+@media (max-width: 600px) {
+  .quiz-card { padding: 20px 14px; border-radius: 18px; }
+  .step-head h2 { font-size: 20px; }
+  .rec-grid { grid-template-columns: 1fr; }
+  .energy-quad-grid { grid-template-columns: 1fr; }
+  .btn-quiz-step { width: 100%; justify-content: center; }
 }

@@ -350,3 +350,82 @@
   flex: 1;
   padding: 24px 32px 48px;
 }
+
+/* ========================================================
+   RESPONSIVE CHO ADMIN LAYOUT TRÊN TABLET & MOBILE
+   ======================================================== */
+@media (max-width: 992px) {
+  .admin-shell {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid #efe6ec;
+  }
+
+  .admin-brand {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+  }
+
+  .admin-nav__category {
+    display: none;
+  }
+
+  .admin-nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 8px 14px;
+    gap: 6px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-nav__link {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    font-size: 13px;
+    border-radius: 10px;
+    background: #fcf7fa;
+  }
+  .admin-nav__link.active {
+    background: #7b1e58;
+    color: #ffffff;
+  }
+
+  .admin-sidebar__foot {
+    display: none;
+  }
+
+  .admin-topbar {
+    padding: 10px 16px;
+    gap: 12px;
+  }
+
+  .admin-content {
+    padding: 16px 14px 36px;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-search-pill {
+    display: none;
+  }
+  .admin-profile-meta {
+    display: none;
+  }
+  .admin-topbar {
+    justify-content: flex-end;
+  }
+}

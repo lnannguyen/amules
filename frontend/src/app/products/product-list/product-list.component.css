@@ -1005,3 +1005,59 @@ input:checked + .toggle-slider:before {
   .top-active-filter-bar { flex-direction: column; align-items: stretch; }
   .commitments-banner { grid-template-columns: 1fr; }
 }
+@media (max-width: 600px) {
+  .shop-hero {
+    padding: 18px 16px;
+    border-radius: 16px;
+    gap: 14px;
+  }
+  .shop-hero__title {
+    font-size: 21px;
+  }
+  .shop-hero__sub {
+    font-size: 12.5px;
+  }
+  .shop-hero__cert {
+    padding: 12px 14px;
+    width: 100%;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .p-card {
+    border-radius: 14px;
+  }
+  .p-card__body {
+    padding: 10px 10px 12px;
+  }
+  .p-name {
+    font-size: 12.5px;
+    line-height: 1.35;
+    margin: 4px 0 6px;
+  }
+  .p-price__cur {
+    font-size: 15px;
+  }
+  .p-price__old {
+    font-size: 11px;
+  }
+  .btn-add-cart {
+    padding: 7px 10px;
+    font-size: 11.5px;
+    border-radius: 8px;
+  }
+  .p-badge {
+    top: 8px;
+    left: 8px;
+    font-size: 9.5px;
+    padding: 3px 7px;
+  }
+  .btn-wishlist {
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+  }
+}

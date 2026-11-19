@@ -31,7 +31,13 @@
 
 @media (max-width: 860px) {
   .addr-grid { grid-template-columns: 1fr; }
-  .pack-banner, .ssl-bar { flex-direction: column; align-items: flex-start; }
+  .pack-banner, .ssl-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+}
+
+@media (max-width: 540px) {
+  .form-row { grid-template-columns: 1fr; gap: 10px; }
+  .modal-card { border-radius: 16px; margin: 0 10px; }
+  .modal-card__head, .modal-card__body, .modal-card__foot { padding: 14px 16px; }
 }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px); }

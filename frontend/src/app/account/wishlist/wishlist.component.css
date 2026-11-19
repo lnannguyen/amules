@@ -37,5 +37,11 @@
 
 @media (max-width: 1024px) {
   .wish-grid { grid-template-columns: repeat(2, 1fr); }
-  .wish-cta, .wish-toolbar { flex-direction: column; align-items: flex-start; }
+  .wish-cta, .wish-toolbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+}
+
+@media (max-width: 540px) {
+  .wish-grid { grid-template-columns: 1fr; gap: 12px; }
+  .wish-cta__btns { flex-direction: column; width: 100%; }
+  .wish-cta__btns .btn { width: 100%; text-align: center; }
 }

@@ -490,3 +490,25 @@
     margin-left: 36px;
   }
 }
+
+@media (max-width: 600px) {
+  .cart-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .cart-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+  .voucher-input-group {
+    flex-direction: column;
+  }
+  .voucher-input-group button {
+    width: 100%;
+  }
+  .cart-summary-card {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+}

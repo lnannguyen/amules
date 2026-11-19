@@ -41,4 +41,7 @@
 @media (max-width: 860px) {
   .mystic-grid-3 { grid-template-columns: 1fr; }
   .avatar-row, .profile-actions { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .field-row-2 { grid-template-columns: 1fr; }
+  .profile-actions__btns { width: 100%; display: flex; flex-direction: column; }
+  .profile-actions__btns button { width: 100%; text-align: center; }
 }

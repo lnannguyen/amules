@@ -126,3 +126,8 @@
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .quick-links-grid { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 540px) {
+  .stats-grid { grid-template-columns: 1fr; gap: 10px; }
+  .order-meta, .order-summary-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+}

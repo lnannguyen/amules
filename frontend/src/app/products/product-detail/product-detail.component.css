@@ -505,3 +505,14 @@
   .spec-list, .energy-cards { grid-template-columns: 1fr; }
   .related-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+@media (max-width: 600px) {
+  .detail-wrap { padding-top: 14px; padding-bottom: 40px; }
+  .product-title { font-size: 22px; }
+  .cur-price { font-size: 24px; }
+  .gallery-thumbs { gap: 8px; }
+  .gallery-thumbs img { width: 56px; height: 56px; border-radius: 8px; }
+  .action-row { gap: 10px; }
+  .action-row button { width: 100%; justify-content: center; }
+  .tabs-nav { overflow-x: auto; white-space: nowrap; }
+}

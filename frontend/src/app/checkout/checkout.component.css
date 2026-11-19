@@ -264,6 +264,12 @@
   .row-2, .row-3 { grid-template-columns: 1fr; }
 }
 
+@media (max-width: 600px) {
+  .checkout-card { padding: 16px 14px; border-radius: 16px; }
+  .checkout-head h1 { font-size: 22px; }
+  .pay-option { padding: 12px; }
+}
+
 /* 3RD-PARTY PAYMENT GATEWAY BADGES & MODAL */
 .pay-badge {
   margin-left: auto;

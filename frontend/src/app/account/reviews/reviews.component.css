@@ -52,5 +52,12 @@
 @media (max-width: 900px) {
   .rev-form-card { grid-template-columns: 1fr; }
   .rev-prod { border-right: 0; border-bottom: 1px solid var(--pink-line); padding-right: 0; padding-bottom: 16px; }
-  .rev-bar { flex-direction: column; align-items: flex-start; }
+  .rev-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+
+@media (max-width: 500px) {
+  .rev-item { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .rev-item__img { width: 64px; height: 64px; }
+  .rev-editor__actions { width: 100%; display: flex; flex-direction: column; }
+  .rev-editor__actions .btn { width: 100%; text-align: center; }
 }

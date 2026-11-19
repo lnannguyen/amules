@@ -53,3 +53,8 @@
 @media (max-width: 960px) {
   .sec-cols, .twofa-grid { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 500px) {
+  .sec-form-actions { display: flex; flex-direction: column; width: 100%; gap: 8px; }
+  .sec-form-actions button { width: 100%; }
+}
