@@ -1188,6 +1188,9 @@ app.post('/api/auth/logout', (req, res) => {
 const handleGoogleAuthUser = async (profileData) => {
   const db = getDB();
   const email = (profileData.email || '').trim().toLowerCase();
+  if (!email || !email.includes('@')) {
+    throw new Error('Vui lòng cung cấp địa chỉ email Google hợp lệ');
+  }
   const isDemo = email === 'lananh.gemini@gmail.com';
   let user = null;
 
@@ -1201,11 +1204,15 @@ const handleGoogleAuthUser = async (profileData) => {
     user = fallbackUsers.find(u => u.email === email);
   }
 
+  const namePart = email.split('@')[0];
+  const autoName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+  const fullName = profileData.fullName || (isDemo ? 'Nguyễn Hoàng Lan Anh' : autoName);
+
   if (!user) {
     const newUser = {
-      fullName: profileData.fullName || (isDemo ? 'Nguyễn Hoàng Lan Anh' : 'Khách hàng mới'),
+      fullName,
       email,
-      phone: isDemo ? '0982 456 789' : '',
+      phone: profileData.phone || (isDemo ? '0982 456 789' : ''),
       avatar: profileData.avatar || '',
       authProvider: 'google',
       role: 'customer',
@@ -2405,6 +2412,173 @@ app.put('/api/users/addresses/:id/default', async (req, res) => {
     } catch (e) {}
 
     res.json({ message: 'Đã đặt làm địa chỉ mặc định', addresses });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// -------------------------------------------------------------
+// MYSTIC MATCH SESSIONS & RECOMMENDATIONS (MONGODB SYNC)
+// -------------------------------------------------------------
+app.get('/api/mystic-match/my-session', async (req, res) => {
+  try {
+    const db = getDB();
+    const email = (req.session.user && req.session.user.email) || (req.cookies && req.cookies.remember_user);
+    if (!email || !db) {
+      return res.json({ session: null, recommendations: [], products: [] });
+    }
+
+    const user = await db.collection('users').findOne({ email });
+    if (!user) {
+      return res.json({ session: null, recommendations: [], products: [] });
+    }
+
+    const uId = user._id;
+    // Tìm session trắc nghiệm mới nhất
+    const session = await db.collection('mystic_match_sessions')
+      .findOne({ $or: [{ userId: uId }, { userId: uId.toString() }] }, { sort: { createdAt: -1 } });
+
+    if (!session) {
+      return res.json({ session: null, recommendations: [], products: [] });
+    }
+
+    const sId = session._id;
+    const recs = await db.collection('mystic_match_recommendations')
+      .find({ $or: [{ sessionId: sId }, { sessionId: sId.toString() }] })
+      .sort({ displayOrder: 1 })
+      .toArray();
+
+    let prods = [];
+    if (recs && recs.length > 0) {
+      const pIds = recs.map(r => toObjectId(r.productId) || r.productId);
+      prods = await db.collection('products').find({
+        $or: [
+          { _id: { $in: pIds } },
+          { id: { $in: recs.map(r => String(r.productId)) } }
+        ]
+      }).toArray();
+    }
+
+    res.json({ session, recommendations: recs, products: prods });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/mystic-match/submit', async (req, res) => {
+  try {
+    const db = getDB();
+    const email = (req.session.user && req.session.user.email) || (req.cookies && req.cookies.remember_user);
+    let user = null;
+    if (email && db) {
+      try { user = await db.collection('users').findOne({ email }); } catch (e) {}
+    }
+
+    const {
+      birthDate,
+      birthDay,
+      birthMonth,
+      birthYear,
+      gender,
+      wish,
+      quizAnswers,
+      calculatedZodiac,
+      calculatedElement,
+      dominantChakra,
+      matchSummary,
+      recommendedProductIds
+    } = req.body;
+
+    const uId = user ? user._id : null;
+    const sessionDoc = {
+      userId: uId ? uId : (req.body.userId || null),
+      userEmail: email || null,
+      birthDate: birthDate || `${birthYear}-${String(birthMonth).padStart(2, '0')}-${String(birthDay).padStart(2, '0')}`,
+      zodiac: calculatedZodiac?.name || req.body.zodiac || '',
+      zodiacLatin: calculatedZodiac?.latin || '',
+      element: calculatedElement?.name || req.body.element || '',
+      gender: gender || 'female',
+      wish: wish || 'peace',
+      quizAnswers: quizAnswers || [],
+      dominantChakra: dominantChakra || 'Luân xa Tim (An Nhiên & Yêu Thương)',
+      matchSummary: matchSummary || 'Bản mệnh hài hòa, đón nhận tần số cát tường và hộ thân bình an.',
+      createdAt: new Date()
+    };
+
+    let sessionId = null;
+    if (db) {
+      const sessionResult = await db.collection('mystic_match_sessions').insertOne(sessionDoc);
+      sessionId = sessionResult.insertedId;
+
+      const recDocs = (recommendedProductIds || []).map((pId, idx) => ({
+        sessionId: sessionId,
+        userId: uId,
+        productId: pId,
+        matchScore: 98 - idx * 3,
+        matchReasons: [
+          `Tương hợp bản mệnh ${sessionDoc.element}`,
+          `Cộng hưởng ${sessionDoc.dominantChakra}`
+        ],
+        displayOrder: idx + 1,
+        createdAt: new Date()
+      }));
+
+      if (recDocs.length > 0) {
+        await db.collection('mystic_match_recommendations').insertMany(recDocs);
+      }
+
+      if (uId) {
+        await db.collection('users').updateOne(
+          { _id: uId },
+          {
+            $set: {
+              zodiac: sessionDoc.zodiac,
+              element: sessionDoc.element,
+              dob: `${birthDay}/${birthMonth}/${birthYear}`,
+              mysticMatchCompleted: true,
+              lastMysticMatchAt: new Date()
+            }
+          }
+        );
+      }
+
+      // Tự động đồng bộ ra file JSON amules-database
+      try {
+        const allSessions = await db.collection('mystic_match_sessions').find({}).toArray();
+        const allRecs = await db.collection('mystic_match_recommendations').find({}).toArray();
+        const sCandidates = [
+          path.join(__dirname, '..', '..', 'amules-database', 'mystic_match_sessions.json'),
+          path.join(__dirname, '..', 'amules-database', 'mystic_match_sessions.json'),
+          path.join(process.cwd(), 'amules-database', 'mystic_match_sessions.json')
+        ];
+        for (const p of sCandidates) {
+          if (fs.existsSync(p)) {
+            fs.writeFileSync(p, JSON.stringify(allSessions, null, 2), 'utf-8');
+            break;
+          }
+        }
+        const rCandidates = [
+          path.join(__dirname, '..', '..', 'amules-database', 'mystic_match_recommendations.json'),
+          path.join(__dirname, '..', 'amules-database', 'mystic_match_recommendations.json'),
+          path.join(process.cwd(), 'amules-database', 'mystic_match_recommendations.json')
+        ];
+        for (const p of rCandidates) {
+          if (fs.existsSync(p)) {
+            fs.writeFileSync(p, JSON.stringify(allRecs, null, 2), 'utf-8');
+            break;
+          }
+        }
+      } catch (e) {
+        console.error('[Sync] Lỗi ghi file mystic_match JSON:', e.message);
+      }
+    }
+
+    res.json({
+      success: true,
+      sessionId,
+      session: sessionDoc,
+      message: 'Đã lưu kết quả bài trắc nghiệm năng lượng tâm thức vào hồ sơ CSDL MongoDB!'
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -240,15 +240,6 @@ export class MysticMatchToolComponent implements OnInit {
     }
   }
 
-  switchMode(newMode: 'guest' | 'member'): void {
-    if (newMode === 'member' && !this._authService.isLoggedIn()) {
-      this.showAuthPromptModal = true;
-      return;
-    }
-    this.mode = newMode;
-    this.step = 'form';
-  }
-
   // Khởi động Trắc nghiệm Năng lượng chuyên sâu (Thành viên)
   startMemberQuiz(): void {
     if (!this._authService.isLoggedIn()) {

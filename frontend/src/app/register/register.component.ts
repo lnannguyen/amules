@@ -36,6 +36,14 @@ export class RegisterComponent {
     newsletter: new FormControl(false)
   }, { validators: passwordMatchValidator });
 
+  showGoogleModal = false;
+  googleFullName = '';
+  googleEmail = '';
+  googlePhone = '';
+  googleSubmitting = false;
+  googleError = '';
+  googleClientId = '357340138878-4tj8dbnk5osk0n07ltvp7209781qdqlf.apps.googleusercontent.com';
+
   constructor(
     private _auth: AuthService,
     private _router: Router,
@@ -88,16 +96,61 @@ export class RegisterComponent {
     });
   }
 
-  onGoogle() {
-    this.submitting = true;
-    this._auth.loginWithGoogle().subscribe({
+  onGoogle(): void {
+    this.googleError = '';
+    this.showGoogleModal = true;
+  }
+
+  closeGoogleModal(): void {
+    this.showGoogleModal = false;
+    this.googleError = '';
+  }
+
+  openRealGoogleAuth(): void {
+    const origin = (typeof window !== 'undefined' && window.location.origin) ? window.location.origin : 'http://localhost:4200';
+    const redirectUri = encodeURIComponent(origin);
+    const scope = encodeURIComponent('email profile openid');
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${this.googleClientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}&prompt=select_account`;
+    window.location.href = authUrl;
+  }
+
+  registerWithGoogle(): void {
+    this.googleError = '';
+    const fullName = (this.googleFullName || '').trim();
+    const email = (this.googleEmail || '').trim().toLowerCase();
+    const phone = (this.googlePhone || '').trim();
+
+    if (!fullName || fullName.length < 2) {
+      this.googleError = 'Vui lòng nhập Họ và tên của bạn (tối thiểu 2 ký tự).';
+      return;
+    }
+    if (!email || !email.includes('@') || !email.includes('.')) {
+      this.googleError = 'Vui lòng cung cấp địa chỉ email Google hợp lệ.';
+      return;
+    }
+
+    this.googleSubmitting = true;
+    const googleUser = {
+      fullName,
+      email,
+      phone: phone || undefined,
+      authProvider: 'google'
+    };
+
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('amules_remembered_google_email', email);
+    }
+
+    this._auth.loginWithGoogle(googleUser).subscribe({
       next: () => {
-        this.submitting = false;
-        this._router.navigate(['/']);
+        this.googleSubmitting = false;
+        this.showGoogleModal = false;
+        this._router.navigate(['/account/profile']);
       },
-      error: () => {
-        this.submitting = false;
-        this._router.navigate(['/']);
+      error: (err: any) => {
+        this.googleSubmitting = false;
+        this.googleError = err?.message || 'Không thể đăng ký với Google. Vui lòng kiểm tra lại thông tin.';
+        this._cdr.detectChanges();
       }
     });
   }

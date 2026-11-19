@@ -10,20 +10,24 @@
 
 <!-- Lời nhắc nếu chưa làm bài trắc nghiệm 4 chiều -->
 @if (!hasCompletedQuiz) {
-  <div class="acc-card acc-card--tint quiz-invite-card" style="margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; background: linear-gradient(135deg, #fdf2f8 0%, #fff 100%); border: 1.5px dashed var(--plum-line, #e2b8d2);">
-    <div style="display: flex; align-items: center; gap: 16px;">
-      <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--plum); color: #fff; display: grid; place-items: center; flex-shrink: 0;">
-        <app-icon name="sparkle" [size]="22"></app-icon>
-      </div>
-      <div>
-        <h3 class="serif" style="font-size: 18px; color: var(--ink); margin-bottom: 4px;">Khai Mở Hồ Sơ Năng Lượng Tâm Thức &amp; Luân Xa</h3>
-        <p style="font-size: 13px; color: var(--muted); margin: 0; line-height: 1.5;">Bạn chưa thực hiện Bài Trắc Nghiệm 4 Chiều độc quyền. Hãy dành 60 giây để khám phá luân xa bảo bọc và mở khóa hồ sơ độc bản.</p>
-      </div>
+<div class="acc-card acc-card--tint quiz-invite-card"
+  style="margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; background: linear-gradient(135deg, #fdf2f8 0%, #fff 100%); border: 1.5px dashed var(--plum-line, #e2b8d2);">
+  <div style="display: flex; align-items: center; gap: 16px;">
+    <div
+      style="width: 48px; height: 48px; border-radius: 50%; background: var(--plum); color: #fff; display: grid; place-items: center; flex-shrink: 0;">
+      <app-icon name="sparkle" [size]="22"></app-icon>
     </div>
-    <a routerLink="/mystic-match" class="btn btn--primary btn-sm" style="white-space: nowrap;">
-      Làm bài trắc nghiệm ngay &rarr;
-    </a>
+    <div>
+      <h3 class="serif" style="font-size: 18px; color: var(--ink); margin-bottom: 4px;">Khai Mở Hồ Sơ Năng Lượng Tâm
+        Thức &amp; Luân Xa</h3>
+      <p style="font-size: 13px; color: var(--muted); margin: 0; line-height: 1.5;">Bạn chưa thực hiện Bài Trắc Nghiệm 4
+        Chiều độc quyền. Hãy dành 60 giây để khám phá luân xa bảo bọc và mở khóa hồ sơ độc bản.</p>
+    </div>
   </div>
+  <a routerLink="/mystic-match" class="btn btn--primary btn-sm" style="white-space: nowrap;">
+    Làm bài trắc nghiệm ngay &rarr;
+  </a>
+</div>
 }
 
 <!-- 1. Bản đồ năng lượng vũ trụ -->
@@ -32,7 +36,8 @@
     <div>
       <span class="eyebrow"><app-icon name="sparkle" [size]="12"></app-icon> BẢN ĐỒ NĂNG LƯỢNG VŨ TRỤ</span>
       <h2 class="serif mm-hero__title">Hồ Sơ Năng Lượng &amp; Bản Mệnh Cá Nhân</h2>
-      <p class="mm-hero__meta">Chủ sở hữu: <b>{{ userName || 'Thành viên AMULES' }}</b> • Cập nhật gần nhất: <b>{{ sessionDateStr }}</b></p>
+      <p class="mm-hero__meta">Chủ sở hữu: <b>{{ userName || 'Thành viên AMULES' }}</b> • Cập nhật gần nhất: <b>{{
+          sessionDateStr }}</b></p>
     </div>
 
     <div class="mm-freq-pill">
@@ -59,12 +64,13 @@
   </div>
 
   @if (latestSession?.matchSummary) {
-    <div style="margin-top: 20px; padding: 14px 18px; background: rgba(255,255,255,0.7); border: 1px solid var(--pink-line); border-radius: 14px; font-size: 13.5px; color: var(--ink);">
-      <strong style="color: var(--plum); display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
-        <app-icon name="sparkle" [size]="14"></app-icon> Thông Điệp Tâm Thức Độc Bản:
-      </strong>
-      {{ latestSession.matchSummary }}
-    </div>
+  <div
+    style="margin-top: 20px; padding: 14px 18px; background: rgba(255,255,255,0.7); border: 1px solid var(--pink-line); border-radius: 14px; font-size: 13.5px; color: var(--ink);">
+    <strong style="color: var(--plum); display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+      <app-icon name="sparkle" [size]="14"></app-icon> Thông Điệp Tâm Thức Độc Bản:
+    </strong>
+    {{ latestSession.matchSummary }}
+  </div>
   }
 
   <div class="mm-hero__foot">
@@ -95,7 +101,8 @@
     <span class="mm-col__ico"><app-icon name="sun" [size]="18"></app-icon></span>
     <small class="mm-col__eyebrow">BẢNG MÀU BẢN MỆNH &amp; TƯƠNG SINH</small>
     <h3 class="serif">Màu Sắc Năng Lượng Vượng Khí</h3>
-    <p class="mm-col__desc">Bảng màu được tuyển chọn theo quy luật tương sinh tương hợp, hỗ trợ sinh khí và vượng khí cho người mang mệnh {{ elementName }}:</p>
+    <p class="mm-col__desc">Bảng màu được tuyển chọn theo quy luật tương sinh tương hợp, hỗ trợ sinh khí và vượng khí
+      cho người mang mệnh {{ elementName }}:</p>
 
     <div class="color-list">
       @for (c of colors; track c.name) {
@@ -120,14 +127,16 @@
     <span class="mm-col__ico"><app-icon name="gem" [size]="18"></app-icon></span>
     <small class="mm-col__eyebrow">TINH THỂ HỘ MỆNH CHỦ ĐẠO</small>
     <h3 class="serif">Đá Tự Nhiên Tương Hợp Tối Đa</h3>
-    <p class="mm-col__desc">Các dòng tinh thể tự nhiên có tần số rung động cộng hưởng mạnh nhất với {{ energyPillars[0].title }} và {{ elementName }}:</p>
+    <p class="mm-col__desc">Các dòng tinh thể tự nhiên có tần số rung động cộng hưởng mạnh nhất với {{
+      energyPillars[0].title }} và {{ elementName }}:</p>
 
     <div class="stone-box">
       <div class="stone-box__head">
         <strong>Aquamarine &amp; Moonstone</strong>
         <span class="acc-badge">Hộ Mệnh 98%</span>
       </div>
-      <p>Viên đá của sự định tâm và trực giác nhạy bén, mang lại dũng khí, thanh lọc cảm xúc và chở che giấc ngủ an lành.</p>
+      <p>Viên đá của sự định tâm và trực giác nhạy bén, mang lại dũng khí, thanh lọc cảm xúc và chở che giấc ngủ an
+        lành.</p>
     </div>
 
     <div class="stone-box">
@@ -135,7 +144,8 @@
         <strong>Thạch Anh Tự Nhiên Tuyển Chọn</strong>
         <span class="acc-badge">Cộng Hưởng 95%</span>
       </div>
-      <p>Khuếch đại tần số từ trường tích cực, kích hoạt luân xa tương hợp và thu hút nhân duyên hòa hợp, tài lộc hanh thông.</p>
+      <p>Khuếch đại tần số từ trường tích cực, kích hoạt luân xa tương hợp và thu hút nhân duyên hòa hợp, tài lộc hanh
+        thông.</p>
     </div>
 
     <div class="mm-col__foot">
@@ -149,7 +159,8 @@
     <span class="mm-col__ico"><app-icon name="lotus" [size]="18"></app-icon></span>
     <small class="mm-col__eyebrow">PHONG CÁCH CHẾ TÁC</small>
     <h3 class="serif">Phong Cách Trang Sức Phù Hợp</h3>
-    <p class="mm-col__desc">Ưu tiên thiết kế có đường nét uyển chuyển, thanh thoát nhằm khai mở trường khí hanh thông:</p>
+    <p class="mm-col__desc">Ưu tiên thiết kế có đường nét uyển chuyển, thanh thoát nhằm khai mở trường khí hanh thông:
+    </p>
 
     <ul class="style-list">
       <li>
@@ -184,7 +195,8 @@
     <h2 class="serif">Tạo Tác Hộ Mệnh Dành Riêng Cho Bạn</h2>
     <p>Gợi ý tinh tuyển từ CSDL MongoDB khớp với Bản đồ năng lượng của {{ userName || 'quý khách' }}.</p>
   </div>
-  <a routerLink="/collections" class="link-arrow">Xem tất cả bộ sưu tập <app-icon name="arrow-right" [size]="14"></app-icon></a>
+  <a routerLink="/collections" class="link-arrow">Xem tất cả bộ sưu tập <app-icon name="arrow-right"
+      [size]="14"></app-icon></a>
 </div>
 
 <div class="mm-prod-grid">
@@ -223,7 +235,8 @@
   <span class="moon-msg__ico"><app-icon name="moon" [size]="18"></app-icon></span>
   <div class="moon-msg__body">
     <strong>Lời Nhắn Nạp Năng Lượng Cho Đá Tuần Này</strong>
-    <p>Kỳ Trăng Tròn sắp tới (15 âm lịch) là thời điểm hoàn hảo nhất để tắm trăng thanh tẩy đá và nạp đầy sinh khí cho bảo vật hộ mệnh của bạn.</p>
+    <p>Kỳ Trăng Tròn sắp tới (15 âm lịch) là thời điểm hoàn hảo nhất để tắm trăng thanh tẩy đá và nạp đầy sinh khí cho
+      bảo vật hộ mệnh của bạn.</p>
   </div>
   <a routerLink="/articles" class="btn btn--outline btn--xs">
     Xem cẩm nang thanh tẩy <app-icon name="book" [size]="13"></app-icon>

@@ -23,26 +23,21 @@
   <!-- Header -->
   <header class="mm-head">
     <div class="mm-mode-bar">
-      <span class="eyebrow"><app-icon name="sparkle" [size]="14"></app-icon> Công nghệ giải mã thiên thể độc quyền</span>
-      
-      <!-- Phân định 2 chế độ: Rút gọn cho khách vãng lai vs Đầy đủ cho thành viên -->
-      <div class="mode-switcher">
-        <button type="button" class="mode-tab" [class.active]="mode === 'guest'" (click)="switchMode('guest')">
-          <app-icon name="sun" [size]="14"></app-icon> Rút gọn (Khách vãng lai)
-        </button>
-        <button type="button" class="mode-tab" [class.active]="mode === 'member'" (click)="switchMode('member')">
-          <app-icon name="sparkle" [size]="14"></app-icon> Đầy đủ (Thành viên VIP)
-          @if (!_authService.isLoggedIn()) {
-            <span class="lock-tag"><app-icon name="lock" [size]="11"></app-icon> Đăng nhập</span>
-          }
-        </button>
-      </div>
+      @if (mode === 'member') {
+        <span class="badge-vip-member">
+          <app-icon name="sparkle" [size]="14"></app-icon> ĐẶC QUYỀN THÀNH VIÊN: TRẮC NGHIỆM TÂM THỨC &amp; LUÂN XA 4 CHIỀU
+        </span>
+      } @else {
+        <span class="eyebrow">
+          <app-icon name="sparkle" [size]="14"></app-icon> Công nghệ giải mã thiên thể độc quyền
+        </span>
+      }
     </div>
 
     <h1 class="mm-title serif">Mystic Match™: Tìm Vị Bùa Hộ Mệnh Của Riêng Bạn</h1>
     <p class="mm-sub">
       @if (mode === 'guest') {
-        <span>Chế độ rút gọn: Nhập ngày sinh &amp; ước nguyện để tính nhanh Cung hoàng đạo và Ngũ hành Can Chi Nạp Âm.</span>
+        <span>Chế độ rút gọn dành cho khách vãng lai: Nhập ngày sinh &amp; ước nguyện để tính nhanh Cung hoàng đạo và Ngũ hành Can Chi Nạp Âm.</span>
       } @else {
         <span>Chế độ thành viên chuyên sâu: Tích hợp <b>Bài Trắc Nghiệm Năng Lượng Tâm Thức &amp; Luân Xa 4 Chiều</b>, giải mã tần số rung động và tự động lưu trữ vĩnh viễn vào tài khoản cá nhân.</span>
       }

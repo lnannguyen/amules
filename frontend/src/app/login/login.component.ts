@@ -20,6 +20,8 @@ export class LoginComponent implements OnInit {
   googleClientId = '357340138878-4tj8dbnk5osk0n07ltvp7209781qdqlf.apps.googleusercontent.com';
 
   customGoogleEmail = '';
+  customGoogleName = '';
+  googleError = '';
 
   constructor(
     private _auth: AuthService,
@@ -106,17 +108,20 @@ export class LoginComponent implements OnInit {
 
   // Đăng nhập nhanh với email Google của người dùng
   loginWithCustomEmail(): void {
+    this.googleError = '';
     const raw = (this.customGoogleEmail || '').trim().toLowerCase();
-    if (!raw || !raw.includes('@')) {
-      alert('Vui lòng nhập địa chỉ email Google hợp lệ (ví dụ: anan265464@gmail.com)');
+    if (!raw || !raw.includes('@') || !raw.includes('.')) {
+      this.googleError = 'Vui lòng nhập địa chỉ email Google hợp lệ (ví dụ: anan265464@gmail.com).';
       return;
     }
     this.googleSubmitting = true;
     const namePart = raw.split('@')[0];
     const capitalized = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+    const resolvedName = this.customGoogleName.trim() || ((raw === 'anan265464@gmail.com') ? 'Thu An' : capitalized);
+
     const googleUser = {
       email: raw,
-      fullName: (raw === 'anan265464@gmail.com') ? 'Thu An' : capitalized,
+      fullName: resolvedName,
       authProvider: 'google'
     };
     if (typeof localStorage !== 'undefined') {
@@ -128,10 +133,10 @@ export class LoginComponent implements OnInit {
         this.showGoogleModal = false;
         this._router.navigate(['/account/profile']);
       },
-      error: () => {
+      error: (err: any) => {
         this.googleSubmitting = false;
-        this.showGoogleModal = false;
-        this._router.navigate(['/account/profile']);
+        this.googleError = err?.message || 'Đăng nhập Google thất bại. Vui lòng kiểm tra lại email.';
+        this._cdr.detectChanges();
       }
     });
   }
@@ -159,10 +164,12 @@ export class LoginComponent implements OnInit {
   }
 
   onGoogle() {
+    this.googleError = '';
     this.showGoogleModal = true;
   }
 
   closeGoogleModal() {
     this.showGoogleModal = false;
+    this.googleError = '';
   }
 }

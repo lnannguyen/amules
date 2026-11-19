@@ -122,10 +122,22 @@
         </div>
 
         <div class="google-auth-body">
+          @if (googleError) {
+          <div class="google-alert-error">
+            {{ googleError }}
+          </div>
+          }
+
           <div class="google-field-group">
-            <label for="googleEmailInput">Email Google của bạn</label>
+            <label for="googleEmailInput">Email Google của bạn *</label>
             <input id="googleEmailInput" type="email" [(ngModel)]="customGoogleEmail"
               placeholder="Nhập email (ví dụ: anan265464@gmail.com)" (keyup.enter)="loginWithCustomEmail()" autofocus>
+          </div>
+
+          <div class="google-field-group">
+            <label for="googleNameInput">Họ và tên hiển thị (tùy chọn)</label>
+            <input id="googleNameInput" type="text" [(ngModel)]="customGoogleName"
+              placeholder="Nhập họ tên (mặc định lấy theo tài khoản)" (keyup.enter)="loginWithCustomEmail()">
           </div>
 
           <p class="google-disclaimer">

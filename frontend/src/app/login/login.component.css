@@ -74,6 +74,16 @@
   color: #202124;
 }
 
+.google-alert-error {
+  background: #fce8e6;
+  color: #c5221f;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  border: 1px solid #fad2cf;
+}
+
 .google-auth-body {
   display: flex;
   flex-direction: column;
