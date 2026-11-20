@@ -1,6 +1,8 @@
 [
   {
-    "_id": "0077ee7a934a956624ff30e6",
+    "_id": {
+      "$oid": "0077ee7a934a956624ff30e6"
+    },
     "fullName": "Quản trị AMULES",
     "email": "admin@amules.vn",
     "phone": "0900000001",
@@ -20,7 +22,9 @@
     "updatedAt": "2026-09-01T00:00:00.000Z"
   },
   {
-    "_id": "e4774cdda0793f86414e8b91",
+    "_id": {
+      "$oid": "e4774cdda0793f86414e8b91"
+    },
     "fullName": "Nguyễn Hoàng Lan Anh",
     "email": "lananh.gemini@gmail.com",
     "phone": "0982456789",
@@ -51,7 +55,9 @@
     "updatedAt": "2026-11-08T00:00:00.000Z"
   },
   {
-    "_id": "270c1b084f3f146eb5787075",
+    "_id": {
+      "$oid": "270c1b084f3f146eb5787075"
+    },
     "fullName": "Trần Thu Hà",
     "email": "thuha.tran@gmail.com",
     "phone": "0911222333",
@@ -71,7 +77,9 @@
     "updatedAt": "2026-10-02T00:00:00.000Z"
   },
   {
-    "_id": "6afcc51cff8e99cc477cf59a",
+    "_id": {
+      "$oid": "6afcc51cff8e99cc477cf59a"
+    },
     "fullName": "An Nguyễn Thị Thu",
     "email": "annttk24406h1@st.uel.edu.vn",
     "phone": "0982 456 789",
@@ -87,7 +95,9 @@
     "passwordHash": "$2b$10$YBUQAy4BxnFrqFm3QSvapODLjPA83CUrc708q/O0y6sPCqq5CncNC"
   },
   {
-    "_id": "6afd90886110da292e0b54b0",
+    "_id": {
+      "$oid": "6afd90886110da292e0b54b0"
+    },
     "fullName": "Nguyễn Thị Thu An",
     "email": "anan265464@gmail.com",
     "phone": "0901234567",
@@ -102,8 +112,12 @@
     "zodiac": "Kim Ngưu (Taurus)",
     "wristSize": "15 cm",
     "addresses": [],
-    "createdAt": "2026-11-18T11:48:24.451Z",
-    "updatedAt": "2026-11-19T17:42:52.577Z",
+    "createdAt": {
+      "$date": "2026-11-18T11:48:24.451Z"
+    },
+    "updatedAt": {
+      "$date": "2026-11-19T17:42:52.577Z"
+    },
     "nickname": "An An",
     "passwordHash": "$2b$10$SO2PEGZUnNTlE4HEap8mdO2K84YrgH.z4zrCdaagjMAxq5uoKvnHq",
     "resetOtp": "708323",
@@ -115,7 +129,9 @@
     "twoFactorSecret": ""
   },
   {
-    "_id": "6aff2b65e02421e98b6ec47c",
+    "_id": {
+      "$oid": "6aff2b65e02421e98b6ec47c"
+    },
     "fullName": "Nguyen An",
     "email": "nguyenthithuan2425@gmail.com",
     "phone": "0789651433",
@@ -133,13 +149,19 @@
     "wristSize": "",
     "addresses": [],
     "newsletter": true,
-    "createdAt": "2026-11-19T17:01:25.483Z",
-    "updatedAt": "2026-11-19T17:30:46.462Z",
+    "createdAt": {
+      "$date": "2026-11-19T17:01:25.483Z"
+    },
+    "updatedAt": {
+      "$date": "2026-11-19T17:30:46.462Z"
+    },
     "avatar": "",
     "nickname": "An"
   },
   {
-    "_id": "6aff3564cab7e1a1106425b8",
+    "_id": {
+      "$oid": "6aff3564cab7e1a1106425b8"
+    },
     "fullName": "Test 2FA User",
     "email": "test2fa_1795110244556@amules.vn",
     "phone": "0988776655",
@@ -157,10 +179,76 @@
     "wristSize": "",
     "addresses": [],
     "newsletter": false,
-    "createdAt": "2026-11-19T17:44:04.657Z",
-    "updatedAt": "2026-11-19T17:44:04.671Z",
+    "createdAt": {
+      "$date": "2026-11-19T17:44:04.657Z"
+    },
+    "updatedAt": {
+      "$date": "2026-11-19T17:44:04.671Z"
+    },
     "twoFactorEnabled": true,
     "twoFactorMethod": "sms",
     "twoFactorSecret": ""
+  },
+  {
+    "_id": {
+      "$oid": "6affb5edcab7e1a1106425b9"
+    },
+    "fullName": "Test 2FA User",
+    "email": "user_2fa_1795143149271@amules.vn",
+    "phone": "0988112233",
+    "passwordHash": "$2b$10$V0fgdTpCyCD0KurJfid6i.VVgHslA3a38EeDjspU/9/cfovXFUyOi",
+    "role": "customer",
+    "status": "active",
+    "tier": "Thành viên mới",
+    "points": 0,
+    "failedLoginAttempts": 0,
+    "lockedUntil": null,
+    "dob": "",
+    "gender": "",
+    "element": "",
+    "zodiac": "",
+    "wristSize": "",
+    "addresses": [],
+    "newsletter": false,
+    "createdAt": {
+      "$date": "2026-11-20T02:52:29.359Z"
+    },
+    "updatedAt": {
+      "$date": "2026-11-20T02:52:29.384Z"
+    },
+    "twoFactorEnabled": true,
+    "twoFactorMethod": "sms",
+    "twoFactorSecret": ""
+  },
+  {
+    "_id": {
+      "$oid": "6affb66f5e92b385996f6395"
+    },
+    "fullName": "Test 2FA User",
+    "email": "user_2fa_1795143279606@amules.vn",
+    "phone": "0920227612",
+    "passwordHash": "$2b$10$XTe5mKbjxRUaCwyXyQIzIeTFcCcx2PT89xDuD5cdpx1QFaibGJgca",
+    "role": "customer",
+    "status": "active",
+    "tier": "Thành viên mới",
+    "points": 0,
+    "failedLoginAttempts": 0,
+    "lockedUntil": null,
+    "dob": "",
+    "gender": "",
+    "element": "",
+    "zodiac": "",
+    "wristSize": "",
+    "addresses": [],
+    "newsletter": false,
+    "createdAt": {
+      "$date": "2026-11-20T02:54:39.720Z"
+    },
+    "updatedAt": {
+      "$date": "2026-11-20T02:54:39.934Z"
+    },
+    "twoFactorEnabled": false,
+    "twoFactorMethod": "totp",
+    "twoFactorSecret": "AMULES2026SECKEY725W"
   }
 ]
