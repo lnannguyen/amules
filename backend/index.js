@@ -901,8 +901,8 @@ app.delete('/api/products/:id', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const db = getDB();
-    const { username, password, rememberMe } = req.body;
-    const cleanUser = (username || '').trim().toLowerCase();
+    const { username, email, password, rememberMe } = req.body;
+    const cleanUser = (username || email || '').trim().toLowerCase();
 
     let user = null;
     if (db) {
